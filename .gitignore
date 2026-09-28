@@ -1,0 +1,25 @@
+# IDE and local tooling
+.idea/
+.planning/
+
+# Maven build output
+**/target/
+
+# Generated client runtime logs
+**/logs/
+
+# Python bytecode and caches
+**/__pycache__/
+*.py[cod]
+
+# Local environment and generated secrets
+.env
+.env.*
+*.key
+*.crt
+*.p12
+*.jks
+
+# OS/editor files
+Thumbs.db
+.DS_Store

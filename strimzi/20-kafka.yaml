@@ -1,0 +1,60 @@
+apiVersion: kafka.strimzi.io/v1
+kind: Kafka
+metadata:
+  name: kafka
+  namespace: kafka
+spec:
+  kafka:
+    version: 4.3.1
+    logging:
+      type: external
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-runtime-logging
+          key: log4j2.properties
+    metricsConfig:
+      type: jmxPrometheusExporter
+      valueFrom:
+        configMapKeyRef:
+          name: kafka-metrics
+          key: kafka-metrics-config.yml
+    listeners:
+      - name: plain
+        port: 9092
+        type: internal
+        tls: false
+      - name: external
+        port: 9094
+        type: nodeport
+        tls: false
+        configuration:
+          advertisedHostTemplate: localhost
+          bootstrap:
+            nodePort: 32325
+          brokers:
+            - broker: 0
+              advertisedHost: localhost
+              advertisedPort: 40001
+              nodePort: 30640
+            - broker: 1
+              advertisedHost: localhost
+              advertisedPort: 40002
+              nodePort: 30265
+            - broker: 2
+              advertisedHost: localhost
+              advertisedPort: 40003
+              nodePort: 31059
+    config:
+      offsets.topic.replication.factor: 3
+      transaction.state.log.replication.factor: 3
+      transaction.state.log.min.isr: 2
+      default.replication.factor: 3
+      min.insync.replicas: 2
+      log.retention.hours: 168
+      log.retention.bytes: 10737418240
+    jvmOptions:
+      -Xms: 2g
+      -Xmx: 3g
+  entityOperator:
+    topicOperator: {}
+    userOperator: {}

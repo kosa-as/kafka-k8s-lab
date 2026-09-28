@@ -1,0 +1,40 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-metrics
+  namespace: kafka
+data:
+  kafka-metrics-config.yml: |
+    lowercaseOutputName: true
+    lowercaseOutputLabelNames: true
+    rules:
+      - pattern: 'kafka.server<type=(.+), name=(.+)PerSec\w*><>Count'
+        name: kafka_server_$1_$2_total
+        type: COUNTER
+      - pattern: 'kafka.server<type=(.+), name=(.+)PerSec\w*><>(\w+)'
+        name: kafka_server_$1_$2
+        type: GAUGE
+      - pattern: 'kafka.server<type=(.+), name=(.+)><>(\w+)'
+        name: kafka_server_$1_$2
+        type: GAUGE
+      - pattern: 'kafka.network<type=(.+), name=(.+)PerSec\w*><>Count'
+        name: kafka_network_$1_$2_total
+        type: COUNTER
+      - pattern: 'kafka.network<type=(.+), name=(.+)PerSec\w*><>(\w+)'
+        name: kafka_network_$1_$2
+        type: GAUGE
+      - pattern: 'kafka.network<type=(.+), name=(.+)><>(\w+)'
+        name: kafka_network_$1_$2
+        type: GAUGE
+      - pattern: 'kafka.log<type=Log, name=LogEndOffset, topic=([^,]+), partition=([0-9]+)><>Value'
+        name: kafka_log_logendoffset
+        labels:
+          topic: "$1"
+          partition: "$2"
+        type: GAUGE
+      - pattern: 'kafka.log<type=(.+), name=(.+)><>(\w+)'
+        name: kafka_log_$1_$2
+        type: GAUGE
+      - pattern: 'java.lang<type=(.+), name=(.+)><>(\w+)'
+        name: jvm_$1_$2
+        type: GAUGE

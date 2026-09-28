@@ -1,0 +1,89 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kafka-runtime-logging
+  namespace: kafka
+data:
+  log4j2.properties: |
+    # Kafka runtime logs go to stdout and a bounded rolling file on the broker PVC.
+    name=KafkaConfig
+    appender.console.type=Console
+    appender.console.name=STDOUT
+    appender.console.layout.type=PatternLayout
+    appender.console.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+
+    appender.file.type=RollingFile
+    appender.file.name=KAFKA_FILE
+    appender.file.fileName=/mnt/kafka-runtime-logs/server.log
+    appender.file.filePattern=/mnt/kafka-runtime-logs/server-%i.log.gz
+    appender.file.layout.type=PatternLayout
+    appender.file.layout.pattern=%d{yyyy-MM-dd HH:mm:ss} %-5p [%t] %c{1}:%L - %m%n
+    appender.file.policies.type=Policies
+    appender.file.policies.size.type=SizeBasedTriggeringPolicy
+    appender.file.policies.size.size=100 MB
+    appender.file.strategy.type=DefaultRolloverStrategy
+    appender.file.strategy.max=10
+
+    rootLogger.level=INFO
+    rootLogger.appenderRefs=console,file
+    rootLogger.appenderRef.console.ref=STDOUT
+    rootLogger.appenderRef.file.ref=KAFKA_FILE
+    rootLogger.additivity=false
+
+    logger.kafka.name=kafka
+    logger.kafka.level=INFO
+    logger.kafka.appenderRefs=console,file
+    logger.kafka.appenderRef.console.ref=STDOUT
+    logger.kafka.appenderRef.file.ref=KAFKA_FILE
+    logger.kafka.additivity=false
+
+    logger.orgapachekafka.name=org.apache.kafka
+    logger.orgapachekafka.level=INFO
+    logger.orgapachekafka.appenderRefs=console,file
+    logger.orgapachekafka.appenderRef.console.ref=STDOUT
+    logger.orgapachekafka.appenderRef.file.ref=KAFKA_FILE
+    logger.orgapachekafka.additivity=false
+
+    logger.requestlogger.name=kafka.request.logger
+    logger.requestlogger.level=WARN
+    logger.requestlogger.appenderRefs=console,file
+    logger.requestlogger.appenderRef.console.ref=STDOUT
+    logger.requestlogger.appenderRef.file.ref=KAFKA_FILE
+    logger.requestlogger.additivity=false
+
+    logger.requestchannel.name=kafka.network.RequestChannel$
+    logger.requestchannel.level=WARN
+    logger.requestchannel.appenderRefs=console,file
+    logger.requestchannel.appenderRef.console.ref=STDOUT
+    logger.requestchannel.appenderRef.file.ref=KAFKA_FILE
+    logger.requestchannel.additivity=false
+
+    logger.controller.name=org.apache.kafka.controller
+    logger.controller.level=INFO
+    logger.controller.appenderRefs=console,file
+    logger.controller.appenderRef.console.ref=STDOUT
+    logger.controller.appenderRef.file.ref=KAFKA_FILE
+    logger.controller.additivity=false
+
+    logger.logcleaner.name=kafka.log.LogCleaner
+    logger.logcleaner.level=INFO
+    logger.logcleaner.appenderRefs=console,file
+    logger.logcleaner.appenderRef.console.ref=STDOUT
+    logger.logcleaner.appenderRef.file.ref=KAFKA_FILE
+    logger.logcleaner.additivity=false
+
+    logger.statechange.name=state.change.logger
+    logger.statechange.level=INFO
+    logger.statechange.appenderRefs=console,file
+    logger.statechange.appenderRef.console.ref=STDOUT
+    logger.statechange.appenderRef.file.ref=KAFKA_FILE
+    logger.statechange.additivity=false
+
+    logger.authorizer.name=kafka.authorizer.logger
+    logger.authorizer.level=INFO
+    logger.authorizer.appenderRefs=console,file
+    logger.authorizer.appenderRef.console.ref=STDOUT
+    logger.authorizer.appenderRef.file.ref=KAFKA_FILE
+    logger.authorizer.additivity=false
+
+    monitorInterval=30

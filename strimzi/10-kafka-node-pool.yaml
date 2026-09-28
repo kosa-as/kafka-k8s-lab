@@ -1,0 +1,37 @@
+apiVersion: kafka.strimzi.io/v1
+kind: KafkaNodePool
+metadata:
+  name: kafka
+  namespace: kafka
+  labels:
+    strimzi.io/cluster: kafka
+spec:
+  replicas: 3
+  roles:
+    - controller
+    - broker
+  resources:
+    requests:
+      cpu: "4"
+      memory: 4Gi
+    limits:
+      cpu: "4"
+      memory: 6Gi
+  template:
+    pod:
+      metadata:
+        annotations:
+          kafka.strimzi.io/log-sidecar: "enabled"
+      templatedVolumes:
+        - name: broker-runtime-logs
+          persistentVolumeClaim:
+            claimName: kafka-runtime-logs-{nodeId}
+    kafkaContainer:
+      volumeMounts:
+        - name: broker-runtime-logs
+          mountPath: /mnt/kafka-runtime-logs
+  storage:
+    type: persistent-claim
+    class: hostpath
+    size: 20Gi
+    deleteClaim: false
