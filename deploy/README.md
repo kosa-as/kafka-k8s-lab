@@ -18,6 +18,8 @@
 .\deploy\all.ps1
 ```
 
+支持 Windows PowerShell 5.1，无需安装 `pwsh`。OpenSSL 和 Helm 的可预期错误按进程退出码处理，正常的 stderr 进度输出不会中断部署。
+
 执行顺序为：
 
 ```text
@@ -25,6 +27,12 @@ kafka.ps1 (含 Webhook 安装和 Kafka 创建) -> logging.ps1 -ReconcileOnly -> 
 ```
 
 脚本会等待 Strimzi Operator、Kafka、日志 injector、Prometheus 和 Dashboard 组件达到可用状态。首次执行可能需要拉取 Docker 和 Dashboard 镜像。
+
+日志 injector 复用已有证书；更新 TLS 证书或本地镜像后会重新启动，并通过 API Server 的 server-side dry-run 确认 `log-agent`、`health-sidecar` 和健康目录挂载实际注入成功，再处理 Broker。检查不会创建真实 Pod。
+
+自定义 Kafka 镜像在构建时将探针脚本规范为 LF，避免 Windows CRLF 导致 Linux 报 `env: 'sh\r': No such file or directory`。已有 Pod 仍使用原镜像时，需要重建 Pod 才能加载修正后的本地镜像；重建 Pod 不会删除数据和日志 PVC。
+
+Dashboard chart 下载失败时，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。
 
 ## 单模块更新
 
@@ -62,6 +70,16 @@ helm list -A
 ```
 
 验证脚本会直接运行 liveness wrapper 的新鲜/过期状态测试，检查每个 Broker 的自定义镜像、`health-sidecar`、`kafka-health` `emptyDir` 及 Kafka 只读/侧车读写挂载，并通过 `kubectl exec` 确认 Kafka 只能读取健康目录。它不伪造 Broker 健康决策；持续写入 `status=failure` 后观察 Kubelet 3 次、10 秒周期的重启阈值属于单独的运维演练。
+
+PowerShell 回归检查（在 Windows PowerShell 5.1 中执行；镜像检查需要已构建 `kafka-health:local`，下载回退和真实注入检查需要已部署的本地集群）：
+
+```powershell
+.\deploy\tests\logging-certificate.ps1
+.\deploy\tests\kafka-image.ps1
+.\deploy\tests\webhook-retry.ps1
+.\deploy\tests\dashboard-download.ps1
+.\deploy\tests\webhook-admission.ps1
+```
 
 Dashboard 地址：<https://localhost:30443/>。Prometheus 默认通过端口转发访问：
 

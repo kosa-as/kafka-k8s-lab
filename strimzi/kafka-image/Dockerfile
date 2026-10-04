@@ -7,6 +7,9 @@ RUN test -x /opt/kafka/kafka_liveness.sh \
 
 COPY kafka_liveness.sh /opt/kafka/kafka_liveness.sh
 
-RUN chmod 0755 /opt/kafka/kafka_liveness.sh /opt/kafka/kafka_liveness_strimzi.sh
+# Windows checkouts can supply CRLF even when the repository stores LF.
+# Kubelet executes the shebang directly, so normalize before installing it.
+RUN sed -i 's/\r$//' /opt/kafka/kafka_liveness.sh \
+    && chmod 0755 /opt/kafka/kafka_liveness.sh /opt/kafka/kafka_liveness_strimzi.sh
 
 USER 1001
