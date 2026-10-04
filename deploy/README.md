@@ -18,6 +18,8 @@
 .\deploy\all.ps1
 ```
 
+支持 Windows PowerShell 5.1，无需安装 `pwsh`。OpenSSL 和 Helm 的可预期错误按进程退出码处理，正常的 stderr 进度输出不会中断部署。
+
 执行顺序为：
 
 ```text
@@ -25,6 +27,10 @@ kafka.ps1 -> logging.ps1 -> metrics.ps1 -> dashboard.ps1
 ```
 
 脚本会等待 Strimzi Operator、Kafka、日志 injector、Prometheus 和 Dashboard 组件达到可用状态。首次执行可能需要拉取 Docker 和 Dashboard 镜像。
+
+日志 injector 每次更新 TLS 证书后会重新启动，并通过 API Server 的 server-side dry-run 确认 `log-agent` 实际注入成功，再处理 Broker。检查不会创建真实 Pod。
+
+Dashboard chart 下载失败时，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。
 
 ## 单模块更新
 
@@ -58,6 +64,14 @@ kafka.ps1 -> logging.ps1 -> metrics.ps1 -> dashboard.ps1
 kubectl get kafka,kafkanodepool,kafkatopic,pods,pvc,svc -n kafka -o wide
 kubectl get pods,svc -n kubernetes-dashboard -o wide
 helm list -A
+```
+
+PowerShell 回归检查（在 Windows PowerShell 5.1 中执行；后两项需要已部署的本地集群）：
+
+```powershell
+.\deploy\tests\logging-certificate.ps1
+.\deploy\tests\dashboard-download.ps1
+.\deploy\tests\webhook-admission.ps1
 ```
 
 Dashboard 地址：<https://localhost:30443/>。Prometheus 默认通过端口转发访问：

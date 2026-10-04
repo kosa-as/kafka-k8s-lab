@@ -33,16 +33,24 @@ try {
         throw "OpenSSL configuration was not found at $OpensslConfig"
     }
 
-    & openssl req -x509 -nodes -newkey rsa:2048 `
-      -config $OpensslConfig `
-      -keyout $KeyPath `
-      -out $CertPath `
-      -days 365 `
-      -subj '/CN=kafka-log-sidecar-injector.kafka.svc' `
-      -addext 'subjectAltName=DNS:kafka-log-sidecar-injector.kafka.svc,DNS:kafka-log-sidecar-injector.kafka.svc.cluster.local' `
-      2>$null | Out-Null
-    if ($LASTEXITCODE -ne 0) {
-        throw "openssl failed with exit code $LASTEXITCODE"
+    # OpenSSL writes key-generation progress to stderr even on success.
+    # Direct stderr redirection can throw NativeCommandError on Windows PS 5.1.
+    $OpensslArguments = @(
+        'req', '-x509', '-nodes', '-newkey', 'rsa:2048',
+        '-config', ('"{0}"' -f $OpensslConfig),
+        '-keyout', ('"{0}"' -f $KeyPath),
+        '-out', ('"{0}"' -f $CertPath),
+        '-days', '365',
+        '-subj', '/CN=kafka-log-sidecar-injector.kafka.svc',
+        '-addext', 'subjectAltName=DNS:kafka-log-sidecar-injector.kafka.svc,DNS:kafka-log-sidecar-injector.kafka.svc.cluster.local'
+    )
+    $OpensslErrorPath = Join-Path $CertDir 'openssl.stderr.log'
+    $OpensslProcess = Start-Process -FilePath $OpensslExe `
+      -ArgumentList $OpensslArguments -NoNewWindow -Wait -PassThru `
+      -RedirectStandardError $OpensslErrorPath
+    if ($OpensslProcess.ExitCode -ne 0) {
+        $OpensslError = Get-Content -Raw -LiteralPath $OpensslErrorPath
+        throw "openssl failed with exit code $($OpensslProcess.ExitCode): $OpensslError"
     }
 
     kubectl -n kafka create secret tls kafka-log-sidecar-injector-tls `
@@ -59,6 +67,9 @@ try {
     ) | Set-Content -NoNewline $WebhookManifest
 
     kubectl apply -f $WebhookManifest
+    # The TLS context is loaded only at startup; updating the Secret alone does
+    # not update the certificate served by an existing injector process.
+    kubectl -n kafka rollout restart deployment/kafka-log-sidecar-injector
     kubectl -n kafka rollout status deployment/kafka-log-sidecar-injector --timeout=120s
 
     $EndpointReady = $false
@@ -72,6 +83,36 @@ try {
         Start-Sleep -Seconds 2
     }
     if (-not $EndpointReady) { throw 'kafka-log-sidecar-injector Service has no ready EndpointSlice address' }
+
+    # Prove that API server CA propagation and admission are working before
+    # recreating any brokers. failurePolicy=Ignore otherwise hides TLS failures.
+    Write-Host 'Verifying webhook admission with a server-side dry-run...'
+    $Probe = @{
+        apiVersion = 'v1'
+        kind = 'Pod'
+        metadata = @{
+            name = 'kafka-log-injection-probe'
+            namespace = 'kafka'
+            labels = @{ 'strimzi.io/cluster' = 'kafka' }
+            annotations = @{ 'kafka.strimzi.io/log-sidecar' = 'enabled' }
+        }
+        spec = @{
+            containers = @(@{ name = 'kafka'; image = 'quay.io/strimzi/kafka:1.2.0-kafka-4.3.1' })
+            volumes = @(@{ name = 'broker-runtime-logs'; emptyDir = @{} })
+        }
+    }
+    $AdmissionReady = $false
+    for ($Attempt = 0; $Attempt -lt 60; $Attempt++) {
+        $Result = $Probe | ConvertTo-Json -Depth 10 | kubectl create --dry-run=server -f - -o json
+        if ($LASTEXITCODE -ne 0) { throw 'Webhook admission dry-run failed' }
+        $AdmittedPod = $Result | ConvertFrom-Json
+        if (@($AdmittedPod.spec.containers | Where-Object { $_.name -eq 'log-agent' }).Count -eq 1) {
+            $AdmissionReady = $true
+            break
+        }
+        Start-Sleep -Seconds 2
+    }
+    if (-not $AdmissionReady) { throw 'Webhook did not inject log-agent; check its TLS certificate and API server CA trust' }
 
     Write-Host 'Applying Kafka runtime logging configuration...'
     kubectl apply -f (Join-Path $StrimziRoot '50-kafka-runtime-log-config.yaml')

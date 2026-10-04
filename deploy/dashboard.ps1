@@ -11,14 +11,26 @@ $ChartPath = Join-Path $ChartDir 'kubernetes-dashboard'
 
 New-Item -ItemType Directory -Path $ChartDir | Out-Null
 try {
-    helm status kubernetes-dashboard -n kubernetes-dashboard 2>$null | Out-Null
-    $ReleaseExists = ($LASTEXITCODE -eq 0)
+    # Inspect optional native-command failures by exit code. In Windows PS 5.1,
+    # direct stderr redirection can terminate before the fallback is evaluated.
+    $HelmExe = (Get-Command helm -ErrorAction Stop).Source
+    $HelmStatus = Start-Process -FilePath $HelmExe `
+      -ArgumentList @('status', 'kubernetes-dashboard', '-n', 'kubernetes-dashboard') `
+      -NoNewWindow -Wait -PassThru `
+      -RedirectStandardOutput (Join-Path $ChartDir 'helm-status.stdout.log') `
+      -RedirectStandardError (Join-Path $ChartDir 'helm-status.stderr.log')
+    $ReleaseExists = ($HelmStatus.ExitCode -eq 0)
 
     Write-Host "Downloading Kubernetes Dashboard chart $ChartVersion..."
-    helm pull $ChartUrl --untar --untardir $ChartDir 2>$null
-    $ChartAvailable = ($LASTEXITCODE -eq 0 -and (Test-Path -LiteralPath $ChartPath))
+    $HelmPullErrorPath = Join-Path $ChartDir 'helm-pull.stderr.log'
+    $HelmPull = Start-Process -FilePath $HelmExe `
+      -ArgumentList @('pull', ('"{0}"' -f $ChartUrl), '--untar', '--untardir', ('"{0}"' -f $ChartDir)) `
+      -NoNewWindow -Wait -PassThru `
+      -RedirectStandardError $HelmPullErrorPath
+    $ChartAvailable = ($HelmPull.ExitCode -eq 0 -and (Test-Path -LiteralPath $ChartPath))
+    $HelmPullError = Get-Content -Raw -LiteralPath $HelmPullErrorPath
     if (-not $ChartAvailable -and -not $ReleaseExists) {
-        throw "Failed to download or unpack Kubernetes Dashboard chart $ChartVersion"
+        throw "Failed to download or unpack Kubernetes Dashboard chart ${ChartVersion}: $HelmPullError"
     }
 
     if ($ChartAvailable) {
@@ -35,7 +47,7 @@ try {
         }
     }
     else {
-        Write-Warning 'Dashboard Helm chart download failed; reusing the existing Helm release.'
+        Write-Warning "Dashboard Helm chart download failed; reusing the existing Helm release. $HelmPullError"
     }
 
     kubectl create serviceaccount dashboard-admin `
