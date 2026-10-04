@@ -81,7 +81,7 @@ webhooks:
   - name: kafka-log-sidecar-injector.kafka.svc
     admissionReviewVersions: ["v1"]
     sideEffects: None
-    failurePolicy: Ignore
+    failurePolicy: Fail
     timeoutSeconds: 5
     reinvocationPolicy: IfNeeded
     clientConfig:

@@ -33,7 +33,7 @@
 
 旧的 `strimzi/install.ps1` 和 `strimzi/install-runtime-log-sidecar.ps1` 仍可使用，但现在只是调用 `deploy` 目录中的兼容入口。
 
-`deploy/kafka.ps1` 会先创建 Kafka CR 引用的指标/运行日志 ConfigMap 和日志 PVC；`deploy/logging.ps1` 再构建并启用 sidecar 注入器及 Webhook。
+`deploy/kafka.ps1` 会先创建 Kafka CR 引用的指标/运行日志 ConfigMap，构建自定义 `kafka-health:local` 镜像，并调用 `deploy/logging.ps1 -InstallOnly` 安装和等待 sidecar 注入 Webhook；确认 Webhook Service 有可用 endpoint 后才创建 Kafka Pod。`deploy/logging.ps1 -ReconcileOnly` 会在更新时逐个校验并重建缺少完整注入形状的 Broker Pod。
 
 该脚本在 Docker Desktop 中构建 `kafka-log-sidecar-injector:local`，创建三个日志 PVC，配置 Kafka 同时写 stdout 和 `/mnt/kafka-runtime-logs/server.log`，并通过 Mutating Admission Webhook 给每个 broker Pod 注入 `log-agent` sidecar。
 
@@ -58,7 +58,10 @@ kubectl get svc kafka-kafka-external-bootstrap -n kafka
 kubectl get kafka -n kafka
 kubectl get pods,pvc -n kafka -o wide
 kubectl get kafka kafka -n kafka -o jsonpath='{.status.conditions[*].message}'
+.\strimzi\verify-kafka-health-liveness.ps1
 ```
+
+单次 `failure` 写入在 30 秒 TTL 内可能还没达到 3 次 liveness 失败就过期，因此不能用来证明 Kubelet 重启。重启演练必须让测试侧车每 5 秒持续刷新 `failure`，观察 10 秒探针周期和 3 次阈值后再恢复 `healthy`；侧车停止或状态过期时按设计 fail-open 到原 Strimzi Java 进程检查。
 
 查看 broker 文件日志和 sidecar 输出：
 

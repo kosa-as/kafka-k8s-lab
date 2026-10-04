@@ -22,11 +22,17 @@ spec:
       metadata:
         annotations:
           kafka.strimzi.io/log-sidecar: "enabled"
+      securityContext:
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
       templatedVolumes:
         - name: broker-runtime-logs
           persistentVolumeClaim:
             claimName: kafka-runtime-logs-{nodeId}
     kafkaContainer:
+      env:
+        - name: KAFKA_HEALTH_STATUS_TTL_SECONDS
+          value: "30"
       volumeMounts:
         - name: broker-runtime-logs
           mountPath: /mnt/kafka-runtime-logs

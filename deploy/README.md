@@ -5,8 +5,8 @@
 ## 脚本
 
 - `all.ps1`：按依赖顺序部署完整平台。
-- `kafka.ps1`：部署 Kafka Namespace、指标与运行日志 ConfigMap、运行日志 PVC、Strimzi Operator、KafkaNodePool、Kafka 和 Topic。
-- `logging.ps1`：构建日志 sidecar injector，创建运行日志 PVC，部署 TLS Webhook，并应用 Kafka 文件日志配置；如果现有 Broker 未包含 `log-agent`，脚本会删除这些 Pod，让 Webhook 在重建时注入 sidecar。
+- `kafka.ps1`：部署 Kafka Namespace、指标与运行日志 ConfigMap、Strimzi Operator，先安装并等待 Mutating Webhook，再构建自定义 Kafka 镜像并创建 KafkaNodePool、Kafka 和 Topic。
+- `logging.ps1`：构建日志/健康 sidecar injector，创建运行日志 PVC，部署 TLS Webhook；`-InstallOnly` 只安装 Webhook，`-ReconcileOnly` 按 Broker 逐个检查并重建缺少完整注入形状的 Pod。
 - `metrics.ps1`：配置 Kafka JMX Prometheus Exporter，并部署 Prometheus。
 - `dashboard.ps1`：安装 Dashboard 7.14.0，暴露 HTTPS NodePort `30443`，并应用长期 Token Secret。
 
@@ -21,7 +21,7 @@
 执行顺序为：
 
 ```text
-kafka.ps1 -> logging.ps1 -> metrics.ps1 -> dashboard.ps1
+kafka.ps1 (含 Webhook 安装和 Kafka 创建) -> logging.ps1 -ReconcileOnly -> metrics.ps1 -> dashboard.ps1
 ```
 
 脚本会等待 Strimzi Operator、Kafka、日志 injector、Prometheus 和 Dashboard 组件达到可用状态。首次执行可能需要拉取 Docker 和 Dashboard 镜像。
@@ -58,7 +58,10 @@ kafka.ps1 -> logging.ps1 -> metrics.ps1 -> dashboard.ps1
 kubectl get kafka,kafkanodepool,kafkatopic,pods,pvc,svc -n kafka -o wide
 kubectl get pods,svc -n kubernetes-dashboard -o wide
 helm list -A
+.\strimzi\verify-kafka-health-liveness.ps1
 ```
+
+验证脚本会直接运行 liveness wrapper 的新鲜/过期状态测试，检查每个 Broker 的自定义镜像、`health-sidecar`、`kafka-health` `emptyDir` 及 Kafka 只读/侧车读写挂载，并通过 `kubectl exec` 确认 Kafka 只能读取健康目录。它不伪造 Broker 健康决策；持续写入 `status=failure` 后观察 Kubelet 3 次、10 秒周期的重启阈值属于单独的运维演练。
 
 Dashboard 地址：<https://localhost:30443/>。Prometheus 默认通过端口转发访问：
 
