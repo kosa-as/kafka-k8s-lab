@@ -115,11 +115,15 @@ try {
 
     $EndpointReady = $false
     for ($Attempt = 0; $Attempt -lt 60; $Attempt++) {
-        $Endpoint = kubectl get endpoints kafka-log-sidecar-injector -n kafka -o jsonpath='{.subsets[0].addresses[0].ip}' 2>$null
-        if ($Endpoint) { $EndpointReady = $true; break }
+        $Slices = kubectl get endpointslices -n kafka -l 'kubernetes.io/service-name=kafka-log-sidecar-injector' -o json | ConvertFrom-Json
+        foreach ($Slice in @($Slices.items)) {
+            $ReadyEndpoints = @($Slice.endpoints | Where-Object { $_.conditions.ready -eq $true -and @($_.addresses).Count -gt 0 })
+            if ($ReadyEndpoints.Count -gt 0) { $EndpointReady = $true; break }
+        }
+        if ($EndpointReady) { break }
         Start-Sleep -Seconds 2
     }
-    if (-not $EndpointReady) { throw 'kafka-log-sidecar-injector Service has no ready endpoint' }
+    if (-not $EndpointReady) { throw 'kafka-log-sidecar-injector Service has no ready EndpointSlice address' }
     Wait-WebhookAdmission
     if ($InstallOnly) { exit 0 }
 
