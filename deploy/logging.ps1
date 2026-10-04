@@ -61,6 +61,18 @@ try {
     kubectl apply -f $WebhookManifest
     kubectl -n kafka rollout status deployment/kafka-log-sidecar-injector --timeout=120s
 
+    $EndpointReady = $false
+    for ($Attempt = 0; $Attempt -lt 60; $Attempt++) {
+        $Slices = kubectl get endpointslices -n kafka -l 'kubernetes.io/service-name=kafka-log-sidecar-injector' -o json | ConvertFrom-Json
+        foreach ($Slice in @($Slices.items)) {
+            $ReadyEndpoints = @($Slice.endpoints | Where-Object { $_.conditions.ready -eq $true -and @($_.addresses).Count -gt 0 })
+            if ($ReadyEndpoints.Count -gt 0) { $EndpointReady = $true; break }
+        }
+        if ($EndpointReady) { break }
+        Start-Sleep -Seconds 2
+    }
+    if (-not $EndpointReady) { throw 'kafka-log-sidecar-injector Service has no ready EndpointSlice address' }
+
     Write-Host 'Applying Kafka runtime logging configuration...'
     kubectl apply -f (Join-Path $StrimziRoot '50-kafka-runtime-log-config.yaml')
     kubectl apply -f (Join-Path $StrimziRoot '10-kafka-node-pool.yaml')
