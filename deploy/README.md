@@ -8,7 +8,7 @@
 - `kafka.ps1`：部署 Kafka Namespace、指标与运行日志 ConfigMap、Strimzi Operator，先安装并等待 Mutating Webhook，再构建自定义 Kafka 镜像并创建 KafkaNodePool、Kafka 和 Topic。
 - `logging.ps1`：构建日志/健康 sidecar injector，创建运行日志 PVC，部署 TLS Webhook；`-InstallOnly` 只安装 Webhook，`-ReconcileOnly` 按 Broker 逐个检查并重建缺少完整注入形状的 Pod。
 - `metrics.ps1`：配置 Kafka JMX Prometheus Exporter，并部署 Prometheus。
-- `dashboard.ps1`：安装 Dashboard 7.14.0，暴露 HTTPS NodePort `30443`，并应用长期 Token Secret。
+- `dashboard.ps1`：安装 Dashboard 7.14.0，使用 `dashboard/.helm-cache/7.14.0` 本地缓存 Helm Chart，暴露 HTTPS NodePort `30443`，并应用长期 Token Secret。
 
 ## 完整部署
 
@@ -32,7 +32,7 @@ kafka.ps1 (含 Webhook 安装和 Kafka 创建) -> logging.ps1 -ReconcileOnly -> 
 
 自定义 Kafka 镜像在构建时将探针脚本规范为 LF，避免 Windows CRLF 导致 Linux 报 `env: 'sh\r': No such file or directory`。已有 Pod 仍使用原镜像时，需要重建 Pod 才能加载修正后的本地镜像；重建 Pod 不会删除数据和日志 PVC。
 
-Dashboard chart 下载失败时，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。
+Dashboard Chart 会缓存到 `dashboard/.helm-cache/7.14.0`，后续运行优先复用本地 Chart，不再重复访问 GitHub。缓存缺失时下载失败，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。该缓存目录已加入 `.gitignore`。
 
 ## 单模块更新
 

@@ -33,6 +33,8 @@ Dashboard 页面通过 HTTPS 提供服务，当前证书为自签名证书。首
 
 下面是 `deploy/dashboard.ps1` 使用的底层安装命令，适合需要手动控制 Chart 下载或参数时参考。
 
+统一部署脚本会将解包后的 Chart 缓存到 `dashboard/.helm-cache/7.14.0`，该目录已加入 `.gitignore`。缓存存在时不会重复下载；下面的命令用于手动下载或刷新缓存。
+
 Kubernetes Dashboard 官方 Helm 仓库地址当前返回 404。下面使用官方 GitHub Release 中的 Chart 包，固定到本次部署使用的 `7.14.0`：
 
 ```powershell
