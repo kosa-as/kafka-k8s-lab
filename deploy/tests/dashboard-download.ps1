@@ -3,10 +3,16 @@ $ErrorActionPreference = 'Stop'
 # Run the real Helm checks against an installed release and an unreachable URL.
 # A download failure must reach the existing-release fallback under PS 5.1.
 $Source = Get-Content -Raw (Join-Path $PSScriptRoot '..\dashboard.ps1')
-$Start = $Source.IndexOf('try {')
+$ParseTokens = $null
+$ParseErrors = $null
+$null = [System.Management.Automation.Language.Parser]::ParseInput($Source, [ref]$ParseTokens, [ref]$ParseErrors)
+if ($ParseErrors.Count -gt 0) {
+    throw "Dashboard script failed syntax validation: $($ParseErrors.Message -join '; ')"
+}
+Write-Host 'PASS: the complete Dashboard script parses successfully.'
+$Start = $Source.IndexOf('$HelmExe =')
 if ($Start -lt 0) { throw 'Dashboard download block was not found' }
-$Start += 'try {'.Length
-$End = $Source.IndexOf('    if ($ChartAvailable)', $Start)
+$End = $Source.IndexOf('if ($ChartAvailable) {', $Start)
 if ($Start -lt 0 -or $End -lt 0) { throw 'Dashboard download block was not found' }
 $DownloadBlock = [scriptblock]::Create($Source.Substring($Start, $End - $Start))
 $ChartVersion = '7.14.0'
