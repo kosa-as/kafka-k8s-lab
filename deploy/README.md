@@ -8,7 +8,7 @@
 - `kafka.ps1`：部署 Kafka Namespace、指标与运行日志 ConfigMap、运行日志 PVC、Strimzi Operator、KafkaNodePool、Kafka 和 Topic。
 - `logging.ps1`：构建日志 sidecar injector，创建运行日志 PVC，部署 TLS Webhook，并应用 Kafka 文件日志配置；如果现有 Broker 未包含 `log-agent`，脚本会删除这些 Pod，让 Webhook 在重建时注入 sidecar。
 - `metrics.ps1`：配置 Kafka JMX Prometheus Exporter，并部署 Prometheus。
-- `dashboard.ps1`：安装 Dashboard 7.14.0，暴露 HTTPS NodePort `30443`，并应用长期 Token Secret。
+- `dashboard.ps1`：安装 Dashboard 7.14.0，使用 `dashboard/.helm-cache/7.14.0` 本地缓存 Helm Chart，暴露 HTTPS NodePort `30443`，并应用长期 Token Secret。
 
 ## 完整部署
 
@@ -30,7 +30,7 @@ kafka.ps1 -> logging.ps1 -> metrics.ps1 -> dashboard.ps1
 
 日志 injector 每次更新 TLS 证书后会重新启动，并通过 API Server 的 server-side dry-run 确认 `log-agent` 实际注入成功，再处理 Broker。检查不会创建真实 Pod。
 
-Dashboard chart 下载失败时，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。
+Dashboard Chart 会缓存到 `dashboard/.helm-cache/7.14.0`，后续运行优先复用本地 Chart，不再重复访问 GitHub。缓存缺失时下载失败，只有已有 Helm release 才会复用现有安装，并继续检查组件可用状态；首次安装下载失败仍会报错，错误信息会保留。该缓存目录已加入 `.gitignore`。
 
 ## 单模块更新
 

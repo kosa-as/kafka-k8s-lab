@@ -15,6 +15,15 @@ $ChartDir = Join-Path ([IO.Path]::GetTempPath()) ('dashboard test ' + [guid]::Ne
 $ChartPath = Join-Path $ChartDir 'kubernetes-dashboard'
 New-Item -ItemType Directory -Path $ChartDir | Out-Null
 try {
+    New-Item -ItemType Directory -Path $ChartPath -Force | Out-Null
+    New-Item -ItemType File -Path (Join-Path $ChartPath 'Chart.yaml') -Force | Out-Null
+    $ChartUrl = 'https://127.0.0.1:1/unavailable-chart.tgz'
+    . $DownloadBlock
+    if (-not $ChartAvailable) { throw 'Existing chart cache was not reported as available' }
+    Write-Host 'PASS: existing local chart cache avoids a Helm download.'
+
+    Remove-Item -LiteralPath $ChartPath -Recurse -Force
+    $ChartUrl = 'https://127.0.0.1:1/unavailable-chart.tgz'
     . $DownloadBlock
     if (-not $ReleaseExists) { throw 'Test requires the installed kubernetes-dashboard release' }
     if ($ChartAvailable) { throw 'Unreachable chart URL was reported as available' }

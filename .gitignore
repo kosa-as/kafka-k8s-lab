@@ -5,6 +5,9 @@
 # Maven build output
 **/target/
 
+# Locally cached Helm charts
+dashboard/.helm-cache/
+
 # Generated client runtime logs
 **/logs/
 

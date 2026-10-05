@@ -5,11 +5,11 @@ $RepoRoot = Split-Path -Parent $ScriptRoot
 $DashboardRoot = Join-Path $RepoRoot 'dashboard'
 $ChartVersion = '7.14.0'
 $ChartUrl = "https://github.com/kubernetes/dashboard/releases/download/kubernetes-dashboard-$ChartVersion/kubernetes-dashboard-$ChartVersion.tgz"
-$ChartDir = Join-Path ([System.IO.Path]::GetTempPath()) `
-  ('kubernetes-dashboard-chart-' + [guid]::NewGuid().ToString('N'))
+$ChartCacheRoot = Join-Path $DashboardRoot '.helm-cache'
+$ChartDir = Join-Path $ChartCacheRoot $ChartVersion
 $ChartPath = Join-Path $ChartDir 'kubernetes-dashboard'
 
-New-Item -ItemType Directory -Path $ChartDir | Out-Null
+New-Item -ItemType Directory -Path $ChartDir -Force | Out-Null
 try {
     # Inspect optional native-command failures by exit code. In Windows PS 5.1,
     # direct stderr redirection can terminate before the fallback is evaluated.
@@ -21,14 +21,20 @@ try {
       -RedirectStandardError (Join-Path $ChartDir 'helm-status.stderr.log')
     $ReleaseExists = ($HelmStatus.ExitCode -eq 0)
 
-    Write-Host "Downloading Kubernetes Dashboard chart $ChartVersion..."
-    $HelmPullErrorPath = Join-Path $ChartDir 'helm-pull.stderr.log'
-    $HelmPull = Start-Process -FilePath $HelmExe `
-      -ArgumentList @('pull', ('"{0}"' -f $ChartUrl), '--untar', '--untardir', ('"{0}"' -f $ChartDir)) `
-      -NoNewWindow -Wait -PassThru `
-      -RedirectStandardError $HelmPullErrorPath
-    $ChartAvailable = ($HelmPull.ExitCode -eq 0 -and (Test-Path -LiteralPath $ChartPath))
-    $HelmPullError = Get-Content -Raw -LiteralPath $HelmPullErrorPath
+    $ChartManifestPath = Join-Path $ChartPath 'Chart.yaml'
+    $ChartAvailable = Test-Path -LiteralPath $ChartManifestPath
+    $HelmPullError = ''
+    if (-not $ChartAvailable) {
+        Write-Host "Downloading Kubernetes Dashboard chart $ChartVersion..."
+        Remove-Item -LiteralPath $ChartPath -Recurse -Force -ErrorAction SilentlyContinue
+        $HelmPullErrorPath = Join-Path $ChartDir 'helm-pull.stderr.log'
+        $HelmPull = Start-Process -FilePath $HelmExe `
+          -ArgumentList @('pull', ('"{0}"' -f $ChartUrl), '--untar', '--untardir', ('"{0}"' -f $ChartDir)) `
+          -NoNewWindow -Wait -PassThru `
+          -RedirectStandardError $HelmPullErrorPath
+        $ChartAvailable = ($HelmPull.ExitCode -eq 0 -and (Test-Path -LiteralPath $ChartManifestPath))
+        $HelmPullError = Get-Content -Raw -LiteralPath $HelmPullErrorPath
+    }
     if (-not $ChartAvailable -and -not $ReleaseExists) {
         throw "Failed to download or unpack Kubernetes Dashboard chart ${ChartVersion}: $HelmPullError"
     }
@@ -63,7 +69,4 @@ try {
       -n kubernetes-dashboard `
       --timeout=8m
     kubectl get pods,svc -n kubernetes-dashboard -o wide
-}
-finally {
-    Remove-Item -LiteralPath $ChartDir -Recurse -Force -ErrorAction SilentlyContinue
 }
