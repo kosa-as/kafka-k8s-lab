@@ -1,0 +1,15 @@
+# Example only. Applying this file immediately kills the Kafka container once.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: kafka-0-container-kill
+  namespace: kafka
+spec:
+  action: container-kill
+  mode: one
+  containerNames:
+    - kafka
+  selector:
+    pods:
+      kafka:
+        - kafka-kafka-0

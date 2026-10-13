@@ -1,0 +1,26 @@
+# Example only. Applying this file immediately injects a 60-second delay.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: kafka-0-network-delay
+  namespace: kafka
+spec:
+  action: delay
+  mode: one
+  selector:
+    pods:
+      kafka:
+        - kafka-kafka-0
+  direction: to
+  target:
+    mode: all
+    selector:
+      pods:
+        kafka:
+          - kafka-kafka-1
+          - kafka-kafka-2
+  delay:
+    latency: 200ms
+    jitter: 20ms
+    correlation: "0"
+  duration: 60s

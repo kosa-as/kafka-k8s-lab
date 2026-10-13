@@ -1,0 +1,23 @@
+# Chaos Mesh Helm chart 2.8.4, Docker Desktop single-node Kubernetes.
+images:
+  registry: ghcr.io
+  tag: v2.8.4
+timezone: Asia/Shanghai
+controllerManager:
+  replicaCount: 1
+chaosDaemon:
+  runtime: docker
+  socketPath: /var/run/docker.sock
+dashboard:
+  create: true
+  securityMode: true
+  rootUrl: http://localhost:32333
+  service:
+    type: NodePort
+    nodePort: 32333
+  persistentVolume:
+    enabled: true
+    storageClassName: hostpath
+    size: 1Gi
+prometheus:
+  create: false

@@ -7,6 +7,7 @@
 
 # Locally cached Helm charts
 dashboard/.helm-cache/
+chaos-mesh/.helm-cache/
 
 # Generated client runtime logs
 **/logs/

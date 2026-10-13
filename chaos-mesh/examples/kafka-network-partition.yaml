@@ -1,0 +1,22 @@
+# Example only. Applying this file immediately isolates node 0 from peers.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: kafka-0-network-partition
+  namespace: kafka
+spec:
+  action: partition
+  mode: one
+  selector:
+    pods:
+      kafka:
+        - kafka-kafka-0
+  direction: both
+  target:
+    mode: all
+    selector:
+      pods:
+        kafka:
+          - kafka-kafka-1
+          - kafka-kafka-2
+  duration: 60s

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chaos-kafka-manager
+  namespace: kafka
+automountServiceAccountToken: false
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: chaos-kafka-manager
+  namespace: kafka
+rules:
+  - apiGroups: [""]
+    resources: [pods, namespaces, events]
+    verbs: [get, list, watch]
+  - apiGroups: [chaos-mesh.org]
+    resources: ["*"]
+    verbs: [get, list, watch, create, delete, patch, update]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: chaos-kafka-manager
+  namespace: kafka
+subjects:
+  - kind: ServiceAccount
+    name: chaos-kafka-manager
+    namespace: kafka
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: chaos-kafka-manager
