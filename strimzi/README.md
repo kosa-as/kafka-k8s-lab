@@ -1,5 +1,7 @@
 # Strimzi Kafka 集群
 
+> 历史实现：当前部署入口已改为 `bitnami/` 和 `deploy/kafka.ps1`。本目录保存旧 Strimzi 配置，供回溯使用；不要与新部署脚本混用。
+
 本目录部署一个 3 节点的 Strimzi KRaft Kafka 集群，运行在当前 Docker Desktop Kubernetes 中。
 
 ## 资源

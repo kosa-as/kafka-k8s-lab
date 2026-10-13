@@ -13,7 +13,12 @@ public record ConsumerConfig(Duration duration, String bootstrapServers, String 
             throw new IllegalArgumentException("duration must be a positive integer: " + rawDuration, e);
         }
         if (seconds <= 0) throw new IllegalArgumentException("duration must be positive");
-        return new ConsumerConfig(Duration.ofSeconds(seconds), p.getProperty("bootstrapServers", "localhost:40000"),
-                p.getProperty("topic", "demo"), p.getProperty("groupId", "timestamp-consumer"));
+        return new ConsumerConfig(Duration.ofSeconds(seconds), p.getProperty("bootstrapServers", "localhost:32000"),
+                nonBlankOrDefault(p, "topic", "demo"), nonBlankOrDefault(p, "groupId", "timestamp-consumer"));
+    }
+
+    private static String nonBlankOrDefault(Properties p, String key, String fallback) {
+        String value = p.getProperty(key);
+        return value == null || value.isBlank() ? fallback : value;
     }
 }

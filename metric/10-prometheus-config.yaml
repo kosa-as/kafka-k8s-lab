@@ -13,7 +13,7 @@ data:
       - job_name: kafka-brokers
         static_configs:
           - targets:
-              - kafka-kafka-0.kafka-kafka-brokers.kafka.svc:9404
-              - kafka-kafka-1.kafka-kafka-brokers.kafka.svc:9404
-              - kafka-kafka-2.kafka-kafka-brokers.kafka.svc:9404
+              - bitnami-kafka-controller-0.bitnami-kafka-controller-headless.kafka.svc:9404
+              - bitnami-kafka-controller-1.bitnami-kafka-controller-headless.kafka.svc:9404
+              - bitnami-kafka-controller-2.bitnami-kafka-controller-headless.kafka.svc:9404
         metrics_path: /metrics

@@ -1,15 +1,25 @@
 $ErrorActionPreference = 'Stop'
 
-$ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoRoot = Split-Path -Parent $ScriptRoot
-$StrimziRoot = Join-Path $RepoRoot 'strimzi'
+$RepoRoot = Split-Path -Parent $PSScriptRoot
+$BitnamiRoot = Join-Path $RepoRoot 'bitnami'
 $MetricRoot = Join-Path $RepoRoot 'metric'
 
-kubectl apply -f (Join-Path $MetricRoot '00-kafka-metrics-config.yaml')
-kubectl apply -f (Join-Path $StrimziRoot '20-kafka.yaml')
-kubectl wait --for=condition=Ready kafka/kafka -n kafka --timeout=900s
+$ApplyOutput = kubectl apply -f (Join-Path $BitnamiRoot '00-jmx-config.yaml')
+if ($LASTEXITCODE -ne 0) { throw 'Failed to apply Bitnami Kafka JMX configuration.' }
+if ($ApplyOutput -match 'configured') {
+    kubectl -n kafka rollout restart statefulset/bitnami-kafka-controller
+    if ($LASTEXITCODE -ne 0) { throw 'Failed to restart Bitnami Kafka controllers.' }
+}
+kubectl -n kafka rollout status statefulset/bitnami-kafka-controller --timeout=15m
+if ($LASTEXITCODE -ne 0) { throw 'Bitnami Kafka controllers did not become ready.' }
 
 kubectl apply -f (Join-Path $MetricRoot '10-prometheus-config.yaml')
+if ($LASTEXITCODE -ne 0) { throw 'Failed to apply Prometheus configuration.' }
 kubectl apply -f (Join-Path $MetricRoot '20-prometheus.yaml')
-kubectl rollout status deployment/prometheus -n kafka --timeout=180s
-kubectl get deployment,svc -n kafka -l app=prometheus -o wide
+if ($LASTEXITCODE -ne 0) { throw 'Failed to apply Prometheus Deployment.' }
+kubectl -n kafka rollout restart deployment/prometheus
+if ($LASTEXITCODE -ne 0) { throw 'Failed to restart Prometheus.' }
+kubectl -n kafka rollout status deployment/prometheus --timeout=180s
+if ($LASTEXITCODE -ne 0) { throw 'Prometheus did not become ready.' }
+
+kubectl -n kafka get deployment,svc -l app=prometheus -o wide

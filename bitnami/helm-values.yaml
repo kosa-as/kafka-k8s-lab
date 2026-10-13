@@ -1,0 +1,151 @@
+# Bitnami Kafka chart 32.5.0, pinned by deploy/kafka.ps1.
+# This is a disposable Docker Desktop KRaft cluster; old Strimzi PVCs are not reused.
+global:
+  security:
+    allowInsecureImages: true # The official archived images live under bitnamilegacy.
+
+image:
+  registry: docker.io
+  repository: bitnamilegacy/kafka
+  tag: 4.0.0-debian-12-r10
+
+# Managed by deploy/kafka.ps1 so repeated Helm upgrades keep stable IDs.
+existingKraftSecret: bitnami-kafka-kraft-static
+
+controller:
+  replicaCount: 3
+  controllerOnly: false
+  minId: 0
+  heapOpts: -Xms1g -Xmx2g
+  resources:
+    requests:
+      cpu: 1
+      memory: 2Gi
+    limits:
+      cpu: 3
+      memory: 4Gi
+  startupProbe:
+    enabled: true
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 30
+    successThreshold: 1
+  persistence:
+    enabled: true
+    storageClass: hostpath
+    size: 20Gi
+  logPersistence:
+    enabled: true
+    storageClass: hostpath
+    size: 2Gi
+  extraVolumes:
+    - name: kafka-health
+      emptyDir: {}
+  sidecars:
+    - name: log-agent
+      image: docker.io/bitnamilegacy/os-shell:12-debian-12-r51
+      imagePullPolicy: IfNotPresent
+      command: [/bin/sh, -c]
+      args:
+        - >-
+          until [ -f /opt/bitnami/kafka/logs/server.log ]; do sleep 1; done;
+          exec tail -n+1 -F /opt/bitnami/kafka/logs/server.log
+      resources:
+        requests: {cpu: 10m, memory: 16Mi}
+        limits: {cpu: 100m, memory: 64Mi}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      volumeMounts:
+        - name: logs
+          mountPath: /opt/bitnami/kafka/logs
+          readOnly: true
+    # Preserve the existing lab health sidecar's status-file behavior.
+    # Kafka liveness/readiness continue to use the chart's own probes.
+    - name: health-sidecar
+      image: docker.io/bitnamilegacy/os-shell:12-debian-12-r51
+      imagePullPolicy: IfNotPresent
+      command: [/bin/sh, -c]
+      args:
+        - >-
+          while :; do
+            now="$(date +%s)";
+            printf 'status=healthy\nupdated_at=%s\n' "$now" > /var/run/kafka-health/status;
+            sleep 5;
+          done
+      resources:
+        requests: {cpu: 10m, memory: 16Mi}
+        limits: {cpu: 100m, memory: 64Mi}
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1001
+        runAsGroup: 1001
+        allowPrivilegeEscalation: false
+        readOnlyRootFilesystem: true
+      volumeMounts:
+        - name: kafka-health
+          mountPath: /var/run/kafka-health
+
+broker:
+  replicaCount: 0
+
+listeners:
+  client:
+    protocol: PLAINTEXT
+  controller:
+    protocol: PLAINTEXT
+  interbroker:
+    protocol: PLAINTEXT
+  external:
+    protocol: PLAINTEXT
+
+service:
+  type: NodePort
+  nodePorts:
+    client: 32004
+    external: 32000
+
+externalAccess:
+  enabled: true
+  controller:
+    service:
+      type: NodePort
+      domain: localhost
+      nodePorts: [32001, 32002, 32003]
+
+defaultInitContainers:
+  volumePermissions:
+    enabled: false
+    image:
+      repository: bitnamilegacy/os-shell
+  autoDiscovery:
+    enabled: false
+    image:
+      repository: bitnamilegacy/kubectl
+
+existingLog4j2ConfigMap: bitnami-kafka-log4j2
+
+overrideConfiguration:
+  offsets.topic.replication.factor: 3
+  transaction.state.log.replication.factor: 3
+  transaction.state.log.min.isr: 2
+  default.replication.factor: 3
+  min.insync.replicas: 2
+  log.retention.hours: 168
+  log.retention.bytes: 10737418240
+
+metrics:
+  jmx:
+    enabled: true
+    image:
+      repository: bitnamilegacy/jmx-exporter
+    existingConfigmap: bitnami-kafka-jmx
+    containerPorts:
+      metrics: 9404
+    service:
+      ports:
+        metrics: 9404

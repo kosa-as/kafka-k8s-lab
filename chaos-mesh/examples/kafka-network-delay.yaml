@@ -10,15 +10,15 @@ spec:
   selector:
     pods:
       kafka:
-        - kafka-kafka-0
+        - bitnami-kafka-controller-0
   direction: to
   target:
     mode: all
     selector:
       pods:
         kafka:
-          - kafka-kafka-1
-          - kafka-kafka-2
+          - bitnami-kafka-controller-1
+          - bitnami-kafka-controller-2
   delay:
     latency: 200ms
     jitter: 20ms

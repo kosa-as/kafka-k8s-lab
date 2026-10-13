@@ -8,7 +8,7 @@ public record ProducerConfig(Duration duration, int frequencyPerSecond, String b
         long seconds = positiveLong(p, "duration", 60);
         int frequency = positiveInt(p, "frequency", 1);
         return new ProducerConfig(Duration.ofSeconds(seconds), frequency,
-                p.getProperty("bootstrapServers", "localhost:40000"), p.getProperty("topic", "demo"));
+                p.getProperty("bootstrapServers", "localhost:32000"), p.getProperty("topic", "demo"));
     }
     private static long positiveLong(Properties p, String key, long fallback) {
         String raw = p.getProperty(key, Long.toString(fallback));

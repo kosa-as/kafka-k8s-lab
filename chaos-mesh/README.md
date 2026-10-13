@@ -16,7 +16,7 @@ kubectl --context docker-desktop -n kafka create token chaos-kafka-manager --dur
 
 在 Dashboard 的 Token 登录框中填写：Name 为 `kafka-manager`，Token 为上面命令的输出。该账号可以管理 `kafka` 命名空间中的 Chaos Mesh 资源，不能管理其他命名空间的实验，也不是 cluster-admin。Token 过期后重新生成；不需要保存到 Git。
 
-已使用短期 Token 验证 Dashboard 能读取 `kafka-kafka-0`。如果 NodePort 后续无法访问，在独立 PowerShell 窗口运行并保持窗口打开：
+已使用短期 Token 验证 Dashboard 能读取 `bitnami-kafka-controller-0`。如果 NodePort 后续无法访问，在独立 PowerShell 窗口运行并保持窗口打开：
 
 ```powershell
 kubectl --context docker-desktop -n chaos-mesh port-forward --address 127.0.0.1 svc/chaos-dashboard 2333:2333
@@ -28,7 +28,7 @@ kubectl --context docker-desktop -n chaos-mesh port-forward --address 127.0.0.1 
 
 | 示例文件 | 实际作用 | 如何恢复 |
 | --- | --- | --- |
-| `examples/kafka-container-kill.yaml` | 只杀死 `kafka-kafka-0` 中的 `kafka` 容器一次，保留其他 sidecar | kubelet 根据 Pod 的重启策略重启 Kafka；恢复耗时取决于 Kafka 启动和副本追赶 |
+| `examples/kafka-container-kill.yaml` | 只杀死 `bitnami-kafka-controller-0` 中的 `kafka` 容器一次，保留其他 sidecar | kubelet 根据 Pod 的重启策略重启 Kafka；恢复耗时取决于 Kafka 启动和副本追赶 |
 | `examples/kafka-network-delay.yaml` | 节点 0 发往节点 1、2 的流量增加 200ms 延迟、20ms 抖动 | 注入成功后持续约 60s，控制器正常工作时自动撤销网络规则 |
 | `examples/kafka-network-partition.yaml` | 阻断节点 0 与节点 1、2 的双向流量 | 注入成功后持续约 60s，控制器正常工作时自动撤销网络规则 |
 
@@ -38,7 +38,7 @@ kubectl --context docker-desktop -n chaos-mesh port-forward --address 127.0.0.1 
 
 如果只是了解流程，可以打开 YAML、查看 Dashboard 的新建实验表单，但不要点击 Submit/Create。**点击提交或者不带 dry-run 执行 kubectl apply，就会立即注入故障。**
 
-Dashboard 手动配置时选 `kafka` 命名空间，使用标签 `strimzi.io/pod-name=kafka-kafka-0`，确认预览只匹配这个 Pod。Container Kill 的容器名填写 `kafka`；网络实验设置 60s 时长。要精确复用本说明的对端范围，优先使用已给出的 YAML。
+Dashboard 手动配置时选 `kafka` 命名空间，使用标签 `statefulset.kubernetes.io/pod-name=bitnami-kafka-controller-0`，确认预览只匹配这个 Pod。Container Kill 的容器名填写 `kafka`；网络实验设置 60s 时长。要精确复用本说明的对端范围，优先使用已给出的 YAML。
 
 ## 3. 仅校验 YAML，不执行
 
@@ -58,7 +58,7 @@ kubectl --context docker-desktop apply --dry-run=server -f chaos-mesh/examples/k
 
 ```powershell
 kubectl config current-context
-kubectl --context docker-desktop -n kafka get pods kafka-kafka-0 kafka-kafka-1 kafka-kafka-2
+kubectl --context docker-desktop -n kafka get pods bitnami-kafka-controller-0 bitnami-kafka-controller-1 bitnami-kafka-controller-2
 ```
 
 一次只选一个实验。例如，以下命令会立即执行网络延迟实验：
@@ -76,7 +76,7 @@ kubectl --context docker-desktop apply -f chaos-mesh/examples/kafka-network-dela
 kubectl --context docker-desktop -n kafka describe networkchaos kafka-0-network-delay
 kubectl --context docker-desktop -n kafka get networkchaos kafka-0-network-delay -o yaml
 kubectl --context docker-desktop -n kafka get pods -w
-kubectl --context docker-desktop -n kafka logs kafka-kafka-0 -c kafka --tail=100
+kubectl --context docker-desktop -n kafka logs bitnami-kafka-controller-0 -c kafka --tail=100
 ```
 
 查看实验的 Conditions、Records、Events，确认注入、恢复是否成功；同时比较业务指标和 Kafka 日志。Container Kill 时可查看 `podchaos kafka-0-container-kill`，以及 Kafka 容器的重启次数和 `logs --previous`。

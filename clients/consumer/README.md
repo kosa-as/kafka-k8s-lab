@@ -1,6 +1,6 @@
 # Consumer
 
-消费 demo topic，执行: mvn compile exec:java -Dduration=60 -DbootstrapServers=localhost:40000 -Dtopic=demo -DgroupId=timestamp-consumer
+消费 demo topic，执行: mvn compile exec:java -Dduration=60 -DbootstrapServers=localhost:32000 -Dtopic=demo -DgroupId=timestamp-consumer
 
 duration 单位为秒，默认 60；程序打印 partition、offset 和时间戳 payload。
 
