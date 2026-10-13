@@ -1,30 +1,32 @@
-# Bitnami Legacy Kafka on Docker Desktop
+# Bitnami Legacy Kafka 配置
 
-`helm-values.yaml` deploys three combined KRaft controller/broker nodes using the official archived `bitnamilegacy/kafka:4.0.0-debian-12-r10` image. The chart source is pinned to commit `bb5e98a6e3c5ca196420d2414769b681c9284101` (Kafka chart 32.5.0) and cached under `.helm-cache/` by `deploy/kafka.ps1`. The common subchart is copied from the same source commit. Bitnami Legacy images are archived and receive no updates.
+`helm-values.yaml` 使用 `bitnamilegacy/kafka:4.0.0-debian-12-r10` 部署三个 KRaft controller/broker 混合节点。部署脚本将 Kafka Chart 32.5.0 的源码固定在 Git commit `bb5e98a6e3c5ca196420d2414769b681c9284101`，连同同一版本的 common 子 Chart 缓存在 `.helm-cache/`。Legacy 镜像是归档版本，不再获得更新。
 
-`deploy/kafka.ps1` creates a stable `bitnami-kafka-kraft-static` Secret so repeated Helm upgrades retain the cluster and node IDs. Each node has a new 20Gi `hostpath` data PVC and 2Gi runtime log PVC. The release does not mount or migrate Strimzi PVCs. `demo` is recreated with three partitions, RF3, seven-day retention and min ISR2. Old messages and consumer offsets are intentionally not copied.
+脚本创建 `bitnami-kafka-kraft-static` Secret，保存 cluster ID 和三个节点的目录 ID，供重复部署使用。每个节点使用 20 GiB 的 `hostpath` 数据 PVC 和 2 GiB 日志 PVC。`demo` topic 有 3 个分区、副本因子 3、最小同步副本数 2，保留 7 天。
 
-The Kafka container writes stdout and a rolling `server.log`. `log-agent` tails that file to its stdout. The existing lab `health-sidecar` status-file behavior is carried forward, while Kafka health is checked by the chart's own probes. The Strimzi admission webhook does not select Bitnami pods.
+Kafka 同时输出 stdout 和滚动的 `server.log`。`log-agent` sidecar 读取日志文件并输出到自身 stdout；`health-sidecar` 更新状态文件。Kafka 的存活与就绪由 Chart 提供的探针判断。JMX Exporter 在每个 Pod 的 `9404` 端口提供指标。
 
-## Install
+## 部署
+
+从仓库根目录运行：
 
 ```powershell
 .\deploy\kafka.ps1
 .\deploy\metrics.ps1
 ```
 
-For the complete platform, use `.\deploy\all.ps1`. The old Strimzi cluster can remain running during validation because the Helm release has different resource names. Run `deploy/retire-strimzi.ps1` only after the new cluster and clients have been verified; it removes the old Strimzi resources and old test PVCs.
+完整平台入口为 `.\deploy\all.ps1`。指标、日志配置分别由 `.\deploy\metrics.ps1` 和 `.\deploy\logging.ps1` 更新。
 
-## Endpoints
+## 连接地址
 
-| Client location | Bootstrap address |
+| 客户端位置 | Bootstrap 地址 |
 | --- | --- |
-| Kubernetes | `bitnami-kafka.kafka.svc:9092` |
-| Windows host | `localhost:32000` |
+| Kubernetes 集群内 | `bitnami-kafka.kafka.svc:9092` |
+| Docker Desktop 宿主机 | `localhost:32000` |
 
-The three external broker addresses are `localhost:32001`, `localhost:32002`, `localhost:32003`. Docker Desktop must expose these NodePorts. Internal, controller, and inter-broker listeners are PLAINTEXT, matching this local lab's existing client behavior.
+宿主机还需能访问三个 broker 的 `localhost:32001`、`localhost:32002` 和 `localhost:32003`。监听器使用 PLAINTEXT，仅适合本地实验。
 
-## Checks
+## 检查
 
 ```powershell
 kubectl -n kafka get statefulset,pods,pvc,svc -l app.kubernetes.io/instance=bitnami-kafka
@@ -32,4 +34,4 @@ kubectl -n kafka exec bitnami-kafka-controller-0 -c kafka -- env -u JMX_PORT /op
 kubectl -n kafka logs bitnami-kafka-controller-0 -c log-agent --tail=20
 ```
 
-Prometheus continues on the existing `prometheus` Service. Its targets now point to the Bitnami controller headless DNS names on port 9404.
+Prometheus 的抓取目标是三个 Kafka Pod 的 headless DNS 地址，端口为 `9404`。完整使用说明见仓库根目录的 [README](../README.md)。

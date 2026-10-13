@@ -8,14 +8,13 @@
 - `logging.ps1`：更新 Log4j2 配置，并验证每个节点的日志文件与 `log-agent`。
 - `metrics.ps1`：更新 JMX 配置和 Prometheus 抓取目标。
 - `dashboard.ps1`：维护现有 Kubernetes Dashboard。
-- `retire-strimzi.ps1`：新集群验证通过后，移除旧 Strimzi Operator、资源及其测试 PVC。
 - `all.ps1`：按 Kafka、指标、Dashboard 的顺序部署平台；日志 sidecar 已随 Kafka 一起部署。
 
 ```powershell
 .\deploy\all.ps1
 ```
 
-Kafka 节点使用新 PVC，与旧 Strimzi 集群并行安装。部署成功后先检查客户端和 Prometheus，再运行旧集群清理脚本。清理会删除旧测试数据，无法恢复。
+Kafka 节点使用独立的数据与日志 PVC。首次部署后请检查客户端连接、`demo` topic 和 Prometheus 抓取状态。
 
 ## 验证
 
@@ -29,4 +28,4 @@ kubectl -n kafka exec deployment/prometheus -- wget -qO- http://localhost:9090/a
 
 宿主机 Kafka bootstrap 为 `localhost:32000`；broker 分别为 `localhost:32001` 至 `32003`。Prometheus 使用 `kubectl -n kafka port-forward svc/prometheus 9090:9090` 查看。
 
-旧的 `strimzi/` 目录和相关测试脚本保留为历史实现参考，不再作为当前部署入口。
+完整的连接方式、Java 示例和常见问题见仓库根目录的 [README](../README.md)。

@@ -1,5 +1,5 @@
 # Bitnami Kafka chart 32.5.0, pinned by deploy/kafka.ps1.
-# This is a disposable Docker Desktop KRaft cluster; old Strimzi PVCs are not reused.
+# Docker Desktop 上的三节点 KRaft 实验集群。
 global:
   security:
     allowInsecureImages: true # The official archived images live under bitnamilegacy.
