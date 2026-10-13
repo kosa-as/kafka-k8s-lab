@@ -100,6 +100,8 @@ kubectl -n kafka port-forward svc/prometheus 9090:9090
 
 端口转发运行期间访问 <http://localhost:9090/graph>；可以查询 `up{job="kafka-brokers"}` 和 `jmx_scrape_error`。三个目标应为 `up`，错误值应为 `0`。指标配置见[指标说明](metric/README.md)。
 
+Prometheus 当前使用临时 `emptyDir` 存储并保留 6 小时指标；Pod 重建后不会保留历史曲线。指标名称以当前 exporter 的实际输出为准，具体查询和排查命令见指标说明。
+
 ## 其他组件与目录
 
 | 目录 | 内容 |
@@ -112,6 +114,8 @@ kubectl -n kafka port-forward svc/prometheus 9090:9090
 | [`chaos-mesh/`](chaos-mesh/README.md) | 可选故障注入示例；不会被完整部署入口自动执行 |
 
 Dashboard 的本机入口为 <https://localhost:30443/>。它使用自签名证书，登录方式见对应说明。Chaos Mesh 示例可能中断 Kafka 服务，使用前请先阅读各实验的作用范围和恢复步骤。
+
+通过 Maven 运行 Java 示例时，请按照[客户端说明](clients/README.md)显式传入所有参数；虽然 Java 配置类有默认值，当前 Maven 插件仍可能将省略的属性传成空值。
 
 ## 常见问题
 

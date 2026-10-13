@@ -2,6 +2,8 @@
 
 本文记录当前 Docker Desktop Kubernetes 集群中的 Kubernetes Dashboard 安装状态、访问方式和维护命令。
 
+从仓库根目录运行 `.\deploy\dashboard.ps1` 可安装或更新。Dashboard 的本机入口是 <https://localhost:30443/>；使用 Token 登录，令牌获取命令见下文。部署文件为 [`10-dashboard-admin-token.yaml`](10-dashboard-admin-token.yaml)，统一入口和其他组件的关系见[部署说明](../deploy/README.md)。
+
 ## 当前部署
 
 - Kubernetes context：`docker-desktop`
@@ -12,8 +14,6 @@
 - HTTPS NodePort：`30443`
 - 浏览器地址：<https://localhost:30443/>
 - Dashboard 各组件运行在 `docker-desktop` 节点；当前已全部 Ready。
-
-安装前集群中没有 Dashboard 工作负载或相关 Dashboard 镜像。安装 Chart 时 Kubernetes 从镜像仓库拉取并启动了 Dashboard Web、API、Auth、Metrics Scraper 和 Kong 镜像。
 
 Dashboard 页面通过 HTTPS 提供服务，当前证书为自签名证书。首次打开时浏览器可能显示证书警告；仅在确认地址为本机集群后继续访问。
 
@@ -33,9 +33,9 @@ Dashboard 页面通过 HTTPS 提供服务，当前证书为自签名证书。首
 
 下面是 `deploy/dashboard.ps1` 使用的底层安装命令，适合需要手动控制 Chart 下载或参数时参考。
 
-统一部署脚本会将解包后的 Chart 缓存到 `dashboard/.helm-cache/7.14.0`，该目录已加入 `.gitignore`。缓存存在时不会重复下载；下面的命令用于手动下载或刷新缓存。
+统一部署脚本会将解包后的 Chart 缓存到 `dashboard/.helm-cache/7.14.0`，该目录已加入 `.gitignore`。缓存存在时不会重复下载。下面的手动示例下载到临时目录，与脚本缓存互不影响。
 
-Kubernetes Dashboard 官方 Helm 仓库地址当前返回 404。下面使用官方 GitHub Release 中的 Chart 包，固定到本次部署使用的 `7.14.0`：
+脚本从 GitHub Release 下载固定版本 `7.14.0` 的 Chart 包。若下载失败但 Helm release 已存在，脚本会复用已有 release，并继续检查本地管理员身份；首次安装仍需成功下载 Chart。
 
 ```powershell
 $chartRoot = Join-Path $env:TEMP 'kubernetes-dashboard-chart'
@@ -136,6 +136,8 @@ curl.exe -k -I --connect-timeout 5 --max-time 15 https://localhost:30443/
 
 成功时所有 Deployment 的 `AVAILABLE` 为 `1`，Service 显示 `443:30443/TCP`，HTTP 检查返回 `200`。`curl -k` 仅跳过本次自签名证书校验，不代表适合生产环境使用。
 
+若页面无法打开，先确认 Kong Service 的 `30443` NodePort 和各 Deployment 状态；若页面可打开但无法登录，重新获取当前 `dashboard-admin-token` 的 Token，并检查 ServiceAccount、ClusterRoleBinding 和 Secret 是否存在。不要把 Token 写入 README 或提交到仓库。
+
 ## 卸载
 
 下面命令会移除 Dashboard Helm Release 和本地管理员授权；执行前确认不再需要该控制台：
@@ -148,12 +150,12 @@ kubectl delete secret dashboard-admin-token -n kubernetes-dashboard
 kubectl delete namespace kubernetes-dashboard
 ```
 
-## 生命周期说明
+## 版本与使用范围
 
-Kubernetes Dashboard 上游项目已归档并停止维护。当前集群运行的是官方发布的 `7.14.0` Chart；后续使用前应评估安全更新和兼容性。上游 README 建议新部署评估 Kubernetes SIG UI 的 [Headlamp](https://github.com/kubernetes-sigs/headlamp)。
+本仓库固定使用 `7.14.0` Chart。更新前应检查当前 Kubernetes 版本、Chart 变更以及管理员 RBAC 配置；本地实验环境的长期管理员 Token 不适合直接用于多用户或不可信网络。
 
 参考：
 
-- [Kubernetes Dashboard 上游仓库及维护状态](https://github.com/kubernetes/dashboard)
+- [Kubernetes Dashboard 上游仓库](https://github.com/kubernetes/dashboard)
 - [Dashboard 官方访问控制说明](https://github.com/kubernetes/dashboard/blob/master/docs/user/access-control/README.md)
 - [Dashboard 7.14.0 Release Chart](https://github.com/kubernetes/dashboard/releases/download/kubernetes-dashboard-7.14.0/kubernetes-dashboard-7.14.0.tgz)

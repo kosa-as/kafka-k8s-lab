@@ -2,7 +2,7 @@
 
 已于 2026-10-05 在 `docker-desktop` 安装 Chaos Mesh **2.8.4**，命名空间为 `chaos-mesh`。控制器、Daemon、Dashboard、DNS 均已就绪，Dashboard 数据使用 `hostpath` 的 1Gi PVC 保存。
 
-本次只安装组件和登录权限。三个示例仅通过服务端 dry-run 校验，没有创建或运行实验、Schedule 或 Workflow。以下真实执行命令留给你以后手动使用，`deploy/all.ps1` 不会自动安装 Chaos Mesh 或执行这些示例。
+`deploy/all.ps1` 不会自动安装 Chaos Mesh 或执行故障实验。仓库中的三个示例默认只是清单文件，`kubectl apply` 会立即创建真实实验。集群中可能保留以前创建的实验对象；每次操作前先用 `kubectl --context docker-desktop -n kafka get podchaos,networkchaos` 检查现状，避免重复执行。
 
 ## 1. 打开 Dashboard 并登录
 
@@ -16,7 +16,7 @@ kubectl --context docker-desktop -n kafka create token chaos-kafka-manager --dur
 
 在 Dashboard 的 Token 登录框中填写：Name 为 `kafka-manager`，Token 为上面命令的输出。该账号可以管理 `kafka` 命名空间中的 Chaos Mesh 资源，不能管理其他命名空间的实验，也不是 cluster-admin。Token 过期后重新生成；不需要保存到 Git。
 
-已使用短期 Token 验证 Dashboard 能读取 `bitnami-kafka-controller-0`。如果 NodePort 后续无法访问，在独立 PowerShell 窗口运行并保持窗口打开：
+如果 NodePort 无法访问，在独立 PowerShell 窗口运行并保持窗口打开：
 
 ```powershell
 kubectl --context docker-desktop -n chaos-mesh port-forward --address 127.0.0.1 svc/chaos-dashboard 2333:2333
@@ -52,7 +52,7 @@ kubectl --context docker-desktop apply --dry-run=server -f chaos-mesh/examples/k
 
 输出含 `server dry run` 表示 API 校验通过，资源不会保存，控制器不会执行故障。这只能验证 schema/webhook，不能证明真实故障注入成功。
 
-## 4. 以后实际执行的步骤（本次未执行）
+## 4. 实际执行的步骤
 
 先确认 context 和三个 Kafka Pod 正常，再准备持续的生产/消费流量，记录吞吐、延迟、超时、消费 lag 和 ISR 基线。已有 Prometheus 可以辅助观察；仅查看 Pod 的 Running 状态不足以判断 Kafka 服务是否恢复。
 
@@ -81,9 +81,9 @@ kubectl --context docker-desktop -n kafka logs bitnami-kafka-controller-0 -c kaf
 
 查看实验的 Conditions、Records、Events，确认注入、恢复是否成功；同时比较业务指标和 Kafka 日志。Container Kill 时可查看 `podchaos kafka-0-container-kill`，以及 Kafka 容器的重启次数和 `logs --previous`。
 
-不要把现有 health-sidecar 的预设健康/失败循环当作真实 Kafka 网络检测结果；评估效果应以实际生产消费请求和 Kafka 指标为准。
+`health-sidecar` 只定期写状态文件，不能反映 Kafka 的真实网络和副本健康；评估效果应以实际生产消费请求、ISR 和 Kafka 指标为准。
 
-## 5. 提前停止、清理与再次运行（本次未执行）
+## 5. 提前停止、清理与再次运行
 
 网络延迟还没结束时，可先暂停，控制器会尝试撤销注入的规则：
 
@@ -123,8 +123,8 @@ kubectl --context docker-desktop -n chaos-mesh get pods,pvc,svc
 kubectl --context docker-desktop -n kafka get podchaos,networkchaos,schedules,workflows
 ```
 
-当前环境为 Kubernetes 1.36.1、Docker 29.8.1，Daemon 已使用 Docker socket `/var/run/docker.sock`，内核中存在 `sch_netem.ko`。本次没有加载网络故障规则，也没有测试真实注入。
+当前安装使用 Docker socket `/var/run/docker.sock`。集群中可能已有历史实验对象；先检查其状态，再运行新的实验。不要将 `Running` 的 Kafka Pod 或已经恢复的实验对象视为业务正常的充分证据。
 
-Daemon 启动日志有 `grant access to /dev/fuse: fail to find device cgroup`：当前是 cgroup v2，而上游这段初始化代码查找 cgroup v1 的 `devices` 控制器。Daemon 已继续启动并 Ready，`/dev/fuse` 设备存在；**IOChaos 可用性仍未验证**。容器/网络示例也仅完成安装和 dry-run 验证，不承诺所有故障类型都兼容 Docker Desktop。
+此前 Daemon 启动日志出现过 `grant access to /dev/fuse: fail to find device cgroup`，但 Daemon 继续启动并就绪。**IOChaos 可用性未验证**；故障注入能力应按具体实验结果判断，不应由组件 Ready 状态推断。
 
 官方参考：[Helm 安装](https://chaos-mesh.org/docs/production-installation-using-helm/)、[权限管理](https://chaos-mesh.org/docs/manage-user-permissions/)、[实验运行与暂停](https://chaos-mesh.org/docs/run-a-chaos-experiment/)、[网络故障](https://chaos-mesh.org/docs/simulate-network-chaos-on-kubernetes/)。
