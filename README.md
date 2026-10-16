@@ -71,8 +71,8 @@ kubectl -n kafka exec bitnami-kafka-controller-0 -c kafka -- env -u JMX_PORT /op
 ```powershell
 Set-Location .\clients
 mvn test
-mvn -pl producer compile exec:java '-Dduration=30' '-Dfrequency=2' '-DbootstrapServers=localhost:32000' '-Dtopic=demo'
-mvn -pl consumer compile exec:java '-Dduration=30' '-DbootstrapServers=localhost:32000' '-Dtopic=demo' '-DgroupId=demo-consumer'
+mvn -pl producer compile exec:java -Dduration=30 -Dfrequency=2 -DbootstrapServers=localhost:32000 -Dtopic=demo
+mvn -pl consumer compile exec:java -Dduration=30 -DbootstrapServers=localhost:32000 -Dtopic=demo -DgroupId=demo-consumer
 ```
 
 生产者发送以毫秒表示的时间戳；消费者从 `demo` 读取消息。建议在两个 PowerShell 窗口分别运行。示例程序的日志写入 `clients/logs/`。更多参数见[客户端说明](clients/README.md)。

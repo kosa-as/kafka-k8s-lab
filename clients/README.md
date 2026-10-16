@@ -18,9 +18,11 @@
 ```powershell
 Set-Location .\clients
 mvn test
-mvn -pl producer compile exec:java '-Dduration=60' '-Dfrequency=2' '-DbootstrapServers=localhost:32000' '-Dtopic=demo'
-mvn -pl consumer compile exec:java '-Dduration=60' '-DbootstrapServers=localhost:32000' '-Dtopic=demo' '-DgroupId=demo-consumer'
+mvn -pl producer compile exec:java -Dduration=60 -Dfrequency=2 -DbootstrapServers=localhost:32000 -Dtopic=demo
+mvn -pl consumer compile exec:java -Dduration=60 -DbootstrapServers=localhost:32000 -Dtopic=demo -DgroupId=demo-consumer
 ```
+
+在 IntelliJ IDEA 的 Maven 运行配置中，工作目录设为 `clients`，并把对应命令从 `-pl` 起填入 Goals；不要给 `-D` 参数加单引号。单引号在该运行配置中会原样传给 `mvn.cmd`，使 Maven 把参数误判为插件目标。
 
 `duration` 单位为秒，`frequency` 单位为每秒发送的消息数。生产者将随机 UUID 用作 key，将发送时的 Unix epoch 毫秒时间戳用作 value，启用 `acks=all` 和幂等生产。消费者订阅 `demo`，使用 String 反序列化和自动提交 offset；对没有已提交 offset 的新消费组，从最早可用消息开始读取。
 

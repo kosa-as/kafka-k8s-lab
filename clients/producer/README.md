@@ -5,7 +5,7 @@
 在 `clients` 目录运行：
 
 ```powershell
-mvn -pl producer compile exec:java '-Dduration=60' '-Dfrequency=10' '-DbootstrapServers=localhost:32000' '-Dtopic=demo'
+mvn -pl producer compile exec:java -Dduration=60 -Dfrequency=10 -DbootstrapServers=localhost:32000 -Dtopic=demo
 Get-Content .\logs\producer.log -Tail 20
 ```
 

@@ -5,7 +5,7 @@
 在 `clients` 目录运行：
 
 ```powershell
-mvn -pl consumer compile exec:java '-Dduration=60' '-DbootstrapServers=localhost:32000' '-Dtopic=demo' '-DgroupId=demo-consumer'
+mvn -pl consumer compile exec:java -Dduration=60 -DbootstrapServers=localhost:32000 -Dtopic=demo -DgroupId=demo-consumer
 Get-Content .\logs\consumer.log -Tail 20
 ```
 
