@@ -1,0 +1,20 @@
+// Standalone verification harness for ReadinessProbe.csp.
+#include "ReadinessProbe.csp";
+
+// These bounded flags belong to verification, not to the probe role.
+var rp_seen_success = 0;
+var rp_seen_failure = 0;
+#define RPSuccessSeen rp_seen_success == 1;
+#define RPFailureSeen rp_seen_failure == 1;
+
+RPBranchTracker() = rp_success -> rp_mark_success{rp_seen_success = 1;} -> RPBranchTracker()
+                  [] rp_failure -> rp_mark_failure{rp_seen_failure = 1;} -> RPBranchTracker();
+RPChecked() = RPIdle() || RPBranchTracker();
+
+#assert RPIdle() deadlockfree;
+#assert RPChecked() reaches RPSuccessSeen;
+#assert RPChecked() reaches RPFailureSeen;
+
+#assert RPIdle() |= [] (rp_invoke -> <> (rp_success || rp_failure || container_restart));
+#assert RPIdle() |= [] (rp_tcp_connected -> X (rp_success || container_restart));
+#assert RPIdle() |= [] ((rp_tcp_failed || rp_timeout) -> X (rp_failure || container_restart));

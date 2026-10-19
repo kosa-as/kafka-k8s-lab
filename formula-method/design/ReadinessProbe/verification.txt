@@ -1,0 +1,109 @@
+=======================================================
+Assertion: RPIdle() deadlockfree
+********Verification Result********
+The Assertion (RPIdle() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4
+Total Transitions:10
+Time Used:0.0084515s
+Estimated Memory Used:8552.664KB
+
+
+=======================================================
+Assertion: RPChecked() reaches RPSuccessSeen
+********Verification Result********
+The Assertion (RPChecked() reaches RPSuccessSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> rp_invoke -> rp_tcp_failed -> rp_failure -> rp_mark_failure -> rp_invoke -> rp_tcp_connected -> rp_success -> rp_mark_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:17
+Total Transitions:36
+Time Used:0.0113979s
+Estimated Memory Used:8593.624KB
+
+
+=======================================================
+Assertion: RPChecked() reaches RPFailureSeen
+********Verification Result********
+The Assertion (RPChecked() reaches RPFailureSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> rp_invoke -> rp_tcp_failed -> rp_failure -> rp_mark_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:7
+Total Transitions:11
+Time Used:0.0002183s
+Estimated Memory Used:8552.664KB
+
+
+=======================================================
+Assertion: RPIdle() |= []( rp_invoke-><>( rp_success|| rp_failure|| container_restart))
+********Verification Result********
+The Assertion (RPIdle() |= []( rp_invoke-><>( rp_success|| rp_failure|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:12
+Total Transitions:25
+Time Used:0.0117576s
+Estimated Memory Used:41239.152KB
+
+
+=======================================================
+Assertion: RPIdle() |= []( rp_tcp_connected-> X ( rp_success|| container_restart))
+********Verification Result********
+The Assertion (RPIdle() |= []( rp_tcp_connected-> X ( rp_success|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:18
+Time Used:0.0072352s
+Estimated Memory Used:8552.616KB
+
+
+=======================================================
+Assertion: RPIdle() |= [](( rp_tcp_failed|| rp_timeout)-> X ( rp_failure|| container_restart))
+********Verification Result********
+The Assertion (RPIdle() |= [](( rp_tcp_failed|| rp_timeout)-> X ( rp_failure|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:18
+Time Used:0.001433s
+Estimated Memory Used:8552.616KB

@@ -1,0 +1,102 @@
+// M0 Kubelet probe-control model for the kafka container in controller-0.
+// Live node: Kubernetes v1.36.1; live Pod: restartPolicy Always.
+// Live thresholds: startup 30, readiness failure 6 / success 1,
+// liveness failure 3 / success 1. Startup and readiness use TCP controller:9093;
+// liveness executes `pgrep -f kafka`.
+// Sources: Kubernetes v1.36.1 worker.go, prober_manager.go, prober.go,
+// pkg/probe/tcp/tcp.go, pkg/probe/exec/exec.go, and
+// pkg/kubelet/kuberuntime/kuberuntime_manager.go.
+// State compression: one probe execution at a time; independent worker
+// scheduling and wall-clock intervals are outside this first composition.
+
+#include "..\ReadinessProbe\ReadinessProbe.csp";
+#include "..\LivenessProbe\LivenessProbe.csp";
+
+var started = 0;
+var kafka_ready = 0;
+var sp_fail_run = 0;
+var rp_fail_run = 0;
+var lp_fail_run = 0;
+
+#define Started started == 1;
+#define KafkaReady kafka_ready == 1;
+#define StartupThreshold sp_fail_run == 30;
+#define LivenessThreshold lp_fail_run == 3;
+#define RPFailRunZero rp_fail_run == 0;
+#define RPFailRunSix rp_fail_run == 6;
+
+// Startup is a Kubelet sub-behavior. A TCP outcome is an abstract input from
+// the future controller listener and fault-environment roles.
+KStartup() = sp_invoke -> KStartupAwait();
+
+KStartupAwait() = sp_tcp_connected -> sp_success{started = 1; sp_fail_run = 0;} -> KRunning()
+                [] sp_tcp_failed -> sp_failure{sp_fail_run++;} -> KStartupCheck()
+                [] sp_timeout -> sp_failure{sp_fail_run++;} -> KStartupCheck();
+
+KStartupCheck() = if (sp_fail_run == 30) { startup_threshold -> KRestart() }
+                  else { KStartup() };
+
+// Startup has succeeded. Readiness and liveness are independently eligible;
+// their executions are serialized here to compress commuting interleavings.
+KRunning() = rp_invoke -> KReadinessAwait()
+             [] lp_invoke -> KLivenessAwait();
+
+KReadinessAwait() = rp_success -> k_commit_rp_success{rp_fail_run = 0; kafka_ready = 1;} -> KRunning()
+                   [] rp_failure -> k_commit_rp_failure{
+                        if (rp_fail_run < 6) { rp_fail_run++; }
+                        if (rp_fail_run == 6) { kafka_ready = 0; }
+                      } -> KRunning();
+
+KLivenessAwait() = lp_success -> k_commit_lp_success{lp_fail_run = 0;} -> KRunning()
+                  [] lp_failure -> k_commit_lp_failure{lp_fail_run++;} -> KLivenessCheck();
+
+KLivenessCheck() = if (lp_fail_run == 3) { liveness_threshold -> KRestart() }
+                   else { KRunning() };
+
+// With restartPolicy=Always, committed Startup/Liveness Failure leads to
+// container replacement. The shared event resets both probe-role processes.
+KRestart() = container_restart -> k_reset{
+               started = 0;
+               kafka_ready = 0;
+               sp_fail_run = 0;
+               rp_fail_run = 0;
+               lp_fail_run = 0;
+             } -> KStartup();
+
+// PAT excludes data-operation events from inferred alphabets. These shared
+// handshake events are plain events, and this explicit alphabet protects the
+// synchronization contract across recursive Kubelet states.
+#alphabet KStartup {sp_invoke, sp_tcp_connected, sp_tcp_failed, sp_timeout,
+                    sp_success, sp_failure, startup_threshold,
+                    rp_invoke, rp_success, rp_failure,
+                    lp_invoke, lp_success, lp_failure,
+                    liveness_threshold, container_restart};
+
+System() = KStartup() || RPIdle() || LPIdle();
+
+#assert System() deadlockfree;
+#assert System() reaches Started;
+#assert System() reaches KafkaReady;
+#assert System() reaches StartupThreshold;
+#assert System() reaches LivenessThreshold;
+
+// Native probes cannot be called before Startup has succeeded.
+#assert System() |= [] (rp_invoke -> Started);
+#assert System() |= [] (lp_invoke -> Started);
+#assert System() |= [] (KafkaReady -> Started);
+
+// Threshold events occur only after the configured consecutive result count.
+#assert System() |= [] (startup_threshold -> StartupThreshold);
+#assert System() |= [] (liveness_threshold -> LivenessThreshold);
+#assert System() |= [] (startup_threshold -> X container_restart);
+#assert System() |= [] (liveness_threshold -> X container_restart);
+
+// Restart re-enters the startup phase and clears Kafka-container readiness.
+#assert System() |= [] (container_restart -> X k_reset);
+#assert System() |= [] (k_reset -> X (!Started && !KafkaReady));
+
+// A raw Readiness result updates Kubelet's Kafka-container cached state.
+#assert System() |= [] (rp_success -> X k_commit_rp_success);
+#assert System() |= [] (k_commit_rp_success -> X (KafkaReady && RPFailRunZero));
+#assert System() |= [] (rp_failure -> X k_commit_rp_failure);
+#assert System() |= [] (RPFailRunSix -> !KafkaReady);

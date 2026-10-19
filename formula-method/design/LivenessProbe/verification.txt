@@ -1,0 +1,109 @@
+=======================================================
+Assertion: LPIdle() deadlockfree
+********Verification Result********
+The Assertion (LPIdle() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4
+Total Transitions:10
+Time Used:0.0131173s
+Estimated Memory Used:8552.664KB
+
+
+=======================================================
+Assertion: LPChecked() reaches LPSuccessSeen
+********Verification Result********
+The Assertion (LPChecked() reaches LPSuccessSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> lp_invoke -> lp_exit_nonzero -> lp_failure -> lp_mark_failure -> lp_invoke -> lp_exit_zero -> lp_success -> lp_mark_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:17
+Total Transitions:36
+Time Used:0.0233942s
+Estimated Memory Used:8593.624KB
+
+
+=======================================================
+Assertion: LPChecked() reaches LPFailureSeen
+********Verification Result********
+The Assertion (LPChecked() reaches LPFailureSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> lp_invoke -> lp_exit_nonzero -> lp_failure -> lp_mark_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:7
+Total Transitions:11
+Time Used:0.0001643s
+Estimated Memory Used:8552.664KB
+
+
+=======================================================
+Assertion: LPIdle() |= []( lp_invoke-><>( lp_success|| lp_failure|| container_restart))
+********Verification Result********
+The Assertion (LPIdle() |= []( lp_invoke-><>( lp_success|| lp_failure|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:12
+Total Transitions:25
+Time Used:0.0082809s
+Estimated Memory Used:41239.152KB
+
+
+=======================================================
+Assertion: LPIdle() |= []( lp_exit_zero-> X ( lp_success|| container_restart))
+********Verification Result********
+The Assertion (LPIdle() |= []( lp_exit_zero-> X ( lp_success|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:18
+Time Used:0.0029377s
+Estimated Memory Used:8552.616KB
+
+
+=======================================================
+Assertion: LPIdle() |= [](( lp_exit_nonzero|| lp_timeout)-> X ( lp_failure|| container_restart))
+********Verification Result********
+The Assertion (LPIdle() |= [](( lp_exit_nonzero|| lp_timeout)-> X ( lp_failure|| container_restart))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:18
+Time Used:0.0001299s
+Estimated Memory Used:8552.616KB

@@ -1,0 +1,20 @@
+// Standalone verification harness for LivenessProbe.csp.
+#include "LivenessProbe.csp";
+
+// These bounded flags belong to verification, not to the probe role.
+var lp_seen_success = 0;
+var lp_seen_failure = 0;
+#define LPSuccessSeen lp_seen_success == 1;
+#define LPFailureSeen lp_seen_failure == 1;
+
+LPBranchTracker() = lp_success -> lp_mark_success{lp_seen_success = 1;} -> LPBranchTracker()
+                  [] lp_failure -> lp_mark_failure{lp_seen_failure = 1;} -> LPBranchTracker();
+LPChecked() = LPIdle() || LPBranchTracker();
+
+#assert LPIdle() deadlockfree;
+#assert LPChecked() reaches LPSuccessSeen;
+#assert LPChecked() reaches LPFailureSeen;
+
+#assert LPIdle() |= [] (lp_invoke -> <> (lp_success || lp_failure || container_restart));
+#assert LPIdle() |= [] (lp_exit_zero -> X (lp_success || container_restart));
+#assert LPIdle() |= [] ((lp_exit_nonzero || lp_timeout) -> X (lp_failure || container_restart));
