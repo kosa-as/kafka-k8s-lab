@@ -1,0 +1,246 @@
+=======================================================
+Assertion: ClientWorkload() deadlockfree
+********Verification Result********
+The Assertion (ClientWorkload() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:28
+Total Transitions:69
+Time Used:0.0101458s
+Estimated Memory Used:8618.2KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWProducePending
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWProducePending) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_send_produce>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:20
+Total Transitions:47
+Time Used:0.0084272s
+Estimated Memory Used:8577.24KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWFetchPending
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWFetchPending) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:3
+Total Transitions:3
+Time Used:0.0001251s
+Estimated Memory Used:8544.472KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWProduceSuccess
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWProduceSuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_send_produce -> client_produce -> b_response_produce_ok -> cw_produce_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:27
+Total Transitions:64
+Time Used:0.0002194s
+Estimated Memory Used:8585.432KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWProduceError
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWProduceError) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_send_produce -> client_produce -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:25
+Total Transitions:57
+Time Used:0.0015586s
+Estimated Memory Used:8577.24KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWFetchData
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWFetchData) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> client_fetch -> b_response_fetch_error -> cw_fetch_retry -> client_fetch -> b_response_fetch_data -> cw_poll_data>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:15
+Total Transitions:28
+Time Used:0.0009649s
+Estimated Memory Used:8560.856KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWFetchEmpty
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWFetchEmpty) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> client_fetch -> b_response_fetch_error -> cw_fetch_retry -> client_fetch -> b_response_fetch_empty -> cw_poll_empty>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:13
+Total Transitions:21
+Time Used:0.00041s
+Estimated Memory Used:8552.664KB
+
+
+=======================================================
+Assertion: ClientWorkload() reaches CWFetchRetrySeen
+********Verification Result********
+The Assertion (ClientWorkload() reaches CWFetchRetrySeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> client_fetch -> b_response_fetch_error -> cw_fetch_retry>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:11
+Time Used:0.0005941s
+Estimated Memory Used:8544.472KB
+
+
+=======================================================
+Assertion: ClientWorkload() |= []( cw_send_produce-> X CWProducePending)
+********Verification Result********
+The Assertion (ClientWorkload() |= []( cw_send_produce-> X CWProducePending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:122
+Time Used:0.0071697s
+Estimated Memory Used:8716.456KB
+
+
+=======================================================
+Assertion: ClientWorkload() |= []( cw_begin_poll-> X CWFetchPending)
+********Verification Result********
+The Assertion (ClientWorkload() |= []( cw_begin_poll-> X CWFetchPending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:122
+Time Used:0.0009578s
+Estimated Memory Used:8724.648KB
+
+
+=======================================================
+Assertion: ClientWorkload() |= []( cw_produce_success-> X ( CWProduceSuccess&&! CWProducePending))
+********Verification Result********
+The Assertion (ClientWorkload() |= []( cw_produce_success-> X ( CWProduceSuccess&&! CWProducePending))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:122
+Time Used:0.0009879s
+Estimated Memory Used:8724.648KB
+
+
+=======================================================
+Assertion: ClientWorkload() |= []( cw_poll_empty-> X ( CWFetchEmpty&&! CWFetchPending))
+********Verification Result********
+The Assertion (ClientWorkload() |= []( cw_poll_empty-> X ( CWFetchEmpty&&! CWFetchPending))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:122
+Time Used:0.0003558s
+Estimated Memory Used:8724.648KB
+
+
+=======================================================
+Assertion: ClientWorkload() |= []( cw_fetch_retry-> X ( CWFetchRetrySeen&& CWFetchPending))
+********Verification Result********
+The Assertion (ClientWorkload() |= []( cw_fetch_retry-> X ( CWFetchRetrySeen&& CWFetchPending))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:122
+Time Used:0.0003996s
+Estimated Memory Used:8724.648KB

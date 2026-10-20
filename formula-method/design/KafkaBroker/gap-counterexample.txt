@@ -12,10 +12,10 @@ System Abstraction: False
 
 
 ********Verification Statistics********
-Visited States:610
-Total Transitions:1524
-Time Used:0.0384937s
-Estimated Memory Used:10885.144KB
+Visited States:993
+Total Transitions:2666
+Time Used:0.0396265s
+Estimated Memory Used:14328.92KB
 
 
 =======================================================
@@ -32,7 +32,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:660
 Total Transitions:915
-Time Used:0.0081716s
+Time Used:0.0043312s
 Estimated Memory Used:11944.152KB
 
 
@@ -52,7 +52,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:154
 Total Transitions:184
-Time Used:0.00173s
+Time Used:0.0016776s
 Estimated Memory Used:9126.104KB
 
 
@@ -72,7 +72,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:355
 Total Transitions:432
-Time Used:0.0014617s
+Time Used:0.001444s
 Estimated Memory Used:10035.416KB
 
 
@@ -92,7 +92,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:150
 Total Transitions:179
-Time Used:0.0007228s
+Time Used:0.0007031s
 Estimated Memory Used:9101.528KB
 
 
@@ -112,7 +112,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:174
 Total Transitions:207
-Time Used:0.0008388s
+Time Used:0.0009321s
 Estimated Memory Used:9208.024KB
 
 
@@ -130,7 +130,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0043503s
+Time Used:0.0052032s
 Estimated Memory Used:13426.856KB
 
 
@@ -148,7 +148,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0046174s
+Time Used:0.0046183s
 Estimated Memory Used:13418.664KB
 
 
@@ -166,7 +166,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0043592s
+Time Used:0.0049211s
 Estimated Memory Used:13459.624KB
 
 
@@ -184,7 +184,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0088251s
+Time Used:0.0044861s
 Estimated Memory Used:13418.664KB
 
 
@@ -202,7 +202,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0047436s
+Time Used:0.0044641s
 Estimated Memory Used:13418.664KB
 
 
@@ -220,7 +220,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0045125s
+Time Used:0.0051934s
 Estimated Memory Used:13476.008KB
 
 
@@ -238,7 +238,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0062565s
+Time Used:0.0044069s
 Estimated Memory Used:13476.008KB
 
 
@@ -256,7 +256,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.005826s
+Time Used:0.0048358s
 Estimated Memory Used:13476.008KB
 
 
@@ -274,7 +274,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0047446s
+Time Used:0.0054365s
 Estimated Memory Used:13631.656KB
 
 
@@ -292,7 +292,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0057706s
+Time Used:0.0046201s
 Estimated Memory Used:13476.008KB
 
 
@@ -310,7 +310,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0045245s
+Time Used:0.0050673s
 Estimated Memory Used:13598.888KB
 
 
@@ -328,7 +328,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0053583s
+Time Used:0.0049241s
 Estimated Memory Used:13467.816KB
 
 
@@ -346,5 +346,5 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:806
 Total Transitions:1098
-Time Used:0.0053357s
+Time Used:0.0046755s
 Estimated Memory Used:13459.624KB

@@ -1,0 +1,33 @@
+// 独立检查分区环境与故障环境的状态约束。
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "..\FaultEnvironment\FaultEnvironment.csp";
+#include "ClusterContext.csp";
+
+CCFaultSystem() = FaultEnvironment() || ClusterContext();
+
+#define CCPartitionUnderMin peer_link_ok == 0 && cc_local_leader == 1 && cc_isr == 1;
+#define CCPartitionLeaderAway peer_link_ok == 0 && cc_local_leader == 0;
+#define CCRecoveredMin peer_link_ok == 1 && cc_local_leader == 1 && cc_isr == 2;
+
+// 故障与分区环境组合没有可达全局死锁。
+#assert CCFaultSystem() deadlockfree;
+// 隔离后两名远端副本均离开 ISR 的状态可达。
+#assert CCFaultSystem() reaches CCPartitionUnderMin;
+// 隔离后目标分区 Leader 迁离节点 0 的状态可达。
+#assert CCFaultSystem() reaches CCPartitionLeaderAway;
+// 链路恢复后，至少一个副本重新进入 ISR 的状态可达。
+#assert CCFaultSystem() reaches CCRecoveredMin;
+// ISR 计数始终处于压缩模型允许的范围。
+#assert CCFaultSystem() |= [] CCIsrBound;
+// 对端链路故障期间不会凭空获得新的远端副本确认。
+#assert CCFaultSystem() |= [] (cc_follower_ack -> CCPeerLinkHealthy);
+// 本地 ISR 检查成功意味着当前节点为 Leader 且 ISR 不少于 2。
+#assert CCFaultSystem() |= [] (b_isr_sufficient -> CCWriteCapable);
+// 本地 ISR 检查失败只发生在本地 Leader 的 ISR 低于 2 时。
+#assert CCFaultSystem() |= [] (b_isr_insufficient -> CCUnderMinIsr);
+// 非 Leader 错误只发生在节点 0 已失去目标分区 Leader 身份时。
+#assert CCFaultSystem() |= [] (b_not_leader_produce -> CCRemoteLeader);
+// 所需副本确认只在 Leader 身份及最低 ISR 条件均满足时发生。
+#assert CCFaultSystem() |= [] (b_replicas_ack -> CCWriteCapable);
+// Fetch 返回目标记录前，模型中已有可读数据。
+#assert CCFaultSystem() |= [] (b_fetch_data_ready -> CCDataAvailable);

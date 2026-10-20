@@ -1,0 +1,26 @@
+// 聚焦候选观测空窗：Broker 已接收 Produce，执行停滞阻断关键步骤，
+// 但 Controller TCP Readiness 与 pgrep Liveness 仍可成功。
+#include "..\Kubelet\Kubelet.csp";
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "..\ClientWorkload\ClientWorkload.csp";
+#include "FaultEnvironment.csp";
+
+var ew_request_accepted = 0;
+var ew_live_count = 0;
+
+#define ExecutionProbeGap kafka_ready == 1 && fe_mode == 3 && execution_ok == 0 && ew_request_accepted == 1 && ew_live_count == 2 && cw_kind == 1 && cw_pending == 1;
+
+ExecutionWitness() = client_produce -> ew_accept{ew_request_accepted = 1; ew_live_count = 0;} -> EWAccepted()
+                     [] lp_success -> ExecutionWitness()
+                     [] container_restart -> ExecutionWitness();
+
+EWAccepted() = [fe_mode == 3] lp_success -> ew_live{if (ew_live_count < 2) { ew_live_count++; }} -> EWAccepted()
+               [] [fe_mode != 3] lp_success -> EWAccepted()
+               [] container_restart -> ew_reset{ew_request_accepted = 0; ew_live_count = 0;} -> ExecutionWitness();
+
+#alphabet ExecutionWitness {client_produce, lp_success, container_restart};
+
+ExecutionWitnessSystem() = System() || KafkaBroker() || ClientWorkload() || FEExecutionOnProduce() || ExecutionWitness();
+
+// 在无时间模型中，已接收但未执行的请求可与 Ready、连续两次 Liveness 成功并存。
+#assert ExecutionWitnessSystem() reaches ExecutionProbeGap;

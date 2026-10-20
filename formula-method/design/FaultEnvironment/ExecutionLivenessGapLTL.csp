@@ -1,0 +1,11 @@
+// 候选健康目标：已接收的 Produce 在 b_execute_produce 前遭遇局部执行停滞时，
+// Liveness 不应继续报告成功。这比原生 pgrep 的检查范围更强。
+// cw_pending 只说明客户端回调尚未结束；单凭它不能证明 Broker 未处理请求。
+// 此聚焦入口由 FEExecutionOnProduce 阻断 b_execute_produce，并由 RequestHandler
+// 保证在执行该步骤前不能形成 Produce 响应。
+#include "ExecutionProbeWitness.csp";
+
+#define AcceptedExecutionStalled fe_mode == 3 && execution_ok == 0 && ew_request_accepted == 1 && cw_kind == 1 && cw_pending == 1;
+
+// 预期 NOT valid：进程仍可被 pgrep 匹配，但请求执行条件已经阻断。
+#assert ExecutionWitnessSystem() |= [] (lp_success -> !AcceptedExecutionStalled);

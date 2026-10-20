@@ -22,11 +22,11 @@
 
 `Lifecycle`约束 Liveness `pgrep -f kafka` 的结果；`NetworkHandler`约束 Startup/Readiness 的 Controller TCP 结果。`probe_path_ok` 与 `client_path_ok` 是不同的外部路径条件，`execution_ok` 与 `storage_ok` 是另外两种推进条件；当前健康基线均为 1，后续 `FaultEnvironment` 才负责改变它们。这些条件不直接改写原生探针的判断规则。
 
-请求路径使用一个在途请求的有限状态抽象：`client_produce/fetch → b_execute_* → b_append/read_request → b_append/read_done → 必要的副本或数据条件 → b_response_*`。Produce 在 `acks=all` 下分出 ISR 不足、所需确认到达、等待超时三种抽象结果；Fetch 区分返回数据与等待后空结果。`b_isr_*`、`b_replicas_*` 和 `b_fetch_*` 当前是未约束的外部条件入口，将由 `ClusterContext` 和 `ClientWorkload` 在后续模型中约束。空 Fetch 响应表示一次协议请求完成，不等于消费者取得业务数据。
+请求路径使用一个在途请求的有限状态抽象：`client_produce/fetch → b_execute_* → b_append/read_request → b_append/read_done → 必要的副本或数据条件 → b_response_*`。Produce 在 `acks=all` 下分出 ISR 不足、所需确认到达、等待超时以及目标分区 Leader 迁离的错误分支；Fetch 区分返回数据、等待后空结果与非本地 Leader 协议错误。独立 Broker 验证中，`b_isr_*`、`b_replicas_*` 和 `b_fetch_*` 仍是外部条件入口；七角色组合由 [ClusterContext](../ClusterContext/design.md)约束这些事件。[ClientWorkload](../ClientWorkload/design.md)已接入请求发起与客户端结果。空 Fetch 响应表示一次协议请求完成，不等于消费者取得业务数据。
 
 ## PAT 验证与候选反例
 
-[独立验证记录](verification.txt)显示 `KafkaBroker()` 的 **9 条断言全部 VALID**，包括无死锁、Produce/Fetch 数据响应路径可达、以及这些事件发生时已到达客户端处理启用前检查点。[组合验证记录](probe-verification.txt)显示 **27 条断言全部 VALID**（其中 18 条来自已包含的 Kubelet 文件，9 条针对组合模型）；组合中的 `ProbeReadyGap = KafkaReady && !ClientEnableCheckpointReached` 可达。Broker 的进程同步还要求客户端请求在 `b_client_enable` 后才能被接收。
+[独立验证记录](verification.txt)显示 `KafkaBroker()` 的 **11 条断言全部 VALID**，包括无死锁、Produce/Fetch 数据响应与非本地 Leader 错误分支可达，以及这些事件发生时已到达客户端处理启用前检查点。[组合验证记录](probe-verification.txt)显示 **27 条断言全部 VALID**（其中 18 条来自已包含的 Kubelet 文件，9 条针对组合模型）；组合中的 `ProbeReadyGap = KafkaReady && !ClientEnableCheckpointReached` 可达。Broker 的进程同步还要求客户端请求在 `b_client_enable` 后才能被接收。
 
 具体检验的是**启动期间探针认为 Kafka 容器已就绪，而客户端请求处理尚未启用**的场景：Controller 的 9093 端口可以接受 TCP 连接，Startup 和 Readiness 因而成功；与此同时，Broker 的 CLIENT 9092 请求处理仍未执行 `b_client_enable`。Liveness 的 `pgrep` 也可能成功，但它只表明进程匹配成功。此反例没有发送 Produce/Fetch 请求，也没有验证请求完成时间。
 
@@ -38,4 +38,4 @@
 
 ## 状态压缩与下一步
 
-本版保留五个组件的并行同步，但每次只处理一个客户端请求；没有展开 Kafka 所有 API、每个分区、副本线程、磁盘页缓存或多个 Broker 的内部状态。Kubelet 原有模型仍一次只调度一个探针。`Execution` 和 `StorageAccess` 仅以能否推进作为接口，没有在没有故障来源的情况下凭空制造线程死锁或 I/O hang。Controller 端口、客户端请求和存储推进的独立性已经明确，下一步可用 `FaultEnvironment` 限制网络、执行、存储条件，再由 `ClusterContext` 提供目标分区 Leader/ISR 与副本确认约束。
+本版保留五个组件的并行同步，但每次只处理一个客户端请求；没有展开 Kafka 所有 API、每个分区、副本线程、磁盘页缓存或多个 Broker 的内部状态。Kubelet 原有模型仍一次只调度一个探针。`Execution` 和 `StorageAccess` 仅以能否推进作为接口，现有 [FaultEnvironment](../FaultEnvironment/design.md) 已通过明确的故障事件控制这些条件；这是抽象注入，不表示实机已发生线程死锁或 I/O hang。Controller 端口、客户端请求和存储推进保持独立；目标分区的 Leader/ISR 与副本确认由 [ClusterContext](../ClusterContext/design.md) 在聚焦组合中约束。

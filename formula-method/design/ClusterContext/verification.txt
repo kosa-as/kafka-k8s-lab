@@ -1,0 +1,202 @@
+=======================================================
+Assertion: CCFaultSystem() deadlockfree
+********Verification Result********
+The Assertion (CCFaultSystem() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:6066
+Total Transitions:25046
+Time Used:0.085406s
+Estimated Memory Used:10035.288KB
+
+
+=======================================================
+Assertion: CCFaultSystem() reaches CCPartitionUnderMin
+********Verification Result********
+The Assertion (CCFaultSystem() reaches CCPartitionUnderMin) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> container_restart -> cc_after_restart -> cc_existing_record -> b_append_done -> cc_begin_ack_wait -> cc_leader_local_again -> container_restart -> fe_peer_partition>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:106
+Total Transitions:195
+Time Used:0.0015467s
+Estimated Memory Used:9052.376KB
+
+
+=======================================================
+Assertion: CCFaultSystem() reaches CCPartitionLeaderAway
+********Verification Result********
+The Assertion (CCFaultSystem() reaches CCPartitionLeaderAway) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> container_restart -> cc_after_restart -> container_restart -> fe_peer_partition>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:33
+Total Transitions:37
+Time Used:0.0002457s
+Estimated Memory Used:8626.392KB
+
+
+=======================================================
+Assertion: CCFaultSystem() reaches CCRecoveredMin
+********Verification Result********
+The Assertion (CCFaultSystem() reaches CCRecoveredMin) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> container_restart -> cc_after_restart -> cc_existing_record -> b_append_done -> cc_begin_ack_wait -> cc_leader_local_again -> b_replicas_timeout -> fe_peer_partition -> cc_clear_ack_wait -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> fe_peer_recover -> fe_storage_stall -> cc_clear_ack_wait -> b_append_done -> cc_begin_ack_wait -> b_append_done -> fe_storage_recover -> fe_execution_hang -> cc_begin_ack_wait -> container_restart -> cc_after_restart -> b_append_done -> cc_begin_ack_wait -> cc_leader_local_again -> b_append_done -> cc_begin_ack_wait -> b_response_produce_error -> fe_execution_restart_clear -> fe_client_path_down -> cc_note_produce_error -> b_isr_insufficient -> cc_note_isr_reject -> b_replicas_timeout -> cc_clear_ack_wait -> b_append_done -> fe_client_path_recover -> fe_peer_partition -> cc_begin_ack_wait -> b_replicas_timeout -> cc_clear_ack_wait -> b_response_produce_error -> cc_note_produce_error -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> fe_peer_recover -> fe_storage_stall -> cc_clear_ack_wait -> b_append_done -> cc_begin_ack_wait -> b_append_done -> fe_storage_recover -> fe_execution_hang -> cc_begin_ack_wait -> b_response_produce_error -> fe_execution_recover -> fe_client_path_down -> cc_note_produce_error -> b_isr_insufficient -> fe_client_path_recover -> fe_probe_path_down -> cc_note_isr_reject -> b_replicas_timeout -> cc_clear_ack_wait -> b_response_produce_error -> cc_note_produce_error -> b_append_done -> cc_begin_ack_wait -> cc_isr_expand>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:296
+Total Transitions:680
+Time Used:0.0013176s
+Estimated Memory Used:10125.528KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= [] CCIsrBound
+********Verification Result********
+The Assertion (CCFaultSystem() |= [] CCIsrBound) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.4343621s
+Estimated Memory Used:21734.088KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( cc_follower_ack-> CCPeerLinkHealthy)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( cc_follower_ack-> CCPeerLinkHealthy)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.4071633s
+Estimated Memory Used:25531.568KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( b_isr_sufficient-> CCWriteCapable)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( b_isr_sufficient-> CCWriteCapable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.3958317s
+Estimated Memory Used:24659.664KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( b_isr_insufficient-> CCUnderMinIsr)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( b_isr_insufficient-> CCUnderMinIsr)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.3994006s
+Estimated Memory Used:24660.712KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( b_not_leader_produce-> CCRemoteLeader)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( b_not_leader_produce-> CCRemoteLeader)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.3618688s
+Estimated Memory Used:25552.496KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( b_replicas_ack-> CCWriteCapable)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( b_replicas_ack-> CCWriteCapable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.4167405s
+Estimated Memory Used:24659.888KB
+
+
+=======================================================
+Assertion: CCFaultSystem() |= []( b_fetch_data_ready-> CCDataAvailable)
+********Verification Result********
+The Assertion (CCFaultSystem() |= []( b_fetch_data_ready-> CCDataAvailable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21009
+Total Transitions:142318
+Time Used:0.3557075s
+Estimated Memory Used:25531.448KB

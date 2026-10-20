@@ -1,0 +1,17 @@
+// 聚焦路径：先通过 Startup 和 Readiness，再隔离对端；当前节点保持目标分区 Leader。
+// 不预设 ISR 立即下降，由副本 Fetch 受阻与 ISR 检查两个事件逐步表示。
+#include "ClusterContextIntegrated.csp";
+
+CCPeerAfterReady() = [kafka_ready == 1] fe_peer_partition{peer_link_ok = 0; fe_mode = 5;} -> CCPeerHeld();
+CCPeerHeld() = container_restart -> CCPeerHeld();
+#alphabet CCPeerAfterReady {container_restart};
+
+CCIsrBody() = System() || KafkaBroker() || ClientWorkload() || CCPeerAfterReady() || ClusterContext() || CCProbeSchedule();
+CCIsrScenario() = cc_pin_local_leader{cc_leader_move_allowed = 0;} -> CCIsrBody();
+
+// 隔离之后 ISR 逐步降到 1，Ready 仍为真。
+#assert CCIsrScenario() reaches CCReadyUnderMin;
+// 本地 Leader 上的 Produce 此时可收到 Broker 协议错误，客户端仍在处理该次发送。
+#assert CCIsrScenario() reaches CCReadyUnderMinBrokerReject;
+// 候选业务 Ready 目标比原生 Controller TCP 检查更强；预期 NOT valid。
+#assert CCIsrScenario() |= [] ((KafkaReady && CCLocalLeader) -> CCWriteCapable);

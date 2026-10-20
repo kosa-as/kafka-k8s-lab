@@ -1,0 +1,36 @@
+// 先加载 Broker 条件变量，再验证故障环境角色本身。
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "FaultEnvironment.csp";
+
+#define FEHealthyAll probe_path_ok == 1 && client_path_ok == 1 && execution_ok == 1 && storage_ok == 1 && peer_link_ok == 1;
+#define FEProbeIsolated probe_path_ok == 0 && client_path_ok == 1 && execution_ok == 1 && storage_ok == 1 && peer_link_ok == 1;
+#define FEClientIsolated probe_path_ok == 1 && client_path_ok == 0 && execution_ok == 1 && storage_ok == 1 && peer_link_ok == 1;
+#define FEExecutionIsolated probe_path_ok == 1 && client_path_ok == 1 && execution_ok == 0 && storage_ok == 1 && peer_link_ok == 1;
+#define FEStorageIsolated probe_path_ok == 1 && client_path_ok == 1 && execution_ok == 1 && storage_ok == 0 && peer_link_ok == 1;
+#define FEPeerIsolated probe_path_ok == 1 && client_path_ok == 1 && execution_ok == 1 && storage_ok == 1 && peer_link_ok == 0;
+
+// 故障角色不存在可达死锁。
+#assert FaultEnvironment() deadlockfree;
+// 探针路径故障可达。
+#assert FaultEnvironment() reaches FEProbePathDown;
+// 客户端路径故障可达。
+#assert FaultEnvironment() reaches FEClientPathDown;
+// 局部 JVM 执行停滞可达。
+#assert FaultEnvironment() reaches FEExecutionHung;
+// 存储停滞可达。
+#assert FaultEnvironment() reaches FEStorageStalled;
+// Broker 对端网络隔离可达。
+#assert FaultEnvironment() reaches FEPeerPartitioned;
+
+// 无故障模式下，所有路径和推进条件保持健康。
+#assert FaultEnvironment() |= [] (FENormal -> FEHealthyAll);
+// 探针路径故障不直接改变其他四项条件。
+#assert FaultEnvironment() |= [] (FEProbePathDown -> FEProbeIsolated);
+// 客户端路径故障不直接改变其他四项条件。
+#assert FaultEnvironment() |= [] (FEClientPathDown -> FEClientIsolated);
+// 执行停滞不直接改变网络及存储条件。
+#assert FaultEnvironment() |= [] (FEExecutionHung -> FEExecutionIsolated);
+// 存储停滞不直接改变网络及执行条件。
+#assert FaultEnvironment() |= [] (FEStorageStalled -> FEStorageIsolated);
+// 对端网络隔离不直接改变本 Pod 的探针、客户端、执行和存储条件。
+#assert FaultEnvironment() |= [] (FEPeerPartitioned -> FEPeerIsolated);

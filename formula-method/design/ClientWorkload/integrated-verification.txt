@@ -1,0 +1,712 @@
+=======================================================
+Assertion: ClientBrokerSystem() deadlockfree
+********Verification Result********
+The Assertion (ClientBrokerSystem() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:251
+Total Transitions:1609
+Time Used:0.0359164s
+Estimated Memory Used:14033.112KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() reaches CWProduceSuccess
+********Verification Result********
+The Assertion (ClientBrokerSystem() reaches CWProduceSuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> container_restart -> cw_poll_empty -> cw_next -> b_clear_client_enable_checkpoint -> b_process_start -> cw_send_produce -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_produce -> b_execute_produce -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> container_restart -> cw_produce_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:84
+Total Transitions:445
+Time Used:0.0023514s
+Estimated Memory Used:10043.608KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() reaches CWProduceError
+********Verification Result********
+The Assertion (ClientBrokerSystem() reaches CWProduceError) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> container_restart -> cw_poll_empty -> cw_next -> b_clear_client_enable_checkpoint -> b_process_start -> cw_send_produce -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> container_restart -> cw_produce_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:222
+Time Used:0.0006922s
+Estimated Memory Used:9314.52KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() reaches CWFetchData
+********Verification Result********
+The Assertion (ClientBrokerSystem() reaches CWFetchData) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> container_restart -> cw_poll_data>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:133
+Total Transitions:799
+Time Used:0.0019448s
+Estimated Memory Used:11206.872KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() reaches CWFetchEmpty
+********Verification Result********
+The Assertion (ClientBrokerSystem() reaches CWFetchEmpty) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> container_restart -> cw_poll_empty>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:26
+Total Transitions:99
+Time Used:0.0003897s
+Estimated Memory Used:8888.536KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() reaches CWFetchRetrySeen
+********Verification Result********
+The Assertion (ClientBrokerSystem() reaches CWFetchRetrySeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_not_leader_fetch -> b_response_fetch_error -> cw_fetch_retry>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:160
+Total Transitions:998
+Time Used:0.0026624s
+Estimated Memory Used:11854.04KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( client_produce-> CWProducePending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( client_produce-> CWProducePending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0331623s
+Estimated Memory Used:11744.064KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( client_fetch-> CWFetchPending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( client_fetch-> CWFetchPending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0282407s
+Estimated Memory Used:11808.912KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( b_response_produce_ok-> CWProducePending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( b_response_produce_ok-> CWProducePending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0256054s
+Estimated Memory Used:11742.4KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( b_response_produce_error-> CWProducePending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( b_response_produce_error-> CWProducePending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0275054s
+Estimated Memory Used:11742.4KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( b_response_fetch_data-> CWFetchPending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( b_response_fetch_data-> CWFetchPending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0278422s
+Estimated Memory Used:11808.912KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( b_response_fetch_empty-> CWFetchPending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( b_response_fetch_empty-> CWFetchPending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0258436s
+Estimated Memory Used:11808.912KB
+
+
+=======================================================
+Assertion: ClientBrokerSystem() |= []( b_response_fetch_error-> CWFetchPending)
+********Verification Result********
+The Assertion (ClientBrokerSystem() |= []( b_response_fetch_error-> CWFetchPending)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1309
+Total Transitions:8824
+Time Used:0.0263694s
+Estimated Memory Used:11808.912KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() deadlockfree
+********Verification Result********
+The Assertion (ClientProbeSystem() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:38045
+Total Transitions:116822
+Time Used:0.8306758s
+Estimated Memory Used:12373.904KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWProduceSuccess
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWProduceSuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> cw_next -> sp_invoke -> sp_tcp_connected -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> sp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> lp_invoke -> lp_exit_zero -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> lp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> cw_produce_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:147
+Total Transitions:178
+Time Used:0.0015026s
+Estimated Memory Used:10371.288KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWProduceError
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWProduceError) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:53
+Total Transitions:56
+Time Used:0.0005784s
+Estimated Memory Used:9126.104KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWFetchData
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWFetchData) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> cw_next -> sp_invoke -> sp_tcp_connected -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> sp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> lp_invoke -> lp_exit_zero -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> lp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> cw_produce_success -> cw_next -> k_commit_lp_success -> lp_invoke -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> lp_exit_zero -> cw_poll_data>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:169
+Total Transitions:219
+Time Used:0.0017837s
+Estimated Memory Used:10838.232KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWFetchEmpty
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWFetchEmpty) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:36
+Total Transitions:36
+Time Used:0.0003968s
+Estimated Memory Used:8921.304KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWFetchRetrySeen
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWFetchRetrySeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> cw_next -> sp_invoke -> sp_tcp_connected -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> sp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> lp_invoke -> lp_exit_zero -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> lp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> cw_produce_success -> cw_next -> k_commit_lp_success -> lp_invoke -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> lp_exit_zero -> cw_poll_data -> cw_next -> lp_success -> k_commit_lp_success -> rp_invoke -> rp_tcp_connected -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> rp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> cw_next -> k_commit_rp_success -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> lp_invoke -> lp_exit_zero -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cw_poll_data -> cw_next -> lp_success -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> cw_produce_success -> cw_next -> k_commit_lp_success -> rp_invoke -> rp_tcp_connected -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> rp_success -> b_not_leader_fetch -> b_response_fetch_error -> cw_fetch_retry>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:387
+Total Transitions:587
+Time Used:0.0053238s
+Estimated Memory Used:8768.712KB
+
+
+=======================================================
+Assertion: ClientProbeSystem() reaches CWReadyWithPendingProduce
+********Verification Result********
+The Assertion (ClientProbeSystem() reaches CWReadyWithPendingProduce) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> cw_begin_poll -> b_process_start -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> cw_send_produce -> client_produce -> b_execute_produce -> b_isr_insufficient -> b_response_produce_error -> cw_delivery_expired -> cw_produce_error -> cw_next -> sp_failure -> [if((sp_fail_run == 30))] -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cw_poll_empty -> cw_next -> startup_threshold -> container_restart -> cw_send_produce -> b_clear_client_enable_checkpoint -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> k_reset -> sp_invoke -> sp_tcp_connected -> sp_success -> rp_invoke -> rp_tcp_connected -> rp_success -> k_commit_rp_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:9912
+Total Transitions:23069
+Time Used:0.1925067s
+Estimated Memory Used:9150.76KB
+
+
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:660
+Total Transitions:915
+Time Used:0.0028819s
+Estimated Memory Used:11944.152KB
+
+
+=======================================================
+Assertion: System() reaches Started
+********Verification Result********
+The Assertion (System() reaches Started) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:154
+Total Transitions:184
+Time Used:0.0006617s
+Estimated Memory Used:9126.104KB
+
+
+=======================================================
+Assertion: System() reaches KafkaReady
+********Verification Result********
+The Assertion (System() reaches KafkaReady) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_connected -> rp_success -> k_commit_rp_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:355
+Total Transitions:432
+Time Used:0.0019426s
+Estimated Memory Used:10035.416KB
+
+
+=======================================================
+Assertion: System() reaches StartupThreshold
+********Verification Result********
+The Assertion (System() reaches StartupThreshold) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:150
+Total Transitions:179
+Time Used:0.0006716s
+Estimated Memory Used:9101.528KB
+
+
+=======================================================
+Assertion: System() reaches LivenessThreshold
+********Verification Result********
+The Assertion (System() reaches LivenessThreshold) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:174
+Total Transitions:207
+Time Used:0.0008651s
+Estimated Memory Used:9208.024KB
+
+
+=======================================================
+Assertion: System() |= []( rp_invoke-> Started)
+********Verification Result********
+The Assertion (System() |= []( rp_invoke-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0040204s
+Estimated Memory Used:13557.928KB
+
+
+=======================================================
+Assertion: System() |= []( lp_invoke-> Started)
+********Verification Result********
+The Assertion (System() |= []( lp_invoke-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0043041s
+Estimated Memory Used:13557.928KB
+
+
+=======================================================
+Assertion: System() |= []( KafkaReady-> Started)
+********Verification Result********
+The Assertion (System() |= []( KafkaReady-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0055482s
+Estimated Memory Used:13598.888KB
+
+
+=======================================================
+Assertion: System() |= []( startup_threshold-> StartupThreshold)
+********Verification Result********
+The Assertion (System() |= []( startup_threshold-> StartupThreshold)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0064135s
+Estimated Memory Used:13557.928KB
+
+
+=======================================================
+Assertion: System() |= []( liveness_threshold-> LivenessThreshold)
+********Verification Result********
+The Assertion (System() |= []( liveness_threshold-> LivenessThreshold)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0049205s
+Estimated Memory Used:13557.928KB
+
+
+=======================================================
+Assertion: System() |= []( startup_threshold-> X container_restart)
+********Verification Result********
+The Assertion (System() |= []( startup_threshold-> X container_restart)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0044002s
+Estimated Memory Used:13615.272KB
+
+
+=======================================================
+Assertion: System() |= []( liveness_threshold-> X container_restart)
+********Verification Result********
+The Assertion (System() |= []( liveness_threshold-> X container_restart)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0047575s
+Estimated Memory Used:13615.272KB
+
+
+=======================================================
+Assertion: System() |= []( container_restart-> X k_reset)
+********Verification Result********
+The Assertion (System() |= []( container_restart-> X k_reset)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0040763s
+Estimated Memory Used:13615.272KB
+
+
+=======================================================
+Assertion: System() |= []( k_reset-> X (! Started&&! KafkaReady))
+********Verification Result********
+The Assertion (System() |= []( k_reset-> X (! Started&&! KafkaReady))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.004506s
+Estimated Memory Used:13770.92KB
+
+
+=======================================================
+Assertion: System() |= []( rp_success-> X k_commit_rp_success)
+********Verification Result********
+The Assertion (System() |= []( rp_success-> X k_commit_rp_success)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0047377s
+Estimated Memory Used:13615.272KB
+
+
+=======================================================
+Assertion: System() |= []( k_commit_rp_success-> X ( KafkaReady&& RPFailRunZero))
+********Verification Result********
+The Assertion (System() |= []( k_commit_rp_success-> X ( KafkaReady&& RPFailRunZero))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0054708s
+Estimated Memory Used:13738.152KB
+
+
+=======================================================
+Assertion: System() |= []( rp_failure-> X k_commit_rp_failure)
+********Verification Result********
+The Assertion (System() |= []( rp_failure-> X k_commit_rp_failure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0046564s
+Estimated Memory Used:13607.08KB
+
+
+=======================================================
+Assertion: System() |= []( RPFailRunSix->! KafkaReady)
+********Verification Result********
+The Assertion (System() |= []( RPFailRunSix->! KafkaReady)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0049158s
+Estimated Memory Used:13598.888KB

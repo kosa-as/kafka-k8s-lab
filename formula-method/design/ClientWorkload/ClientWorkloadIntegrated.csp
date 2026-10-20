@@ -1,0 +1,54 @@
+// 客户端、Broker、Kubelet 与探针的组合验证入口。
+#include "..\Kubelet\Kubelet.csp";
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "ClientWorkload.csp";
+
+ClientBrokerSystem() = KafkaBroker() || ClientWorkload();
+ClientProbeSystem() = System() || KafkaBroker() || ClientWorkload();
+
+// 仅表示 Ready、客户端仍待结果与当前 Broker 尚未启用的状态共存；不限定发送先后。
+#define CWReadyWithPendingProduce kafka_ready == 1 && cw_kind == 1 && cw_pending == 1 && client_enable_checkpoint == 0;
+
+// Broker 与客户端组合后没有可达死锁。
+#assert ClientBrokerSystem() deadlockfree;
+// 组合中存在 Produce 成功回调路径。
+#assert ClientBrokerSystem() reaches CWProduceSuccess;
+// 组合中存在 Produce 错误回调路径。
+#assert ClientBrokerSystem() reaches CWProduceError;
+// 组合中存在 Poll 取得记录的路径。
+#assert ClientBrokerSystem() reaches CWFetchData;
+// 组合中存在 Poll 返回空结果的路径。
+#assert ClientBrokerSystem() reaches CWFetchEmpty;
+// Broker 返回 Fetch 协议错误后，客户端内部重试阶段可达。
+#assert ClientBrokerSystem() reaches CWFetchRetrySeen;
+
+// Produce 请求抵达 Broker 时，客户端正在等待对应操作。
+#assert ClientBrokerSystem() |= [] (client_produce -> CWProducePending);
+// Fetch 请求抵达 Broker 时，客户端正在等待对应操作。
+#assert ClientBrokerSystem() |= [] (client_fetch -> CWFetchPending);
+// Broker 发出 Produce 成功响应时，客户端仍在等待对应操作。
+#assert ClientBrokerSystem() |= [] (b_response_produce_ok -> CWProducePending);
+// Broker 发出 Produce 错误响应时，客户端仍在等待对应操作。
+#assert ClientBrokerSystem() |= [] (b_response_produce_error -> CWProducePending);
+// Broker 发出 Fetch 数据响应时，客户端仍在等待对应操作。
+#assert ClientBrokerSystem() |= [] (b_response_fetch_data -> CWFetchPending);
+// Broker 发出 Fetch 空响应时，客户端仍在等待对应操作。
+#assert ClientBrokerSystem() |= [] (b_response_fetch_empty -> CWFetchPending);
+// Broker 发出 Fetch 错误响应时，客户端仍在等待对应操作。
+#assert ClientBrokerSystem() |= [] (b_response_fetch_error -> CWFetchPending);
+
+// 加入探针与 Kubelet 后，完整组合仍没有可达死锁。
+#assert ClientProbeSystem() deadlockfree;
+// 完整组合中 Produce 成功回调路径仍可达。
+#assert ClientProbeSystem() reaches CWProduceSuccess;
+// 完整组合中 Produce 错误回调路径仍可达。
+#assert ClientProbeSystem() reaches CWProduceError;
+// 完整组合中 Poll 取得记录的路径仍可达。
+#assert ClientProbeSystem() reaches CWFetchData;
+// 完整组合中 Poll 返回空结果的路径仍可达。
+#assert ClientProbeSystem() reaches CWFetchEmpty;
+// 含探针的组合中，Fetch 协议错误后的内部重试阶段仍可达。
+#assert ClientProbeSystem() reaches CWFetchRetrySeen;
+
+// 在无时间组合中，上述 Ready 与等待请求的共同状态可达；它本身不是实机缺陷证据。
+#assert ClientProbeSystem() reaches CWReadyWithPendingProduce;

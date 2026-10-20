@@ -106,6 +106,7 @@ NFetchPending() = [probe_path_ok == 1] sp_tcp_connected -> NFetchPending()
                   [] [probe_path_ok == 0] rp_timeout -> NFetchPending()
                   [] b_response_fetch_data -> NClientEnabled()
                   [] b_response_fetch_empty -> NClientEnabled()
+                  [] b_response_fetch_error -> NClientEnabled()
                   [] container_restart -> NetworkHandler();
 
 #alphabet NetworkHandler {b_controller_bound, b_broker_socket_bound, b_client_enable,
@@ -113,7 +114,7 @@ NFetchPending() = [probe_path_ok == 1] sp_tcp_connected -> NFetchPending()
                           rp_tcp_connected, rp_tcp_failed, rp_timeout,
                           client_produce, client_fetch,
                           b_response_produce_ok, b_response_produce_error,
-                          b_response_fetch_data, b_response_fetch_empty,
+                          b_response_fetch_data, b_response_fetch_empty, b_response_fetch_error,
                           container_restart};
 
 // Execution 表示请求处理线程在 JVM 内的推进步骤，与进程匹配分开；
@@ -133,9 +134,14 @@ RequestHandler() = client_produce -> RProduceDispatch()
 RProduceDispatch() = b_execute_produce -> RProduceIsrCheck()
                      [] container_restart -> RequestHandler();
 
-RProduceIsrCheck() = b_isr_sufficient -> b_append_request -> RProduceAppending()
+RProduceIsrCheck() = b_isr_sufficient -> RProducePreAppend()
                      [] b_isr_insufficient -> b_response_produce_error -> RequestHandler()
+                     [] b_not_leader_produce -> b_response_produce_error -> RequestHandler()
                      [] container_restart -> RequestHandler();
+
+RProducePreAppend() = b_append_request -> RProduceAppending()
+                      [] b_not_leader_produce -> b_response_produce_error -> RequestHandler()
+                      [] container_restart -> RequestHandler();
 
 RProduceAppending() = b_append_done -> RProduceAckWait()
                       [] container_restart -> RequestHandler();
@@ -144,23 +150,31 @@ RProduceAckWait() = b_replicas_ack -> b_response_produce_ok -> RequestHandler()
                     [] b_replicas_timeout -> b_response_produce_error -> RequestHandler()
                     [] container_restart -> RequestHandler();
 
-RFetchDispatch() = b_execute_fetch -> b_read_request -> RFetchReading()
+RFetchDispatch() = b_execute_fetch -> RFetchLeaderCheck()
                    [] container_restart -> RequestHandler();
 
+// 目标分区的 Leader 已迁走时，当前 Broker 返回错误，不执行本地读取。
+RFetchLeaderCheck() = b_read_request -> RFetchReading()
+                      [] b_not_leader_fetch -> b_response_fetch_error -> RequestHandler()
+                      [] container_restart -> RequestHandler();
+
 RFetchReading() = b_read_done -> RFetchWait()
+                  [] b_not_leader_fetch -> b_response_fetch_error -> RequestHandler()
                   [] container_restart -> RequestHandler();
 
 RFetchWait() = b_fetch_data_ready -> b_response_fetch_data -> RequestHandler()
                [] b_fetch_timeout -> b_response_fetch_empty -> RequestHandler()
+               [] b_not_leader_fetch -> b_response_fetch_error -> RequestHandler()
                [] container_restart -> RequestHandler();
 
 #alphabet RequestHandler {client_produce, client_fetch, b_execute_produce,
                           b_execute_fetch, b_isr_sufficient, b_isr_insufficient,
+                          b_not_leader_produce, b_not_leader_fetch,
                           b_append_request, b_append_done, b_replicas_ack,
                           b_replicas_timeout, b_response_produce_ok,
                           b_response_produce_error, b_read_request, b_read_done,
                           b_fetch_data_ready, b_fetch_timeout,
-                          b_response_fetch_data, b_response_fetch_empty,
+                          b_response_fetch_data, b_response_fetch_empty, b_response_fetch_error,
                           container_restart};
 
 // StorageAccess 抽象本地 Leader 日志追加和本地 Fetch 读取。

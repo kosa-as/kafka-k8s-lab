@@ -1,0 +1,75 @@
+// M0 客户端工作负载：从仓库中的 TimestampProducer 和 TimestampConsumer 抽象。
+// 每次只跟踪一个选中请求；生产者的 send 与消费者的 poll 二选一。
+// cw_send_produce / cw_begin_poll 是客户端操作；client_produce / client_fetch
+// 表示请求抵达选中的 Broker，二者不是同一个事件。
+// 结果 1/2/3/4 分别表示 Produce 成功/错误、Poll 有数据/空结果。
+// Fetch 协议错误只进入客户端内部重试阶段，不等同于 poll 向应用抛出异常。
+
+var cw_kind = 0;
+// 1 表示当前操作尚未形成应用层结果；Broker 已响应但客户端仍在重试时也可能为 1。
+var cw_pending = 0;
+var cw_last_result = 0;
+var cw_fetch_retry_seen = 0;
+
+#define CWProducePending cw_kind == 1 && cw_pending == 1;
+#define CWFetchPending cw_kind == 2 && cw_pending == 1;
+#define CWProduceSuccess cw_last_result == 1;
+#define CWProduceError cw_last_result == 2;
+#define CWFetchData cw_last_result == 3;
+#define CWFetchEmpty cw_last_result == 4;
+#define CWFetchRetrySeen cw_fetch_retry_seen == 1;
+
+ClientWorkload() = cw_send_produce{cw_kind = 1; cw_pending = 1; cw_last_result = 0; cw_fetch_retry_seen = 0;} -> CWProduceQueued()
+                 [] cw_begin_poll{cw_kind = 2; cw_pending = 1; cw_last_result = 0; cw_fetch_retry_seen = 0;} -> CWFetchQueued()
+                 [] container_restart -> ClientWorkload();
+
+// Producer.send 是异步调用。请求尚未到达目标 Broker 时，客户端保持等待。
+CWProduceQueued() = client_produce -> CWProduceAwait()
+                    [] container_restart -> CWProduceQueued();
+
+// Broker 的成功响应可结束发送；可重试错误不会立即等同于应用层失败回调。
+CWProduceAwait() = b_response_produce_ok -> CWProduceCallbackOK()
+                   [] b_response_produce_error -> CWProduceAfterBrokerError()
+                   [] container_restart -> CWProduceQueued();
+
+// 客户端可重试，或在自身交付期限/不可恢复错误后结束该次 send。
+// 无时钟模型不推断某次 60 秒隔离是否真的跨过交付期限。
+CWProduceAfterBrokerError() = cw_produce_retry -> CWProduceQueued()
+                              [] cw_delivery_expired -> CWProduceCallbackError()
+                              [] container_restart -> CWProduceQueued();
+
+CWProduceCallbackOK() = cw_produce_success{cw_last_result = 1; cw_pending = 0;} -> CWCycleDone()
+                        [] container_restart -> CWProduceCallbackOK();
+
+CWProduceCallbackError() = cw_produce_error{cw_last_result = 2; cw_pending = 0;} -> CWCycleDone()
+                           [] container_restart -> CWProduceCallbackError();
+
+// 一次 poll 可能返回记录，也可能正常返回空集合；空结果不是业务成功。
+CWFetchQueued() = client_fetch -> CWFetchAwait()
+                  [] container_restart -> CWFetchQueued();
+
+CWFetchAwait() = b_response_fetch_data -> CWFetchCallbackData()
+                 [] b_response_fetch_empty -> CWFetchCallbackEmpty()
+                 [] b_response_fetch_error -> CWFetchAfterBrokerError()
+                 [] container_restart -> CWFetchQueued();
+
+CWFetchCallbackData() = cw_poll_data{cw_last_result = 3; cw_pending = 0;} -> CWCycleDone()
+                        [] container_restart -> CWFetchCallbackData();
+
+CWFetchCallbackEmpty() = cw_poll_empty{cw_last_result = 4; cw_pending = 0;} -> CWCycleDone()
+                         [] container_restart -> CWFetchCallbackEmpty();
+
+// 协议错误后保留本次 poll，在内部刷新/重试的压缩步骤后再请求目标 Broker。
+// 本模型尚未展开真实客户端路由到其他 Broker 和交付超时。
+CWFetchAfterBrokerError() = cw_fetch_retry{cw_fetch_retry_seen = 1;} -> CWFetchQueued()
+                            [] container_restart -> CWFetchQueued();
+
+// 当前操作结束后才能发起下一次，压缩真实程序中的连续发送与循环轮询。
+CWCycleDone() = cw_next{cw_kind = 0;} -> ClientWorkload()
+                [] container_restart -> CWCycleDone();
+
+// 显式同步纯事件；带赋值的客户端本地记录事件不进入跨角色字母表。
+#alphabet ClientWorkload {client_produce, client_fetch,
+                          b_response_produce_ok, b_response_produce_error,
+                          b_response_fetch_data, b_response_fetch_empty, b_response_fetch_error,
+                          container_restart};

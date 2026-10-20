@@ -1,0 +1,36 @@
+// 故障环境与客户端、Broker、Kubelet、探针的完整组合。
+#include "..\Kubelet\Kubelet.csp";
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "..\ClientWorkload\ClientWorkload.csp";
+#include "FaultEnvironment.csp";
+
+FaultSystem() = System() || KafkaBroker() || ClientWorkload() || FaultEnvironment();
+
+#define FEReadyClientPathDown kafka_ready == 1 && fe_mode == 2 && client_path_ok == 0;
+#define FEReadyExecPending kafka_ready == 1 && fe_mode == 3 && cw_kind == 1 && cw_pending == 1;
+#define FEReadyStoragePending kafka_ready == 1 && fe_mode == 4 && cw_kind == 1 && cw_pending == 1;
+#define FEReadyPeerPartition kafka_ready == 1 && fe_mode == 5 && peer_link_ok == 0;
+
+// 故障环境加入后，完整组合仍不存在可达死锁。
+#assert FaultSystem() deadlockfree;
+// 故障可选的模型仍保留 Produce 成功路径。
+#assert FaultSystem() reaches CWProduceSuccess;
+// 完整组合中探针路径故障可达。
+#assert FaultSystem() reaches FEProbePathDown;
+// 完整组合中客户端路径故障可达。
+#assert FaultSystem() reaches FEClientPathDown;
+// 完整组合中执行停滞可达。
+#assert FaultSystem() reaches FEExecutionHung;
+// 完整组合中存储停滞可达。
+#assert FaultSystem() reaches FEStorageStalled;
+// 完整组合中对端网络隔离可达。
+#assert FaultSystem() reaches FEPeerPartitioned;
+
+// Ready 与客户端路径中断可以同时存在。
+#assert FaultSystem() reaches FEReadyClientPathDown;
+// Ready 与等待 Produce 结果的执行停滞可以同时存在。
+#assert FaultSystem() reaches FEReadyExecPending;
+// Ready 与等待 Produce 结果的存储停滞可以同时存在。
+#assert FaultSystem() reaches FEReadyStoragePending;
+// Ready 与 Broker 对端网络隔离可以同时存在。
+#assert FaultSystem() reaches FEReadyPeerPartition;

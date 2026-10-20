@@ -1,0 +1,87 @@
+// M0：只跟踪 demo 分区 2 与节点 0 的本地 Broker。
+// 初始 Leader=0、ISR={0,1,2} 来自 live-topic-snapshot.txt。
+// 其他分区、具体副本 offset 和 KRaft 选举时序压缩为有限状态。
+// 引入本文件前必须先包含 KafkaBroker.csp 和 FaultEnvironment.csp。
+
+var cc_local_leader = 1;
+var cc_leader_move_allowed = 1;
+var cc_isr = 3;
+var cc_lag_observed = 0;
+var cc_ack_wait = 0;
+var cc_follower_acked = 0;
+var cc_ack_epoch_valid = 0;
+var cc_data_available = 0;
+var cc_isr_reject_pending = 0;
+var cc_isr_error_sent = 0;
+
+#define CCLocalLeader cc_local_leader == 1;
+#define CCRemoteLeader cc_local_leader == 0;
+#define CCWriteCapable cc_local_leader == 1 && cc_isr >= 2;
+#define CCUnderMinIsr cc_local_leader == 1 && cc_isr == 1;
+#define CCIsrBound cc_isr >= 0 && cc_isr <= 3 && (cc_local_leader == 0 || cc_isr >= 1);
+#define CCDataAvailable cc_data_available == 1;
+#define CCPeerLinkHealthy peer_link_ok == 1;
+#define CCBrokerIsrErrorSent cc_isr_error_sent == 1;
+
+// 对端网络隔离先使远端副本无法持续 Fetch，随后 ISR 检查才可能移除该副本。
+// 没有真实时钟；两次独立的 lag/shrink 事件分别压缩两个远端副本。
+ClusterContext() = [peer_link_ok == 0 && cc_local_leader == 1 && cc_isr > 1 && cc_lag_observed == 0]
+                   cc_follower_fetch_lost{cc_lag_observed = 1;} -> ClusterContext()
+                 [] [peer_link_ok == 0 && cc_local_leader == 1 && cc_isr > 1 && cc_lag_observed == 1]
+                   cc_isr_shrink{cc_isr = cc_isr - 1; cc_lag_observed = 0;} -> ClusterContext()
+                 [] [peer_link_ok == 1 && cc_lag_observed == 1]
+                   cc_follower_fetch_resumed{cc_lag_observed = 0;} -> ClusterContext()
+                 [] [peer_link_ok == 1 && cc_local_leader == 1 && cc_isr < 3]
+                   cc_isr_expand{cc_isr = cc_isr + 1; cc_lag_observed = 0; cc_isr_error_sent = 0;} -> ClusterContext()
+                 // 网络隔离后 Leader 也可能迁往其他节点；这是独立的元数据结果。
+                 [] [peer_link_ok == 0 && cc_local_leader == 1 && cc_leader_move_allowed == 1]
+                   cc_leader_away{cc_local_leader = 0; cc_isr = 0; cc_lag_observed = 0; cc_ack_epoch_valid = 0; cc_isr_reject_pending = 0; cc_isr_error_sent = 0;} -> ClusterContext()
+                 // 链路恢复不自动重选节点 0；此事件表示后续元数据重新指派。
+                 [] [peer_link_ok == 1 && cc_local_leader == 0]
+                   cc_leader_local_again{cc_local_leader = 1; cc_isr = 1; cc_lag_observed = 0; cc_isr_reject_pending = 0; cc_isr_error_sent = 0;} -> ClusterContext()
+                 // Produce 本地 Leader 检查：ISR 低于 2 时不能开始 acks=all 追加。
+                 [] [cc_local_leader == 1 && cc_isr >= 2]
+                   b_isr_sufficient -> cc_clear_isr_reject{cc_isr_reject_pending = 0; cc_isr_error_sent = 0;} -> ClusterContext()
+                 [] [cc_local_leader == 1 && cc_isr < 2]
+                   b_isr_insufficient -> cc_note_isr_reject{cc_isr_reject_pending = 1; cc_isr_error_sent = 0;} -> ClusterContext()
+                 [] [cc_local_leader == 0]
+                   b_not_leader_produce -> cc_clear_isr_reject{cc_isr_reject_pending = 0; cc_isr_error_sent = 0;} -> ClusterContext()
+                 // 记录实际发出的 Broker 协议错误，不把它等同于 Producer 最终回调。
+                 [] b_response_produce_error -> cc_note_produce_error{
+                      if (cc_isr_reject_pending == 1) { cc_isr_error_sent = 1; }
+                      cc_isr_reject_pending = 0;
+                    } -> ClusterContext()
+                 [] [cc_local_leader == 1]
+                   b_append_request -> ClusterContext()
+                 // 本地追加完成后，仍须等待至少一个远端 ISR 副本确认。
+                 [] b_append_done -> cc_begin_ack_wait{cc_ack_wait = 1; cc_follower_acked = 0; cc_ack_epoch_valid = cc_local_leader;} -> ClusterContext()
+                 [] [cc_ack_wait == 1 && cc_ack_epoch_valid == 1 && peer_link_ok == 1 && cc_local_leader == 1 && cc_isr >= 2]
+                   cc_follower_ack{cc_follower_acked = 1;} -> ClusterContext()
+                 [] [cc_ack_wait == 1 && cc_ack_epoch_valid == 1 && cc_follower_acked == 1 && cc_local_leader == 1 && cc_isr >= 2]
+                   b_replicas_ack -> cc_commit_record{cc_ack_wait = 0; cc_follower_acked = 0; cc_ack_epoch_valid = 0; cc_data_available = 1;} -> ClusterContext()
+                 [] [cc_data_available == 1]
+                   b_response_produce_ok -> ClusterContext()
+                 // 无时间模型中的超时选择；即使故障未恢复，也不会伪造成功确认。
+                 [] [cc_ack_wait == 1]
+                   b_replicas_timeout -> cc_clear_ack_wait{cc_ack_wait = 0; cc_follower_acked = 0; cc_ack_epoch_valid = 0;} -> ClusterContext()
+                 // Fetch 只能在本地 Leader 上继续；空读取与已提交数据分开。
+                 [] [cc_local_leader == 0]
+                   b_not_leader_fetch -> ClusterContext()
+                 [] [cc_local_leader == 1]
+                   b_read_request -> ClusterContext()
+                 [] [cc_local_leader == 1 && cc_data_available == 1]
+                   b_fetch_data_ready -> ClusterContext()
+                 [] [cc_local_leader == 1 && cc_data_available == 0]
+                   b_fetch_timeout -> ClusterContext()
+                 // 初始可能已有被当前消费组尚未读取的记录。
+                 [] [cc_data_available == 0]
+                   cc_existing_record{cc_data_available = 1;} -> ClusterContext()
+                 // 重启取消本次待确认请求；分区数据不因此消失。
+                 [] container_restart -> cc_after_restart{cc_local_leader = 0; cc_isr = 0; cc_lag_observed = 0; cc_ack_wait = 0; cc_follower_acked = 0; cc_ack_epoch_valid = 0; cc_isr_reject_pending = 0; cc_isr_error_sent = 0;} -> ClusterContext();
+
+// 只同步 Broker 已有的纯事件；本角色的状态记录事件保持本地。
+#alphabet ClusterContext {b_isr_sufficient, b_isr_insufficient, b_not_leader_produce,
+                          b_append_request, b_append_done, b_replicas_ack, b_replicas_timeout,
+                          b_response_produce_ok, b_response_produce_error,
+                          b_not_leader_fetch, b_read_request, b_fetch_data_ready, b_fetch_timeout,
+                          container_restart};

@@ -1,0 +1,524 @@
+=======================================================
+Assertion: ClusterSystem() reaches CWProduceSuccess
+********Verification Result********
+The Assertion (ClusterSystem() reaches CWProduceSuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> b_read_done -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cw_poll_data -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> cc_follower_fetch_resumed -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_poll_data -> cc_isr_expand -> cw_next -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> cw_send_produce -> client_produce -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_produce -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> cc_clear_ack_wait -> b_response_produce_error -> cc_note_produce_error -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_delivery_expired -> cw_produce_error -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> cw_next -> cw_begin_poll -> sp_success -> rp_invoke -> client_fetch -> rp_tcp_connected -> rp_success -> cc_leader_away -> fe_peer_recover -> b_execute_fetch -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cw_poll_data -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_next -> cw_begin_poll -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> cw_poll_data -> cw_next -> cc_leader_away -> fe_peer_recover -> cw_begin_poll -> cc_leader_local_again -> cc_isr_expand -> client_fetch -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> k_commit_rp_success -> cc_isr_expand -> b_read_request -> b_read_done -> b_fetch_data_ready -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> b_response_fetch_data -> fe_peer_partition -> cc_follower_fetch_lost -> cw_poll_data -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cw_next -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_send_produce -> client_produce -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_produce -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> cc_clear_ack_wait -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> b_response_produce_error -> fe_peer_partition -> cw_produce_retry -> client_produce -> b_execute_produce -> cc_note_produce_error -> b_isr_insufficient -> cc_note_isr_reject -> fe_peer_recover -> cc_isr_expand -> b_response_produce_error -> cc_note_produce_error -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_produce_retry -> client_produce -> cc_follower_fetch_resumed -> fe_peer_partition -> b_execute_produce -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> b_replicas_timeout -> fe_peer_recover -> cc_clear_ack_wait -> b_response_produce_error -> fe_peer_partition -> cw_produce_retry -> client_produce -> b_execute_produce -> cc_note_produce_error -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> fe_peer_recover -> cc_follower_ack -> b_replicas_ack -> cc_commit_record -> b_response_produce_ok -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_produce_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1881
+Total Transitions:4728
+Time Used:0.0777026s
+Estimated Memory Used:12456.32KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CWFetchData
+********Verification Result********
+The Assertion (ClusterSystem() reaches CWFetchData) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> b_read_done -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cw_poll_data>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:779
+Total Transitions:2363
+Time Used:0.0245815s
+Estimated Memory Used:11648.56KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CWFetchEmpty
+********Verification Result********
+The Assertion (ClusterSystem() reaches CWFetchEmpty) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> b_read_done -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_timeout -> b_response_fetch_empty -> cc_existing_record -> cc_leader_away -> fe_peer_recover -> cw_poll_empty>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:9448
+Total Transitions:39222
+Time Used:0.3594854s
+Estimated Memory Used:15490.6KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CWFetchRetrySeen
+********Verification Result********
+The Assertion (ClusterSystem() reaches CWFetchRetrySeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> b_not_leader_fetch -> b_response_fetch_error -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:199
+Total Transitions:258
+Time Used:0.0027002s
+Estimated Memory Used:11436.248KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CCReadyUnderMin
+********Verification Result********
+The Assertion (ClusterSystem() reaches CCReadyUnderMin) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> b_not_leader_fetch -> b_response_fetch_error -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> sp_success -> rp_invoke -> rp_tcp_connected -> rp_success -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> b_not_leader_fetch -> b_response_fetch_error -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> k_commit_rp_success -> cc_isr_shrink>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:313
+Total Transitions:422
+Time Used:0.0038429s
+Estimated Memory Used:13361.368KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CCReadyUnderMinBrokerReject
+********Verification Result********
+The Assertion (ClusterSystem() reaches CCReadyUnderMinBrokerReject) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> b_read_done -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cw_poll_data -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_next -> cw_begin_poll -> client_fetch -> b_execute_fetch -> b_read_request -> cc_follower_fetch_resumed -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_poll_data -> cc_isr_expand -> cw_next -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> cw_send_produce -> client_produce -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_produce -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> cc_clear_ack_wait -> b_response_produce_error -> cc_note_produce_error -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_delivery_expired -> cw_produce_error -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> cw_next -> cw_begin_poll -> sp_success -> rp_invoke -> client_fetch -> rp_tcp_connected -> rp_success -> cc_leader_away -> fe_peer_recover -> b_execute_fetch -> b_not_leader_fetch -> b_response_fetch_error -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> b_read_request -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_leader_away -> fe_peer_recover -> cw_poll_data -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_next -> cw_begin_poll -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> cw_poll_data -> cw_next -> cc_leader_away -> fe_peer_recover -> cw_begin_poll -> cc_leader_local_again -> cc_isr_expand -> client_fetch -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> k_commit_rp_success -> cc_isr_expand -> b_read_request -> b_read_done -> b_fetch_data_ready -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> b_response_fetch_data -> fe_peer_partition -> cc_follower_fetch_lost -> cw_poll_data -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cw_next -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_send_produce -> client_produce -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_produce -> b_isr_sufficient -> cc_clear_isr_reject -> b_append_request -> b_append_done -> cc_begin_ack_wait -> b_replicas_timeout -> cc_clear_ack_wait -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> b_response_produce_error -> fe_peer_partition -> cw_produce_retry -> client_produce -> b_execute_produce -> cc_note_produce_error -> b_isr_insufficient -> cc_note_isr_reject -> b_response_produce_error -> cc_note_produce_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1628
+Total Transitions:4033
+Time Used:0.0473847s
+Estimated Memory Used:15325.496KB
+
+
+=======================================================
+Assertion: ClusterSystem() reaches CCReadyRemoteLeader
+********Verification Result********
+The Assertion (ClusterSystem() reaches CCReadyRemoteLeader) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> cc_existing_record -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_begin_poll -> b_process_start -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_controller_bound -> sp_tcp_connected -> cc_leader_away -> fe_peer_recover -> b_broker_socket_bound -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_metadata_loaded -> b_unfenced -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> fe_peer_partition -> b_execute_fetch -> b_read_request -> cc_leader_away -> b_not_leader_fetch -> b_response_fetch_error -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> b_execute_fetch -> sp_success -> rp_invoke -> rp_tcp_connected -> rp_success -> cc_isr_expand -> fe_peer_partition -> cc_leader_away -> b_not_leader_fetch -> b_response_fetch_error -> fe_peer_recover -> cc_leader_local_again -> cc_isr_expand -> cc_isr_expand -> fe_peer_partition -> cc_follower_fetch_lost -> fe_peer_recover -> cw_fetch_retry -> client_fetch -> cc_follower_fetch_resumed -> fe_peer_partition -> cc_leader_away -> fe_peer_recover -> k_commit_rp_success -> b_execute_fetch -> b_not_leader_fetch -> cc_leader_local_again -> cc_isr_expand -> fe_peer_partition -> b_response_fetch_error -> cc_follower_fetch_lost -> cc_isr_shrink -> cw_fetch_retry -> cc_leader_away>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:338
+Total Transitions:507
+Time Used:0.007452s
+Estimated Memory Used:14598.36KB
+
+
+=======================================================
+Assertion: ClusterSystem() |= []( b_isr_sufficient-> CCWriteCapable)
+********Verification Result********
+The Assertion (ClusterSystem() |= []( b_isr_sufficient-> CCWriteCapable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:82881
+Total Transitions:377628
+Time Used:3.9425738s
+Estimated Memory Used:12908.968KB
+
+
+=======================================================
+Assertion: ClusterSystem() |= []( b_replicas_ack-> CCWriteCapable)
+********Verification Result********
+The Assertion (ClusterSystem() |= []( b_replicas_ack-> CCWriteCapable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:82881
+Total Transitions:377628
+Time Used:3.9013097s
+Estimated Memory Used:12784.184KB
+
+
+=======================================================
+Assertion: ClusterSystem() |= []( b_fetch_data_ready-> CCDataAvailable)
+********Verification Result********
+The Assertion (ClusterSystem() |= []( b_fetch_data_ready-> CCDataAvailable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:82881
+Total Transitions:377628
+Time Used:4.1026538s
+Estimated Memory Used:13119.128KB
+
+
+=======================================================
+Assertion: System() deadlockfree
+********Verification Result********
+The Assertion (System() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:660
+Total Transitions:915
+Time Used:0.0081618s
+Estimated Memory Used:11952.344KB
+
+
+=======================================================
+Assertion: System() reaches Started
+********Verification Result********
+The Assertion (System() reaches Started) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:154
+Total Transitions:184
+Time Used:0.0007249s
+Estimated Memory Used:9126.104KB
+
+
+=======================================================
+Assertion: System() reaches KafkaReady
+********Verification Result********
+The Assertion (System() reaches KafkaReady) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_zero -> lp_success -> k_commit_lp_success -> rp_invoke -> rp_tcp_failed -> rp_failure -> k_commit_rp_failure -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> rp_invoke -> rp_tcp_connected -> rp_success -> k_commit_rp_success>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:355
+Total Transitions:432
+Time Used:0.0013932s
+Estimated Memory Used:10035.416KB
+
+
+=======================================================
+Assertion: System() reaches StartupThreshold
+********Verification Result********
+The Assertion (System() reaches StartupThreshold) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:150
+Total Transitions:179
+Time Used:0.0006672s
+Estimated Memory Used:9101.528KB
+
+
+=======================================================
+Assertion: System() reaches LivenessThreshold
+********Verification Result********
+The Assertion (System() reaches LivenessThreshold) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_failed -> sp_failure -> [if!((sp_fail_run == 30))] -> sp_invoke -> sp_tcp_connected -> sp_success -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure -> [if!((lp_fail_run == 3))] -> lp_invoke -> lp_exit_nonzero -> lp_failure -> k_commit_lp_failure>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:174
+Total Transitions:207
+Time Used:0.0007673s
+Estimated Memory Used:9208.024KB
+
+
+=======================================================
+Assertion: System() |= []( rp_invoke-> Started)
+********Verification Result********
+The Assertion (System() |= []( rp_invoke-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0048415s
+Estimated Memory Used:13893.8KB
+
+
+=======================================================
+Assertion: System() |= []( lp_invoke-> Started)
+********Verification Result********
+The Assertion (System() |= []( lp_invoke-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0054126s
+Estimated Memory Used:13893.8KB
+
+
+=======================================================
+Assertion: System() |= []( KafkaReady-> Started)
+********Verification Result********
+The Assertion (System() |= []( KafkaReady-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0043477s
+Estimated Memory Used:13934.76KB
+
+
+=======================================================
+Assertion: System() |= []( startup_threshold-> StartupThreshold)
+********Verification Result********
+The Assertion (System() |= []( startup_threshold-> StartupThreshold)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0040637s
+Estimated Memory Used:13893.8KB
+
+
+=======================================================
+Assertion: System() |= []( liveness_threshold-> LivenessThreshold)
+********Verification Result********
+The Assertion (System() |= []( liveness_threshold-> LivenessThreshold)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0044846s
+Estimated Memory Used:13893.8KB
+
+
+=======================================================
+Assertion: System() |= []( startup_threshold-> X container_restart)
+********Verification Result********
+The Assertion (System() |= []( startup_threshold-> X container_restart)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0049141s
+Estimated Memory Used:13951.144KB
+
+
+=======================================================
+Assertion: System() |= []( liveness_threshold-> X container_restart)
+********Verification Result********
+The Assertion (System() |= []( liveness_threshold-> X container_restart)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.004205s
+Estimated Memory Used:13951.144KB
+
+
+=======================================================
+Assertion: System() |= []( container_restart-> X k_reset)
+********Verification Result********
+The Assertion (System() |= []( container_restart-> X k_reset)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0079961s
+Estimated Memory Used:13951.144KB
+
+
+=======================================================
+Assertion: System() |= []( k_reset-> X (! Started&&! KafkaReady))
+********Verification Result********
+The Assertion (System() |= []( k_reset-> X (! Started&&! KafkaReady))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0050816s
+Estimated Memory Used:14106.792KB
+
+
+=======================================================
+Assertion: System() |= []( rp_success-> X k_commit_rp_success)
+********Verification Result********
+The Assertion (System() |= []( rp_success-> X k_commit_rp_success)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0058002s
+Estimated Memory Used:13951.144KB
+
+
+=======================================================
+Assertion: System() |= []( k_commit_rp_success-> X ( KafkaReady&& RPFailRunZero))
+********Verification Result********
+The Assertion (System() |= []( k_commit_rp_success-> X ( KafkaReady&& RPFailRunZero))) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0044899s
+Estimated Memory Used:14074.024KB
+
+
+=======================================================
+Assertion: System() |= []( rp_failure-> X k_commit_rp_failure)
+********Verification Result********
+The Assertion (System() |= []( rp_failure-> X k_commit_rp_failure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0043384s
+Estimated Memory Used:13942.952KB
+
+
+=======================================================
+Assertion: System() |= []( RPFailRunSix->! KafkaReady)
+********Verification Result********
+The Assertion (System() |= []( RPFailRunSix->! KafkaReady)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:806
+Total Transitions:1098
+Time Used:0.0071203s
+Estimated Memory Used:13934.76KB

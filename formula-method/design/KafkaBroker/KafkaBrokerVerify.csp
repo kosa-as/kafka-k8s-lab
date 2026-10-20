@@ -3,11 +3,17 @@
 
 var seen_produce_ok = 0;
 var seen_fetch_data = 0;
+var seen_fetch_error = 0;
+var seen_not_leader_produce = 0;
 #define ProduceOKSeen seen_produce_ok == 1;
 #define FetchDataSeen seen_fetch_data == 1;
+#define FetchErrorSeen seen_fetch_error == 1;
+#define NotLeaderProduceSeen seen_not_leader_produce == 1;
 
 ResponseObserver() = b_response_produce_ok -> mark_produce_ok{seen_produce_ok = 1;} -> ResponseObserver()
-                     [] b_response_fetch_data -> mark_fetch_data{seen_fetch_data = 1;} -> ResponseObserver();
+                     [] b_response_fetch_data -> mark_fetch_data{seen_fetch_data = 1;} -> ResponseObserver()
+                     [] b_response_fetch_error -> mark_fetch_error{seen_fetch_error = 1;} -> ResponseObserver()
+                     [] b_not_leader_produce -> mark_not_leader_produce{seen_not_leader_produce = 1;} -> ResponseObserver();
 BrokerObserved() = KafkaBroker() || ResponseObserver();
 
 // Broker 独立模型不存在可达死锁状态。
@@ -18,6 +24,10 @@ BrokerObserved() = KafkaBroker() || ResponseObserver();
 #assert BrokerObserved() reaches ProduceOKSeen;
 // 至少存在一条 Fetch 返回数据的路径。
 #assert BrokerObserved() reaches FetchDataSeen;
+// 目标分区 Leader 不在本节点时，Fetch 错误响应路径可达。
+#assert BrokerObserved() reaches FetchErrorSeen;
+// Produce 的非本地 Leader 检查分支可达。
+#assert BrokerObserved() reaches NotLeaderProduceSeen;
 // 接收 Produce 请求前，必须已到达客户端处理启用前检查点。
 #assert KafkaBroker() |= [] (client_produce -> ClientEnableCheckpointReached);
 // 接收 Fetch 请求前，必须已到达客户端处理启用前检查点。

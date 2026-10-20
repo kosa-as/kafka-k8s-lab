@@ -1,0 +1,44 @@
+// 七个角色的对端隔离场景组合：故障环境保留网络隔离/恢复分支。
+#include "..\Kubelet\Kubelet.csp";
+#include "..\KafkaBroker\KafkaBroker.csp";
+#include "..\ClientWorkload\ClientWorkload.csp";
+#include "..\FaultEnvironment\FaultEnvironment.csp";
+#include "ClusterContext.csp";
+
+// 只保留一次成功 Startup 和一次成功 Readiness，之后冻结探针调度。
+// 这是原 Kubelet 模型允许的轨迹子集，用于削减无关探针交错；不是时间模型。
+CCProbeSchedule() = sp_invoke -> sp_tcp_connected ->
+                    rp_invoke -> rp_tcp_connected -> rp_success -> CCProbeHold();
+CCProbeHold() = container_restart -> CCProbeSchedule();
+
+#alphabet CCProbeSchedule {sp_invoke, sp_tcp_connected, sp_tcp_failed, sp_timeout,
+                           rp_invoke, rp_tcp_connected, rp_tcp_failed, rp_timeout, rp_success,
+                           lp_invoke, lp_exit_zero, lp_exit_nonzero, lp_timeout, lp_success,
+                           container_restart};
+
+ClusterSystem() = System() || KafkaBroker() || ClientWorkload() || FaultEnvironmentPeer() || ClusterContext() || CCProbeSchedule();
+
+#define CCReadyUnderMin kafka_ready == 1 && peer_link_ok == 0 && cc_local_leader == 1 && cc_isr == 1;
+#define CCReadyUnderMinBrokerReject kafka_ready == 1 && peer_link_ok == 0 && cc_local_leader == 1 && cc_isr == 1 && cc_isr_error_sent == 1 && cw_kind == 1 && cw_pending == 1;
+#define CCReadyRemoteLeader kafka_ready == 1 && peer_link_ok == 0 && cc_local_leader == 0;
+
+// 健康配置下，七角色组合存在 Produce 成功回调路径。
+#assert ClusterSystem() reaches CWProduceSuccess;
+// 健康配置下，Fetch 可取得目标分区中的记录。
+#assert ClusterSystem() reaches CWFetchData;
+// 没有目标记录时，Fetch 可以正常返回空结果。
+#assert ClusterSystem() reaches CWFetchEmpty;
+// Leader 迁往远端后，客户端收到 Fetch 协议错误并进入内部重试的路径可达。
+#assert ClusterSystem() reaches CWFetchRetrySeen;
+// Ready 与本地目标分区 ISR 低于最低要求可同时出现。
+#assert ClusterSystem() reaches CCReadyUnderMin;
+// 目标分区 ISR 不足时，Broker 的 Produce 协议错误可与 Ready 共现。
+#assert ClusterSystem() reaches CCReadyUnderMinBrokerReject;
+// Ready 与目标分区 Leader 已迁往远端可同时出现。
+#assert ClusterSystem() reaches CCReadyRemoteLeader;
+// ISR 检查成功只能发生在本地 Leader 且 ISR 不少于 2 时。
+#assert ClusterSystem() |= [] (b_isr_sufficient -> CCWriteCapable);
+// 所需副本确认只能发生在本地 Leader 且 ISR 不少于 2 时。
+#assert ClusterSystem() |= [] (b_replicas_ack -> CCWriteCapable);
+// Fetch 数据就绪要求本模型中的目标记录已可读。
+#assert ClusterSystem() |= [] (b_fetch_data_ready -> CCDataAvailable);

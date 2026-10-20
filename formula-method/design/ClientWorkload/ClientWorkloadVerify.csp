@@ -1,0 +1,31 @@
+// ClientWorkload 的独立验证入口；不包含 Broker 和 Kubelet。
+#include "ClientWorkload.csp";
+
+// 客户端角色的所有可达状态都可以继续执行。
+#assert ClientWorkload() deadlockfree;
+// 存在发起 Produce 并等待结果的路径。
+#assert ClientWorkload() reaches CWProducePending;
+// 存在发起 Poll 并等待 Fetch 结果的路径。
+#assert ClientWorkload() reaches CWFetchPending;
+// 存在 Produce 成功回调的路径。
+#assert ClientWorkload() reaches CWProduceSuccess;
+// 存在 Produce 错误回调的路径。
+#assert ClientWorkload() reaches CWProduceError;
+// 存在 Poll 取得记录的路径。
+#assert ClientWorkload() reaches CWFetchData;
+// 存在 Poll 返回空结果的路径。
+#assert ClientWorkload() reaches CWFetchEmpty;
+// Broker 返回 Fetch 协议错误后，客户端内部重试阶段可达。
+#assert ClientWorkload() reaches CWFetchRetrySeen;
+
+// 发起异步发送后，下一模型状态保留 Produce 在途操作。
+#assert ClientWorkload() |= [] (cw_send_produce -> X CWProducePending);
+// 开始 Poll 后，下一模型状态保留 Fetch 在途操作。
+#assert ClientWorkload() |= [] (cw_begin_poll -> X CWFetchPending);
+
+// Produce 成功回调后记录成功，并结束当前等待。
+#assert ClientWorkload() |= [] (cw_produce_success -> X (CWProduceSuccess && !CWProducePending));
+// Poll 空返回后记录空结果，并结束当前等待。
+#assert ClientWorkload() |= [] (cw_poll_empty -> X (CWFetchEmpty && !CWFetchPending));
+// 内部重试标记出现后，本次 Poll 仍未形成应用层结果。
+#assert ClientWorkload() |= [] (cw_fetch_retry -> X (CWFetchRetrySeen && CWFetchPending));

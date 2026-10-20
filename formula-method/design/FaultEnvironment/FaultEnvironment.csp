@@ -1,0 +1,64 @@
+// M0 故障环境：一次只激活一种故障，作用于先前 Broker 模型的条件变量。
+// 必须先包含 KafkaBroker.csp，再包含本文件；本角色本身不重复定义这些变量。
+// 模式 1/2/3/4/5：探针路径、客户端路径、JVM 执行、本地存储、Broker 对端网络。
+// 前四项是抽象故障条件；对端网络对应仓库的 NetworkChaos 隔离示例。
+
+var fe_mode = 0;
+var peer_link_ok = 1;
+
+#define FENormal fe_mode == 0;
+#define FEProbePathDown fe_mode == 1 && probe_path_ok == 0;
+#define FEClientPathDown fe_mode == 2 && client_path_ok == 0;
+#define FEExecutionHung fe_mode == 3 && execution_ok == 0;
+#define FEStorageStalled fe_mode == 4 && storage_ok == 0;
+#define FEPeerPartitioned fe_mode == 5 && peer_link_ok == 0;
+
+FaultEnvironment() = fe_probe_path_down{probe_path_ok = 0; fe_mode = 1;} -> FEProbeDown()
+                     [] fe_client_path_down{client_path_ok = 0; fe_mode = 2;} -> FEClientDown()
+                     [] fe_execution_hang{execution_ok = 0; fe_mode = 3;} -> FEExecHung()
+                     [] fe_storage_stall{storage_ok = 0; fe_mode = 4;} -> FEStorageDown()
+                     [] fe_peer_partition{peer_link_ok = 0; fe_mode = 5;} -> FEPeerDown()
+                     [] container_restart -> FaultEnvironment();
+
+// 探针与客户端网络路径故障属于容器外部条件，容器重启不会自动修复。
+FEProbeDown() = fe_probe_path_recover{probe_path_ok = 1; fe_mode = 0;} -> FaultEnvironment()
+                [] container_restart -> FEProbeDown();
+
+FEClientDown() = fe_client_path_recover{client_path_ok = 1; fe_mode = 0;} -> FaultEnvironment()
+                 [] container_restart -> FEClientDown();
+
+// 局部 JVM 执行停滞在本抽象中允许由重启清除；也允许单独恢复。
+FEExecHung() = fe_execution_recover{execution_ok = 1; fe_mode = 0;} -> FaultEnvironment()
+               [] container_restart -> FEExecRestartReset();
+
+FEExecRestartReset() = fe_execution_restart_clear{execution_ok = 1; fe_mode = 0;} -> FaultEnvironment();
+
+// 存储停滞和 Pod 间隔离按外部故障处理，重启后仍需环境恢复。
+FEStorageDown() = fe_storage_recover{storage_ok = 1; fe_mode = 0;} -> FaultEnvironment()
+                  [] container_restart -> FEStorageDown();
+
+FEPeerDown() = fe_peer_recover{peer_link_ok = 1; fe_mode = 0;} -> FaultEnvironment()
+               [] container_restart -> FEPeerDown();
+
+// 只有重启是跨角色纯事件；故障注入与恢复事件只在本角色内改变条件。
+#alphabet FaultEnvironment {container_restart};
+
+// 聚焦验证入口：Produce 已被 Broker 接收后、执行步骤之前注入局部停滞。
+// 将 b_execute_produce 放入字母表，使故障提交前该步骤不能越过。
+FEExecutionOnProduce() = client_produce -> fe_exec_after_accept{execution_ok = 0; fe_mode = 3;} -> FEExecPersistent()
+                         [] container_restart -> FEExecutionOnProduce();
+
+// 此场景不提供自发恢复；容器重启可清除局部执行停滞，再等待下一次请求。
+FEExecPersistent() = container_restart -> fe_execution_restart_clear{execution_ok = 1; fe_mode = 0;} -> FEExecutionOnProduce();
+
+#alphabet FEExecutionOnProduce {client_produce, b_execute_produce, container_restart};
+
+// 分区副本场景的状态压缩入口：只保留节点 0 与对端隔离及恢复。
+// 与完整 FaultEnvironment 使用同样的故障变量和恢复语义。
+FaultEnvironmentPeer() = fe_peer_partition{peer_link_ok = 0; fe_mode = 5;} -> FEPeerOnlyDown()
+                         [] container_restart -> FaultEnvironmentPeer();
+
+FEPeerOnlyDown() = fe_peer_recover{peer_link_ok = 1; fe_mode = 0;} -> FaultEnvironmentPeer()
+                   [] container_restart -> FEPeerOnlyDown();
+
+#alphabet FaultEnvironmentPeer {container_restart};
