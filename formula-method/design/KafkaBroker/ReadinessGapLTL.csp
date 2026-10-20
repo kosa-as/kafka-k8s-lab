@@ -1,0 +1,11 @@
+// 预期反例：启动期间 Controller TCP 探针成功，不能推出
+// Kafka 客户端监听端口已经开始处理请求。
+#include "..\Kubelet\Kubelet.csp";
+#include "KafkaBroker.csp";
+
+ReadinessGapSystem() = System() || KafkaBroker();
+
+// 必要条件检查：一旦 Ready，至少应已到达客户端处理启用前检查点。
+// PAT 应报告 NOT valid，并给出 Controller TCP 成功早于该检查点的轨迹；
+// 检查点先于 b_client_enable，因此未到达检查点可确定处理尚未启用。
+#assert ReadinessGapSystem() |= [] (KafkaReady -> ClientEnableCheckpointReached);

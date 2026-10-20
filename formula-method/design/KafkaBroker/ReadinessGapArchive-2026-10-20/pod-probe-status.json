@@ -1,0 +1,75 @@
+{
+  "collectedAtUtc": "2026-10-20T03:27:15.8614987Z",
+  "context": "docker-desktop",
+  "namespace": "kafka",
+  "pod": "bitnami-kafka-controller-0",
+  "podUid": "0d67db4f-c4d1-4373-ae9c-35f9816e7397",
+  "kafkaContainer": {
+    "name": "kafka",
+    "image": "docker.io/bitnamilegacy/kafka:4.0.0-debian-12-r10",
+    "imageID": "docker-pullable://bitnamilegacy/kafka@sha256:aa0b2aee8c5610dd1d18d48b4f1df0dbe3267b5d4c338d36c9af9cbf0529c0b0",
+    "startedAtUtc": "2026-10-20T01:38:57Z",
+    "readyAtCollection": true,
+    "restartCount": 1,
+    "ports": [
+      {
+        "containerPort": 9093,
+        "name": "controller",
+        "protocol": "TCP"
+      },
+      {
+        "containerPort": 9092,
+        "name": "client",
+        "protocol": "TCP"
+      },
+      {
+        "containerPort": 9094,
+        "name": "interbroker",
+        "protocol": "TCP"
+      },
+      {
+        "containerPort": 9095,
+        "name": "external",
+        "protocol": "TCP"
+      }
+    ],
+    "startupProbe": {
+      "failureThreshold": 30,
+      "initialDelaySeconds": 10,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "tcpSocket": {
+        "port": "controller"
+      },
+      "timeoutSeconds": 5
+    },
+    "readinessProbe": {
+      "failureThreshold": 6,
+      "initialDelaySeconds": 5,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "tcpSocket": {
+        "port": "controller"
+      },
+      "timeoutSeconds": 5
+    },
+    "livenessProbe": {
+      "exec": {
+        "command": [
+          "pgrep",
+          "-f",
+          "kafka"
+        ]
+      },
+      "failureThreshold": 3,
+      "initialDelaySeconds": 10,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "timeoutSeconds": 5
+    }
+  },
+  "podReadyCondition": {
+    "status": "True",
+    "lastTransitionTimeUtc": "2026-10-20T01:39:35Z"
+  }
+}

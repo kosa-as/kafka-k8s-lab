@@ -1,13 +1,12 @@
-// M0 Kubelet probe-control model for the kafka container in controller-0.
-// Live node: Kubernetes v1.36.1; live Pod: restartPolicy Always.
-// Live thresholds: startup 30, readiness failure 6 / success 1,
-// liveness failure 3 / success 1. Startup and readiness use TCP controller:9093;
-// liveness executes `pgrep -f kafka`.
-// Sources: Kubernetes v1.36.1 worker.go, prober_manager.go, prober.go,
-// pkg/probe/tcp/tcp.go, pkg/probe/exec/exec.go, and
-// pkg/kubelet/kuberuntime/kuberuntime_manager.go.
-// State compression: one probe execution at a time; independent worker
-// scheduling and wall-clock intervals are outside this first composition.
+// controller-0 中 Kafka 容器的 M0 Kubelet 探针控制模型。
+// 运行中节点为 Kubernetes v1.36.1；Pod 的 restartPolicy 为 Always。
+// 运行中配置的失败阈值：Startup 为 30，Readiness 为 6，Liveness 为 3；
+// Readiness 和 Liveness 的成功阈值均为 1。Startup 和 Readiness 连接 Controller:9093；
+// Liveness 执行 `pgrep -f kafka`。
+// 源码依据：Kubernetes v1.36.1 的 worker.go、prober_manager.go、prober.go、
+// pkg/probe/tcp/tcp.go、pkg/probe/exec/exec.go，以及
+// pkg/kubelet/kuberuntime/kuberuntime_manager.go。
+// 状态压缩：一次只执行一种探针；独立 worker 调度和实际时间间隔不在本版范围内。
 
 #include "..\ReadinessProbe\ReadinessProbe.csp";
 #include "..\LivenessProbe\LivenessProbe.csp";
@@ -25,8 +24,8 @@ var lp_fail_run = 0;
 #define RPFailRunZero rp_fail_run == 0;
 #define RPFailRunSix rp_fail_run == 6;
 
-// Startup is a Kubelet sub-behavior. A TCP outcome is an abstract input from
-// the future controller listener and fault-environment roles.
+// Startup 是 Kubelet 的内部子行为；TCP 结果是 Controller 监听端口及后续
+// FaultEnvironment 角色提供的抽象输入。
 KStartup() = sp_invoke -> KStartupAwait();
 
 KStartupAwait() = sp_tcp_connected -> sp_success{started = 1; sp_fail_run = 0;} -> KRunning()
@@ -36,8 +35,8 @@ KStartupAwait() = sp_tcp_connected -> sp_success{started = 1; sp_fail_run = 0;} 
 KStartupCheck() = if (sp_fail_run == 30) { startup_threshold -> KRestart() }
                   else { KStartup() };
 
-// Startup has succeeded. Readiness and liveness are independently eligible;
-// their executions are serialized here to compress commuting interleavings.
+// Startup 成功后，Readiness 与 Liveness 都可被调度；为压缩可交换的交错，
+// 本版将两种探针的单次执行串行化。
 KRunning() = rp_invoke -> KReadinessAwait()
              [] lp_invoke -> KLivenessAwait();
 
@@ -53,8 +52,8 @@ KLivenessAwait() = lp_success -> k_commit_lp_success{lp_fail_run = 0;} -> KRunni
 KLivenessCheck() = if (lp_fail_run == 3) { liveness_threshold -> KRestart() }
                    else { KRunning() };
 
-// With restartPolicy=Always, committed Startup/Liveness Failure leads to
-// container replacement. The shared event resets both probe-role processes.
+// restartPolicy=Always 下，已提交的 Startup 或 Liveness 失败达到阈值后重启容器；
+// 共享的重启事件同时重置两个探针角色。
 KRestart() = container_restart -> k_reset{
                started = 0;
                kafka_ready = 0;
@@ -63,9 +62,8 @@ KRestart() = container_restart -> k_reset{
                lp_fail_run = 0;
              } -> KStartup();
 
-// PAT excludes data-operation events from inferred alphabets. These shared
-// handshake events are plain events, and this explicit alphabet protects the
-// synchronization contract across recursive Kubelet states.
+// PAT 推断字母表时会排除带赋值的事件，因此跨角色握手使用无赋值事件；
+// 显式字母表保证递归的 Kubelet 状态仍遵守这些同步约束。
 #alphabet KStartup {sp_invoke, sp_tcp_connected, sp_tcp_failed, sp_timeout,
                     sp_success, sp_failure, startup_threshold,
                     rp_invoke, rp_success, rp_failure,
@@ -74,29 +72,43 @@ KRestart() = container_restart -> k_reset{
 
 System() = KStartup() || RPIdle() || LPIdle();
 
+// Kubelet 与探针组合模型不存在可达死锁状态。
 #assert System() deadlockfree;
+// 存在 Startup 成功并打开探针门控的路径。
 #assert System() reaches Started;
+// 存在 Readiness 成功并将此容器标为 Ready 的路径。
 #assert System() reaches KafkaReady;
+// 连续 30 次 Startup 失败可到达重启阈值。
 #assert System() reaches StartupThreshold;
+// 连续 3 次 Liveness 失败可到达重启阈值。
 #assert System() reaches LivenessThreshold;
 
-// Native probes cannot be called before Startup has succeeded.
+// Startup 成功前不会调用 Readiness。
 #assert System() |= [] (rp_invoke -> Started);
+// Startup 成功前不会调用 Liveness。
 #assert System() |= [] (lp_invoke -> Started);
+// 此容器被标为 Ready 时，Startup 门控已经打开。
 #assert System() |= [] (KafkaReady -> Started);
 
-// Threshold events occur only after the configured consecutive result count.
+// 触发 Startup 阈值事件时，连续失败计数必须为 30。
 #assert System() |= [] (startup_threshold -> StartupThreshold);
+// 触发 Liveness 阈值事件时，连续失败计数必须为 3。
 #assert System() |= [] (liveness_threshold -> LivenessThreshold);
+// Startup 阈值事件的下一个模型事件是容器重启。
 #assert System() |= [] (startup_threshold -> X container_restart);
+// Liveness 阈值事件的下一个模型事件是容器重启。
 #assert System() |= [] (liveness_threshold -> X container_restart);
 
-// Restart re-enters the startup phase and clears Kafka-container readiness.
+// 容器重启事件之后，下一步执行 Kubelet 状态重置。
 #assert System() |= [] (container_restart -> X k_reset);
+// 重置后关闭 Startup 门控，并清除此容器的 Ready 状态。
 #assert System() |= [] (k_reset -> X (!Started && !KafkaReady));
 
-// A raw Readiness result updates Kubelet's Kafka-container cached state.
+// Readiness 原始成功结果在下一步由 Kubelet 提交。
 #assert System() |= [] (rp_success -> X k_commit_rp_success);
+// 提交成功结果后设为 Ready，并清零 Readiness 连续失败计数。
 #assert System() |= [] (k_commit_rp_success -> X (KafkaReady && RPFailRunZero));
+// Readiness 原始失败结果在下一步由 Kubelet 提交。
 #assert System() |= [] (rp_failure -> X k_commit_rp_failure);
+// 连续 6 次 Readiness 失败后清除此容器的 Ready 状态。
 #assert System() |= [] (RPFailRunSix -> !KafkaReady);

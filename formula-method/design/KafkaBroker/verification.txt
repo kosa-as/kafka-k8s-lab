@@ -1,0 +1,166 @@
+=======================================================
+Assertion: KafkaBroker() deadlockfree
+********Verification Result********
+The Assertion (KafkaBroker() deadlockfree) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:23
+Total Transitions:118
+Time Used:0.0228681s
+Estimated Memory Used:8945.88KB
+
+
+=======================================================
+Assertion: KafkaBroker() reaches ClientEnableCheckpointReached
+********Verification Result********
+The Assertion (KafkaBroker() reaches ClientEnableCheckpointReached) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:41
+Time Used:0.0013424s
+Estimated Memory Used:8650.968KB
+
+
+=======================================================
+Assertion: BrokerObserved() reaches ProduceOKSeen
+********Verification Result********
+The Assertion (BrokerObserved() reaches ProduceOKSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> mark_fetch_data -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> client_produce -> b_execute_produce -> mark_fetch_data -> b_isr_sufficient -> b_append_request -> b_append_done -> b_replicas_ack -> b_response_produce_ok -> mark_produce_ok>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:53
+Total Transitions:208
+Time Used:0.0006952s
+Estimated Memory Used:9232.6KB
+
+
+=======================================================
+Assertion: BrokerObserved() reaches FetchDataSeen
+********Verification Result********
+The Assertion (BrokerObserved() reaches FetchDataSeen) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> b_process_start -> b_controller_bound -> b_broker_socket_bound -> b_metadata_loaded -> b_unfenced -> b_reach_client_enable_checkpoint -> b_client_enable -> client_fetch -> b_execute_fetch -> b_read_request -> b_read_done -> b_fetch_data_ready -> b_response_fetch_data -> mark_fetch_data>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:22
+Total Transitions:85
+Time Used:0.0003518s
+Estimated Memory Used:8823KB
+
+
+=======================================================
+Assertion: KafkaBroker() |= []( client_produce-> ClientEnableCheckpointReached)
+********Verification Result********
+The Assertion (KafkaBroker() |= []( client_produce-> ClientEnableCheckpointReached)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:105
+Total Transitions:563
+Time Used:0.0051162s
+Estimated Memory Used:10354.856KB
+
+
+=======================================================
+Assertion: KafkaBroker() |= []( client_fetch-> ClientEnableCheckpointReached)
+********Verification Result********
+The Assertion (KafkaBroker() |= []( client_fetch-> ClientEnableCheckpointReached)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:105
+Total Transitions:563
+Time Used:0.0016509s
+Estimated Memory Used:10354.856KB
+
+
+=======================================================
+Assertion: KafkaBroker() |= []( b_controller_bound->! ClientEnableCheckpointReached)
+********Verification Result********
+The Assertion (KafkaBroker() |= []( b_controller_bound->! ClientEnableCheckpointReached)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:105
+Total Transitions:563
+Time Used:0.0014891s
+Estimated Memory Used:10354.856KB
+
+
+=======================================================
+Assertion: KafkaBroker() |= []( b_response_produce_ok-> ClientEnableCheckpointReached)
+********Verification Result********
+The Assertion (KafkaBroker() |= []( b_response_produce_ok-> ClientEnableCheckpointReached)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:105
+Total Transitions:563
+Time Used:0.0015199s
+Estimated Memory Used:10354.856KB
+
+
+=======================================================
+Assertion: KafkaBroker() |= []( b_response_fetch_data-> ClientEnableCheckpointReached)
+********Verification Result********
+The Assertion (KafkaBroker() |= []( b_response_fetch_data-> ClientEnableCheckpointReached)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:105
+Total Transitions:563
+Time Used:0.0019701s
+Estimated Memory Used:10354.856KB

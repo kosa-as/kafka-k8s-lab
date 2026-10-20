@@ -1,0 +1,21 @@
+{
+  "observedAtUtc": "2026-10-20T01:48:59.6804268Z",
+  "namespace": "kafka",
+  "pod": "bitnami-kafka-controller-0",
+  "container": "kafka",
+  "image": "docker.io/bitnamilegacy/kafka:4.0.0-debian-12-r10",
+  "imageID": "docker-pullable://bitnamilegacy/kafka@sha256:aa0b2aee8c5610dd1d18d48b4f1df0dbe3267b5d4c338d36c9af9cbf0529c0b0",
+  "kafkaVersion": "4.0.0",
+  "config": {
+    "advertised.listeners": "CLIENT://bitnami-kafka-controller-0.bitnami-kafka-controller-headless.kafka.svc.cluster.local:9092,INTERNAL://bitnami-kafka-controller-0.bitnami-kafka-controller-headless.kafka.svc.cluster.local:9094,EXTERNAL://localhost:32001",
+    "controller.listener.names": "CONTROLLER",
+    "controller.quorum.bootstrap.servers": "bitnami-kafka-controller-0.bitnami-kafka-controller-headless.kafka.svc.cluster.local:9093,bitnami-kafka-controller-1.bitnami-kafka-controller-headless.kafka.svc.cluster.local:9093,bitnami-kafka-controller-2.bitnami-kafka-controller-headless.kafka.svc.cluster.local:9093",
+    "default.replication.factor": "3",
+    "inter.broker.listener.name": "INTERNAL",
+    "listeners": "CLIENT://:9092,INTERNAL://:9094,EXTERNAL://:9095,CONTROLLER://:9093",
+    "log.dir": "/bitnami/kafka/data",
+    "min.insync.replicas": "2",
+    "process.roles": "controller,broker",
+    "node.id": "0"
+  }
+}

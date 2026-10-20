@@ -1,0 +1,9 @@
+2026-10-20T01:39:07.279442451Z 2026-10-20 01:39:07 INFO  [main] DataPlaneAcceptor:66 - Awaiting socket connections on 0.0.0.0:9093.
+2026-10-20T01:39:07.667490139Z 2026-10-20 01:39:07 INFO  [main] BrokerServer:57 - [BrokerServer id=0] Waiting for the controller to acknowledge that we are caught up
+2026-10-20T01:39:18.699303682Z 2026-10-20 01:39:18 INFO  [main] BrokerServer:60 - [BrokerServer id=0] Finished waiting for the controller to acknowledge that we are caught up
+2026-10-20T01:39:18.703788622Z 2026-10-20 01:39:18 INFO  [main] BrokerServer:57 - [BrokerServer id=0] Waiting for the broker to be unfenced
+2026-10-20T01:39:18.740359089Z 2026-10-20 01:39:18 INFO  [broker-0-lifecycle-manager-event-handler] BrokerLifecycleManager:66 - [BrokerLifecycleManager id=0] The broker has been unfenced. Transitioning from RECOVERY to RUNNING.
+2026-10-20T01:39:18.740597402Z 2026-10-20 01:39:18 INFO  [main] BrokerServer:60 - [BrokerServer id=0] Finished waiting for the broker to be unfenced
+2026-10-20T01:39:18.748140378Z 2026-10-20 01:39:18 INFO  [main] DataPlaneAcceptor:66 - Awaiting socket connections on 0.0.0.0:9092.
+2026-10-20T01:39:18.754350143Z 2026-10-20 01:39:18 INFO  [main] BrokerServer:66 - [BrokerServer id=0] Transition from STARTING to STARTED
+2026-10-20T01:39:18.757702033Z 2026-10-20 01:39:18 INFO  [main] KafkaRaftServer:66 - [KafkaRaftServer nodeId=0] Kafka Server started

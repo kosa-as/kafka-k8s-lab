@@ -1,0 +1,30 @@
+// Broker 角色的独立验证；以下观测标记不属于 KafkaBroker 本身。
+#include "KafkaBroker.csp";
+
+var seen_produce_ok = 0;
+var seen_fetch_data = 0;
+#define ProduceOKSeen seen_produce_ok == 1;
+#define FetchDataSeen seen_fetch_data == 1;
+
+ResponseObserver() = b_response_produce_ok -> mark_produce_ok{seen_produce_ok = 1;} -> ResponseObserver()
+                     [] b_response_fetch_data -> mark_fetch_data{seen_fetch_data = 1;} -> ResponseObserver();
+BrokerObserved() = KafkaBroker() || ResponseObserver();
+
+// Broker 独立模型不存在可达死锁状态。
+#assert KafkaBroker() deadlockfree;
+// 至少存在一条启动路径可到达客户端处理启用前的检查点。
+#assert KafkaBroker() reaches ClientEnableCheckpointReached;
+// 至少存在一条 Produce 成功响应路径。
+#assert BrokerObserved() reaches ProduceOKSeen;
+// 至少存在一条 Fetch 返回数据的路径。
+#assert BrokerObserved() reaches FetchDataSeen;
+// 接收 Produce 请求前，必须已到达客户端处理启用前检查点。
+#assert KafkaBroker() |= [] (client_produce -> ClientEnableCheckpointReached);
+// 接收 Fetch 请求前，必须已到达客户端处理启用前检查点。
+#assert KafkaBroker() |= [] (client_fetch -> ClientEnableCheckpointReached);
+// 绑定 Controller 监听端口时，尚未到达客户端处理启用前检查点。
+#assert KafkaBroker() |= [] (b_controller_bound -> !ClientEnableCheckpointReached);
+// Produce 成功响应前，必须已到达客户端处理启用前检查点。
+#assert KafkaBroker() |= [] (b_response_produce_ok -> ClientEnableCheckpointReached);
+// Fetch 数据响应前，必须已到达客户端处理启用前检查点。
+#assert KafkaBroker() |= [] (b_response_fetch_data -> ClientEnableCheckpointReached);

@@ -1,7 +1,7 @@
-// Standalone verification harness for ReadinessProbe.csp.
+// ReadinessProbe.csp 的独立验证入口。
 #include "ReadinessProbe.csp";
 
-// These bounded flags belong to verification, not to the probe role.
+// 以下有限状态标记只用于验证，不属于探针角色本身。
 var rp_seen_success = 0;
 var rp_seen_failure = 0;
 #define RPSuccessSeen rp_seen_success == 1;
@@ -11,10 +11,16 @@ RPBranchTracker() = rp_success -> rp_mark_success{rp_seen_success = 1;} -> RPBra
                   [] rp_failure -> rp_mark_failure{rp_seen_failure = 1;} -> RPBranchTracker();
 RPChecked() = RPIdle() || RPBranchTracker();
 
+// 独立探针模型的每个可达状态都能继续执行。
 #assert RPIdle() deadlockfree;
+// 存在 TCP 连接成功并报告 Success 的路径。
 #assert RPChecked() reaches RPSuccessSeen;
+// 存在 TCP 连接失败或超时并报告 Failure 的路径。
 #assert RPChecked() reaches RPFailureSeen;
 
+// 探针调用后，最终报告结果，或被容器重启打断。
 #assert RPIdle() |= [] (rp_invoke -> <> (rp_success || rp_failure || container_restart));
+// TCP 连接成功后，下一步报告 Success，或发生重启。
 #assert RPIdle() |= [] (rp_tcp_connected -> X (rp_success || container_restart));
+// TCP 连接失败或超时后，下一步报告 Failure，或发生重启。
 #assert RPIdle() |= [] ((rp_tcp_failed || rp_timeout) -> X (rp_failure || container_restart));

@@ -1,9 +1,9 @@
-// M0 native LivenessProbe role; safe to include in the Kubelet composition.
-// Source: Bitnami Kafka chart 32.5.0, pinned commit bb5e98a6e3c5ca196420d2414769b681c9284101,
-// bitnami/kafka/templates/controller-eligible/statefulset.yaml, livenessProbe.
-// Saved and live Pod spec: exec `pgrep -f kafka`, initialDelay 10 s,
-// period 10 s, timeout 5 s, failureThreshold 3.
-// Startup gate, counters, and restart are modeled in Kubelet.csp; timing is abstract.
+// M0 原生 LivenessProbe 角色，可直接包含到 Kubelet 组合模型中。
+// 依据：Bitnami Kafka Chart 32.5.0，固定提交 bb5e98a6e3c5ca196420d2414769b681c9284101，
+// bitnami/kafka/templates/controller-eligible/statefulset.yaml 中的 livenessProbe。
+// 保存的配置与运行中 Pod 均执行 `pgrep -f kafka`；
+// 初始延迟 10 秒、周期 10 秒、超时 5 秒、失败阈值 3。
+// Startup 门控、失败计数和重启由 Kubelet.csp 建模；此处抽象掉时间。
 
 LPIdle() = lp_invoke -> LPRunningExec()
          [] container_restart -> LPIdle();

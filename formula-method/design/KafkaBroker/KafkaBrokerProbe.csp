@@ -1,0 +1,29 @@
+// 跨角色组合：基于源码的 KafkaBroker 行为约束现有的 Startup、
+// Readiness、Liveness 和 Kubelet 进程。
+#include "..\Kubelet\Kubelet.csp";
+#include "KafkaBroker.csp";
+
+#define ProbeReadyGap kafka_ready == 1 && client_enable_checkpoint == 0;
+#define ProbeRestartCause sp_fail_run == 30 || lp_fail_run == 3;
+
+BrokerProbeSystem() = System() || KafkaBroker();
+
+// Broker 与探针的完整组合不存在可达死锁状态。
+#assert BrokerProbeSystem() deadlockfree;
+// 完整组合存在到达客户端处理启用前检查点的路径。
+#assert BrokerProbeSystem() reaches ClientEnableCheckpointReached;
+// 存在已标记 Ready、却尚未到达该检查点的状态；这是存在性检查。
+#assert BrokerProbeSystem() reaches ProbeReadyGap;
+
+// 完整组合中的 Readiness 调用必须发生在 Startup 成功之后。
+#assert BrokerProbeSystem() |= [] (rp_invoke -> Started);
+// 完整组合中的 Liveness 调用必须发生在 Startup 成功之后。
+#assert BrokerProbeSystem() |= [] (lp_invoke -> Started);
+// 完整组合中的容器重启必须由 Startup 或 Liveness 失败阈值触发。
+#assert BrokerProbeSystem() |= [] (container_restart -> ProbeRestartCause);
+// 组合中的状态重置会关闭 Startup 门控，并清除此容器的 Ready 状态。
+#assert BrokerProbeSystem() |= [] (k_reset -> X (!Started && !KafkaReady));
+// 组合中的 Produce 成功响应要求已到达客户端处理启用前检查点。
+#assert BrokerProbeSystem() |= [] (b_response_produce_ok -> ClientEnableCheckpointReached);
+// 组合中的 Fetch 数据响应要求已到达客户端处理启用前检查点。
+#assert BrokerProbeSystem() |= [] (b_response_fetch_data -> ClientEnableCheckpointReached);

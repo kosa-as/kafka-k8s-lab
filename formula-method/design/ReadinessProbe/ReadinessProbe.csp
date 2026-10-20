@@ -1,9 +1,9 @@
-// M0 native ReadinessProbe role; safe to include in the Kubelet composition.
-// Source: Bitnami Kafka chart 32.5.0, pinned commit bb5e98a6e3c5ca196420d2414769b681c9284101,
-// bitnami/kafka/templates/controller-eligible/statefulset.yaml, readinessProbe.
-// Saved and live Pod spec: TCP socket to controller:9093,
-// initialDelay 5 s, period 10 s, timeout 5 s, failureThreshold 6.
-// Startup gate, counters, and Ready are modeled in Kubelet.csp; timing is abstract.
+// M0 原生 ReadinessProbe 角色，可直接包含到 Kubelet 组合模型中。
+// 依据：Bitnami Kafka Chart 32.5.0，固定提交 bb5e98a6e3c5ca196420d2414769b681c9284101，
+// bitnami/kafka/templates/controller-eligible/statefulset.yaml 中的 readinessProbe。
+// 保存的配置与运行中 Pod 均使用 Controller 端口 9093 的 TCP 探针；
+// 初始延迟 5 秒、周期 10 秒、超时 5 秒、失败阈值 6。
+// Startup 门控、失败计数和 Ready 状态由 Kubelet.csp 建模；此处抽象掉时间。
 
 RPIdle() = rp_invoke -> RPConnecting()
          [] container_restart -> RPIdle();

@@ -1,0 +1,180 @@
+// Kafka 4.0.0 Controller/Broker 合一 Pod 的 M0 模型，最多保留一个在途请求。
+// 依据：apache/kafka 4.0.0 标签；运行中配置为 process.roles=controller,broker，
+// CONTROLLER:9093、CLIENT:9092、min.insync.replicas=2；客户端示例使用 acks=all。
+// 探针路径、客户端路径、执行和存储的条件将由后续 FaultEnvironment 提供；
+// 当前健康基线将这些条件初始化为 1。
+
+var probe_path_ok = 1;
+var client_path_ok = 1;
+var execution_ok = 1;
+var storage_ok = 1;
+var client_enable_checkpoint = 0;
+
+#define ClientEnableCheckpointReached client_enable_checkpoint == 1;
+
+// Lifecycle：KafkaRaftServer 先启动 ControllerServer，再启动 BrokerServer。
+// Controller 套接字绑定早于 BrokerServer 启用客户端请求处理。
+Lifecycle() = b_process_start -> LControllerStarting()
+              [] lp_exit_nonzero -> Lifecycle()
+              [] lp_timeout -> Lifecycle()
+              [] container_restart -> Lifecycle();
+
+LControllerStarting() = b_controller_bound -> LBrokerStarting()
+                        [] lp_exit_zero -> LControllerStarting()
+                        [] container_restart -> LReset();
+
+LBrokerStarting() = b_broker_socket_bound -> LClientBound()
+                    [] lp_exit_zero -> LBrokerStarting()
+                    [] container_restart -> LReset();
+
+LClientBound() = b_metadata_loaded -> LMetadataLoaded()
+                 [] lp_exit_zero -> LClientBound()
+                 [] container_restart -> LReset();
+
+LMetadataLoaded() = b_unfenced -> LBeforeEnable()
+                    [] lp_exit_zero -> LMetadataLoaded()
+                    [] container_restart -> LReset();
+
+// 此检查点是验证用的抽象边界，位于实际启用事件 b_client_enable 之前。
+// 尚未到达检查点，可确定客户端请求处理尚未启用；到达后仍需等待启用事件。
+LBeforeEnable() = b_reach_client_enable_checkpoint{client_enable_checkpoint = 1;} -> b_client_enable -> LRunning()
+                  [] lp_exit_zero -> LBeforeEnable()
+                  [] container_restart -> LReset();
+
+LRunning() = lp_exit_zero -> LRunning()
+             [] container_restart -> LReset();
+
+LReset() = b_clear_client_enable_checkpoint{client_enable_checkpoint = 0;} -> Lifecycle()
+           [] container_restart -> LReset();
+
+#alphabet Lifecycle {b_process_start, b_controller_bound, b_broker_socket_bound,
+                     b_metadata_loaded, b_unfenced, b_client_enable,
+                     lp_exit_zero, lp_exit_nonzero, lp_timeout, container_restart};
+
+// NetworkHandler 将 Controller 探针路径与客户端监听及响应路径分开；
+// 路径条件由环境输入控制。
+NetworkHandler() = sp_tcp_failed -> NetworkHandler()
+                   [] sp_timeout -> NetworkHandler()
+                   [] rp_tcp_failed -> NetworkHandler()
+                   [] rp_timeout -> NetworkHandler()
+                   [] b_controller_bound -> NControllerOpen()
+                   [] container_restart -> NetworkHandler();
+
+NControllerOpen() = [probe_path_ok == 1] sp_tcp_connected -> NControllerOpen()
+                    [] [probe_path_ok == 1] rp_tcp_connected -> NControllerOpen()
+                    [] [probe_path_ok == 0] sp_tcp_failed -> NControllerOpen()
+                    [] [probe_path_ok == 0] sp_timeout -> NControllerOpen()
+                    [] [probe_path_ok == 0] rp_tcp_failed -> NControllerOpen()
+                    [] [probe_path_ok == 0] rp_timeout -> NControllerOpen()
+                    [] b_broker_socket_bound -> NClientBound()
+                    [] container_restart -> NetworkHandler();
+
+NClientBound() = [probe_path_ok == 1] sp_tcp_connected -> NClientBound()
+                 [] [probe_path_ok == 1] rp_tcp_connected -> NClientBound()
+                 [] [probe_path_ok == 0] sp_tcp_failed -> NClientBound()
+                 [] [probe_path_ok == 0] sp_timeout -> NClientBound()
+                 [] [probe_path_ok == 0] rp_tcp_failed -> NClientBound()
+                 [] [probe_path_ok == 0] rp_timeout -> NClientBound()
+                 [] b_client_enable -> NClientEnabled()
+                 [] container_restart -> NetworkHandler();
+
+NClientEnabled() = [probe_path_ok == 1] sp_tcp_connected -> NClientEnabled()
+                   [] [probe_path_ok == 1] rp_tcp_connected -> NClientEnabled()
+                   [] [probe_path_ok == 0] sp_tcp_failed -> NClientEnabled()
+                   [] [probe_path_ok == 0] sp_timeout -> NClientEnabled()
+                   [] [probe_path_ok == 0] rp_tcp_failed -> NClientEnabled()
+                   [] [probe_path_ok == 0] rp_timeout -> NClientEnabled()
+                   [] [client_path_ok == 1] client_produce -> NProducePending()
+                   [] [client_path_ok == 1] client_fetch -> NFetchPending()
+                   [] container_restart -> NetworkHandler();
+
+NProducePending() = [probe_path_ok == 1] sp_tcp_connected -> NProducePending()
+                    [] [probe_path_ok == 1] rp_tcp_connected -> NProducePending()
+                    [] [probe_path_ok == 0] sp_tcp_failed -> NProducePending()
+                    [] [probe_path_ok == 0] sp_timeout -> NProducePending()
+                    [] [probe_path_ok == 0] rp_tcp_failed -> NProducePending()
+                    [] [probe_path_ok == 0] rp_timeout -> NProducePending()
+                    [] b_response_produce_ok -> NClientEnabled()
+                    [] b_response_produce_error -> NClientEnabled()
+                    [] container_restart -> NetworkHandler();
+
+NFetchPending() = [probe_path_ok == 1] sp_tcp_connected -> NFetchPending()
+                  [] [probe_path_ok == 1] rp_tcp_connected -> NFetchPending()
+                  [] [probe_path_ok == 0] sp_tcp_failed -> NFetchPending()
+                  [] [probe_path_ok == 0] sp_timeout -> NFetchPending()
+                  [] [probe_path_ok == 0] rp_tcp_failed -> NFetchPending()
+                  [] [probe_path_ok == 0] rp_timeout -> NFetchPending()
+                  [] b_response_fetch_data -> NClientEnabled()
+                  [] b_response_fetch_empty -> NClientEnabled()
+                  [] container_restart -> NetworkHandler();
+
+#alphabet NetworkHandler {b_controller_bound, b_broker_socket_bound, b_client_enable,
+                          sp_tcp_connected, sp_tcp_failed, sp_timeout,
+                          rp_tcp_connected, rp_tcp_failed, rp_timeout,
+                          client_produce, client_fetch,
+                          b_response_produce_ok, b_response_produce_error,
+                          b_response_fetch_data, b_response_fetch_empty,
+                          container_restart};
+
+// Execution 表示请求处理线程在 JVM 内的推进步骤，与进程匹配分开；
+// 即使 pgrep 成功，该步骤仍可能被后续环境条件阻塞。
+Execution() = [execution_ok == 1] b_execute_produce -> Execution()
+              [] [execution_ok == 1] b_execute_fetch -> Execution()
+              [] container_restart -> Execution();
+
+#alphabet Execution {b_execute_produce, b_execute_fetch, container_restart};
+
+// RequestHandler 抽象 KafkaApis 的请求分派及 ReplicaManager 回调；
+// 一次只处理一个请求，以限制状态空间。
+RequestHandler() = client_produce -> RProduceDispatch()
+                   [] client_fetch -> RFetchDispatch()
+                   [] container_restart -> RequestHandler();
+
+RProduceDispatch() = b_execute_produce -> RProduceIsrCheck()
+                     [] container_restart -> RequestHandler();
+
+RProduceIsrCheck() = b_isr_sufficient -> b_append_request -> RProduceAppending()
+                     [] b_isr_insufficient -> b_response_produce_error -> RequestHandler()
+                     [] container_restart -> RequestHandler();
+
+RProduceAppending() = b_append_done -> RProduceAckWait()
+                      [] container_restart -> RequestHandler();
+
+RProduceAckWait() = b_replicas_ack -> b_response_produce_ok -> RequestHandler()
+                    [] b_replicas_timeout -> b_response_produce_error -> RequestHandler()
+                    [] container_restart -> RequestHandler();
+
+RFetchDispatch() = b_execute_fetch -> b_read_request -> RFetchReading()
+                   [] container_restart -> RequestHandler();
+
+RFetchReading() = b_read_done -> RFetchWait()
+                  [] container_restart -> RequestHandler();
+
+RFetchWait() = b_fetch_data_ready -> b_response_fetch_data -> RequestHandler()
+               [] b_fetch_timeout -> b_response_fetch_empty -> RequestHandler()
+               [] container_restart -> RequestHandler();
+
+#alphabet RequestHandler {client_produce, client_fetch, b_execute_produce,
+                          b_execute_fetch, b_isr_sufficient, b_isr_insufficient,
+                          b_append_request, b_append_done, b_replicas_ack,
+                          b_replicas_timeout, b_response_produce_ok,
+                          b_response_produce_error, b_read_request, b_read_done,
+                          b_fetch_data_ready, b_fetch_timeout,
+                          b_response_fetch_data, b_response_fetch_empty,
+                          container_restart};
+
+// StorageAccess 抽象本地 Leader 日志追加和本地 Fetch 读取。
+StorageAccess() = b_append_request -> SAppending()
+                  [] b_read_request -> SReading()
+                  [] container_restart -> StorageAccess();
+
+SAppending() = [storage_ok == 1] b_append_done -> StorageAccess()
+               [] container_restart -> StorageAccess();
+
+SReading() = [storage_ok == 1] b_read_done -> StorageAccess()
+             [] container_restart -> StorageAccess();
+
+#alphabet StorageAccess {b_append_request, b_append_done,
+                         b_read_request, b_read_done, container_restart};
+
+KafkaBroker() = Lifecycle() || NetworkHandler() || Execution() || RequestHandler() || StorageAccess();
