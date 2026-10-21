@@ -1,0 +1,91 @@
+// M0-R2：公共有限状态。入口定义 COLD、FAULT、KIND、HAS_DATA、RECOVER、ISSUE、BACKGROUND。
+// FAULT: -1 全部单故障；0 健康；2 客户端链路；3 执行；4 存储；
+// 5 复制链路；6 探针链路；7 进程退出；8 本分区 Leader 迁移。
+// KIND: 1 Produce，2 Fetch。每轮只跟踪一个操作和最多一次重试。
+// 生命周期 0 未启动，1 进程存在，2 Controller 绑定，3 Client 绑定，
+// 4 元数据加载，5 unfence，6 请求处理启用，7 已退出。
+var life = 6 * (1-COLD);
+var started = 1-COLD;
+var ready = 1-COLD;
+var sp_fail = 0;
+var rp_fail = 0;
+var lp_fail = 0;
+// 探针邮箱：0 无结果，1 成功，2 失败；消费前不覆盖。
+var rp_result = 0;
+var lp_result = 0;
+var restart_count = 0;
+var fault = 0;
+// 预算：0 尚未注入，1 当前故障，2 已恢复；最多一轮。
+var fault_budget = 0;
+var probe_net = 1;
+var client_net = 1;
+var exec_ok = 1;
+var disk_ok = 1;
+var replica_net = 1;
+// Broker 请求阶段：0 空闲，1 已接收，2 已分派，3 持有分区读锁并等待 I/O，
+// 4 等待确认/数据，5 响应已形成，6 响应已送出。
+var bp = 0;
+var append_done = 0;
+var response = 0;
+// response/rx：1 Produce 成功，2 ISR 不足，3 非 Leader，4 请求超时，
+// 5 Fetch 数据，6 Fetch 空，7 AFTER_APPEND 错误。
+var rx = 0;
+var broker_expired = 0;
+// 应用状态：0 未调用，1 等待结果，2 Produce 成功，3 交付超时，
+// 4 Poll 有数据，5 Poll 空；协议错误不会直接成为最终应用错误。
+var client = 0;
+var client_expired = 0;
+var retry = 0;
+var error_seen = 0;
+var local_leader = 1;
+var isr1 = 1;
+var isr2 = 1;
+var ack1 = 0;
+var ack2 = 0;
+var lag1 = 0;
+var lag2 = 0;
+// 一条未展开的后续记录使 Leader LEO 超过远端；不是选中记录的 ACK。
+var tail_advanced = 0;
+// hw 表示选中记录已越过高水位；历史确认快照用于验证提交条件。
+var hw = 0;
+var hw_all = 0;
+var hw_min = 0;
+var success_authorized = 0;
+var data_available = HAS_DATA;
+// 观察器仅计数故障后的新探针结果，达到 2 后饱和。
+var fresh_rp = 0;
+var fresh_lp = 0;
+
+#define Ready ready == 1;
+#define Started started == 1;
+#define Enabled life == 6;
+#define Pending client == 1;
+#define Finished client >= 2;
+#define ProduceSuccess client == 2;
+#define ProduceTimeout client == 3;
+#define PollData client == 4;
+#define PollEmpty client == 5;
+#define Committed hw == 1;
+#define UnderMin local_leader == 1 && isr1 + isr2 == 0;
+#define WriteCapable life == 6 && local_leader == 1 && isr1 + isr2 >= 1 && exec_ok == 1 && disk_ok == 1;
+#define SafeHW hw == 0 || (append_done == 1 && hw_all == 1 && hw_min == 1);
+#define SafeSuccess client != 2 || (hw == 1 && success_authorized == 1);
+#define Bounds rp_fail <= 6 && lp_fail <= 3 && sp_fail <= 30 && retry <= 1 && fresh_rp <= 2 && fresh_lp <= 2;
+#define AppendLockSafe bp != 3 || (local_leader == 1 && (KIND == 2 || isr1 + isr2 >= 1));
+#define ReadyBeforeEnable ready == 1 && life >= 2 && life < 6;
+#define ReadyClientTimeout ready == 1 && client == 3 && fault == 2 && fresh_rp == 2 && fresh_lp == 2;
+#define CommittedTimeout hw == 1 && client == 3 && fault == 2;
+#define LateResponse hw == 1 && client == 3 && bp == 6;
+#define ExecutionBlind bp == 1 && exec_ok == 0 && fresh_lp == 2 && ready == 1;
+#define StorageBlind bp == 3 && disk_ok == 0 && fresh_lp == 2 && ready == 1;
+#define ReplicaBlind ready == 1 && isr1 + isr2 == 0 && local_leader == 1 && fresh_rp == 2;
+#define IsrRejected error_seen == 2 && ready == 1;
+#define ProbeFalseNegative ready == 0 && fault == 6 && client == 2;
+#define ProbeHysteresis ready == 1 && rp_fail > 0 && rp_fail < 6;
+#define AfterAppendError response == 7 && hw == 1;
+#define RemoteError error_seen == 3;
+#define Restarted restart_count == 1;
+#define Recovered fault_budget == 2 && client == 2;
+#define TwoAckNeeded bp == 4 && isr1 == 1 && isr2 == 1 && ack1 == 1 && ack2 == 0 && hw == 0;
+#define IsrIntact isr1 == 1 && isr2 == 1;
+#define AfterAppendNotAssumed response != 7 || (hw == 1 && append_done == 1);

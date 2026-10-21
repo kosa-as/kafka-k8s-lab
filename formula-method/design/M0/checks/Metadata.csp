@@ -1,0 +1,24 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 8;
+#define KIND 2;
+#define HAS_DATA 1;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+// M01：Leader 迁离后旧路由 Fetch 可收到协议错误并内部重试。
+#assert M0() reaches RemoteError;
+
+// M02：元数据迁移不能在本地读取持锁期间令 I/O 悬空。
+#assert M0() |= [] AppendLockSafe;

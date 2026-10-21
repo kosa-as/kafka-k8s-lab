@@ -1,0 +1,28 @@
+{
+  "suite": "WholeProgress",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 2,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "2796666",
+      "seconds": "133.2134075",
+      "trace": null,
+      "id": "P01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "16767",
+      "seconds": "0.4916573",
+      "trace": "<init -> fe_process_exit -> c_begin -> time_client -> c_poll -> k_restart>",
+      "id": "P02",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 134.937,
+  "input_sha256": "043046c4ea2bf456c73cc965a2723b2fb1bef3e982f34451c323192f691e91c1",
+  "output_sha256": "7161a35eec0397bf8f9f204c5855c50c120bb9638390bc9154ada90e85d64187"
+}

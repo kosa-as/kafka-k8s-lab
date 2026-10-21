@@ -1,0 +1,36 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+// H01：存在从 send 到应用成功的完整路径。
+#assert M0() reaches ProduceSuccess;
+
+// H02：ISR=3 时仅一个远端追平尚不足以推进 HW。
+#assert M0() reaches TwoAckNeeded;
+
+// H03：提交历史满足追加、全部当前 ISR 确认与 minISR。
+#assert M0() |= [] SafeHW;
+
+// H04：应用成功必须有提交事实及 Broker 成功授权。
+#assert M0() |= [] SafeSuccess;
+
+// H05：时间与客户端线程持续推进时，每个操作最终形成结果，结果允许超时。
+#assert M0() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished);
+
+// H06：调度负对照：不假设公平性时可永远只调度探针；此失败不是源码缺陷。
+#assert M0() |= [] (Pending -> <> Finished);

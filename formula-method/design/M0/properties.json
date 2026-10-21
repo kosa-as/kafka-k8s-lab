@@ -1,0 +1,690 @@
+[
+  {
+    "id": "H01",
+    "suite": "Healthy",
+    "assertion": "M0() reaches ProduceSuccess",
+    "expected": "VALID",
+    "explanation": "存在从 send 到应用成功的完整路径。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "H02",
+    "suite": "Healthy",
+    "assertion": "M0() reaches TwoAckNeeded",
+    "expected": "VALID",
+    "explanation": "ISR=3 时仅一个远端追平尚不足以推进 HW。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "H03",
+    "suite": "Healthy",
+    "assertion": "M0() |= [] SafeHW",
+    "expected": "VALID",
+    "explanation": "提交历史满足追加、全部当前 ISR 确认与 minISR。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "H04",
+    "suite": "Healthy",
+    "assertion": "M0() |= [] SafeSuccess",
+    "expected": "VALID",
+    "explanation": "应用成功必须有提交事实及 Broker 成功授权。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "H05",
+    "suite": "Healthy",
+    "assertion": "M0() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+    "expected": "VALID",
+    "explanation": "时间与客户端线程持续推进时，每个操作最终形成结果，结果允许超时。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "H06",
+    "suite": "Healthy",
+    "assertion": "M0() |= [] (Pending -> <> Finished)",
+    "expected": "NOT valid",
+    "explanation": "调度负对照：不假设公平性时可永远只调度探针；此失败不是源码缺陷。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "S00",
+    "suite": "WholeSafety",
+    "assertion": "M0() |= ([] (SafeHW && SafeSuccess && Bounds && AppendLockSafe && (Ready -> Started) && AfterAppendNotAssumed)) && ([] (ProduceSuccess -> [] ProduceSuccess))",
+    "expected": "VALID",
+    "explanation": "S01 提交条件、S02 成功来源、S03 数值范围、S04 分区锁、S05 Startup 门、S06 AFTER_APPEND 前提、S07 已成功结果稳定性：七项合取共享一次全空间搜索；通过蕴含每项通过。",
+    "config": {
+      "COLD": 0,
+      "FAULT": -1,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "P01",
+    "suite": "WholeProgress",
+    "assertion": "M0() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+    "expected": "VALID",
+    "explanation": "七角色单故障组合：明确公平前提下最终返回成功或失败。",
+    "config": {
+      "COLD": 0,
+      "FAULT": -1,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "P02",
+    "suite": "WholeProgress",
+    "assertion": "M0() reaches Restarted",
+    "expected": "VALID",
+    "explanation": "进程退出可以由 Kubelet 观察并重启。",
+    "config": {
+      "COLD": 0,
+      "FAULT": -1,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "B01",
+    "suite": "Startup",
+    "assertion": "M0() reaches ReadyBeforeEnable",
+    "expected": "VALID",
+    "explanation": "Controller TCP 已开放、Broker 处理尚未启用时，Ready 可先成立。",
+    "config": {
+      "COLD": 1,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "B02",
+    "suite": "Startup",
+    "assertion": "M0() |= [] (Ready -> Enabled)",
+    "expected": "NOT valid",
+    "explanation": "候选健康契约：Ready 应蕴含 Broker 处理启用；无时间模型给出反例。",
+    "config": {
+      "COLD": 1,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "B03",
+    "suite": "Startup",
+    "assertion": "M0() |= [] (Ready -> Started)",
+    "expected": "VALID",
+    "explanation": "冷启动路径仍遵守 Startup 门。",
+    "config": {
+      "COLD": 1,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N01",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() reaches ReadyClientTimeout",
+    "expected": "VALID",
+    "explanation": "新 RP/LP 均至少成功两次，客户端仍可因独立链路故障交付超时。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N02",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() reaches OrderedCommittedTimeout",
+    "expected": "VALID",
+    "explanation": "先观察已提交、调用尚未结束且链路中断，随后客户端才交付超时。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N03",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() reaches OrderedLateResponse",
+    "expected": "VALID",
+    "explanation": "先已提交且链路中断，随后超时，最后恢复并送达迟到响应。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N04",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() |= [] (ProduceTimeout -> !Committed)",
+    "expected": "NOT valid",
+    "explanation": "错误的业务推断：超时就代表消息未提交。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N05",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() reaches Recovered",
+    "expected": "VALID",
+    "explanation": "链路及时恢复后仍存在成功路径。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "N06",
+    "suite": "ClientNetwork",
+    "assertion": "Observed() |= [] (ProduceTimeout -> [] ProduceTimeout)",
+    "expected": "VALID",
+    "explanation": "终态稳定：迟到响应不会把已经超时的调用改成成功。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 1,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "E01",
+    "suite": "Execution",
+    "assertion": "M0() reaches ExecutionPendingBlind",
+    "expected": "VALID",
+    "explanation": "请求已接收且仍等应用结果、执行停滞，新 LP 成功两次而 Ready 保持。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 3,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "E02",
+    "suite": "Execution",
+    "assertion": "M0() |= [] (lp_sample -> ExecutionCanProgress)",
+    "expected": "NOT valid",
+    "explanation": "候选健康契约：pgrep 成功应代表处理线程可推进；该蕴含不成立。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 3,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "D01",
+    "suite": "Storage",
+    "assertion": "Observed() reaches StoragePendingBlind",
+    "expected": "VALID",
+    "explanation": "请求仍等应用结果且持锁等待存储，新 LP 成功两次而 Ready 保持。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 4,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "D02",
+    "suite": "Storage",
+    "assertion": "Observed() |= [] (Ready -> StorageCanProgress)",
+    "expected": "NOT valid",
+    "explanation": "候选健康契约：Ready 应蕴含存储可推进。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 4,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "D03",
+    "suite": "Storage",
+    "assertion": "Observed() reaches OrderedTimeoutInIO",
+    "expected": "VALID",
+    "explanation": "先观察调用仍在等待且 Broker 困于 I/O，随后 Producer 独立交付超时。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 4,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "R01",
+    "suite": "Replica",
+    "assertion": "M0() reaches ReplicaBlind",
+    "expected": "VALID",
+    "explanation": "存在追加和超期未追平条件时，ISR 降至 1，持续 RP 成功。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "R02",
+    "suite": "Replica",
+    "assertion": "M0() reaches IsrRejected",
+    "expected": "VALID",
+    "explanation": "Ready 状态下客户端实际收到 ISR 不足协议错误。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "R03",
+    "suite": "Replica",
+    "assertion": "M0() reaches AfterAppendError",
+    "expected": "VALID",
+    "explanation": "HW 已覆盖记录后、检查 DelayedProduce 前 ISR 缩小，可返回 AFTER_APPEND。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "R04",
+    "suite": "Replica",
+    "assertion": "M0() |= [] (Ready -> MinIsrSatisfied)",
+    "expected": "NOT valid",
+    "explanation": "候选健康契约：Ready 蕴含本地分区满足最低 ISR。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "R05",
+    "suite": "Replica",
+    "assertion": "M0() |= [] (BrokerError -> !Committed)",
+    "expected": "NOT valid",
+    "explanation": "错误的业务推断：Broker 返回错误就代表记录未提交。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "I01",
+    "suite": "IdleReplica",
+    "assertion": "M0() |= [] IsrIntact",
+    "expected": "VALID",
+    "explanation": "完全空闲且 LEO 已追平：只断复制链路不会因落后检查缩 ISR。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 0
+    }
+  },
+  {
+    "id": "I02",
+    "suite": "IdleReplica",
+    "assertion": "M0() |= [] (!UnderMin)",
+    "expected": "VALID",
+    "explanation": "负对照中 ISR=1 不可达；防止断网直接等同 ISR 不足的伪反例。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 0
+    }
+  },
+  {
+    "id": "Q01",
+    "suite": "ProbeNetwork",
+    "assertion": "Observed() reaches ProbeHysteresis",
+    "expected": "VALID",
+    "explanation": "Readiness 连续失败未到六次时缓存 Ready 可以保留。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 6,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "Q02",
+    "suite": "ProbeNetwork",
+    "assertion": "Observed() reaches OrderedNotReadySuccess",
+    "expected": "VALID",
+    "explanation": "先在 NotReady 状态观察仍等待的调用和成功响应，随后调用返回成功。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 6,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "Q03",
+    "suite": "ProbeNetwork",
+    "assertion": "Observed() |= [] (!OrderedNotReadySuccess)",
+    "expected": "NOT valid",
+    "explanation": "反向健康契约：NotReady 以后不应还能完成业务成功；独立路径可反驳。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 6,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "Q04",
+    "suite": "ProbeNetwork",
+    "assertion": "Observed() |= [] (ReadinessThreshold -> !Ready)",
+    "expected": "VALID",
+    "explanation": "六次已消费的连续失败后确实清除 Ready。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 6,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F01",
+    "suite": "FetchData",
+    "assertion": "M0() reaches PollData",
+    "expected": "VALID",
+    "explanation": "健康已提交数据存在时可以完成有数据的 poll。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F02",
+    "suite": "FetchData",
+    "assertion": "M0() |= [] (PollData -> DataAvailable)",
+    "expected": "VALID",
+    "explanation": "不能把不存在的选中数据返回客户端。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F03",
+    "suite": "FetchEmpty",
+    "assertion": "M0() reaches PollEmpty",
+    "expected": "VALID",
+    "explanation": "无目标数据时 poll 正常返回空集合。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 2,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F04",
+    "suite": "FetchEmpty",
+    "assertion": "M0() |= [] (!PollData)",
+    "expected": "VALID",
+    "explanation": "没有数据来源的场景不能产生有数据结果。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 2,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F05",
+    "suite": "FetchNetwork",
+    "assertion": "M0() reaches EmptyWithData",
+    "expected": "VALID",
+    "explanation": "Broker 存有数据但 poll 截止时仍可无数据返回。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F06",
+    "suite": "FetchNetwork",
+    "assertion": "M0() |= [] (PollEmpty -> !DataAvailable)",
+    "expected": "NOT valid",
+    "explanation": "错误的业务推断：poll 返回空集合代表 Broker 没有数据。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "F07",
+    "suite": "FetchNetwork",
+    "assertion": "M0() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+    "expected": "VALID",
+    "explanation": "时间与客户端线程公平推进时 poll 有终态，允许空集合。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 2,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "M01",
+    "suite": "Metadata",
+    "assertion": "M0() reaches RemoteError",
+    "expected": "VALID",
+    "explanation": "Leader 迁离后旧路由 Fetch 可收到协议错误并内部重试。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 8,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  },
+  {
+    "id": "M02",
+    "suite": "Metadata",
+    "assertion": "M0() |= [] AppendLockSafe",
+    "expected": "VALID",
+    "explanation": "元数据迁移不能在本地读取持锁期间令 I/O 悬空。",
+    "config": {
+      "COLD": 0,
+      "FAULT": 8,
+      "KIND": 2,
+      "HAS_DATA": 1,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    }
+  }
+]

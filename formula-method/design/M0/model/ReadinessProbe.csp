@@ -1,0 +1,9 @@
+// 一次 TCP 探测压缩为一次采样；采样与 Kubelet 消费结果仍然分开。
+// 不冻结探针；两个 worker 可独立产生结果。
+ReadinessProbe() = [started == 1 && rp_result == 0 && life != 7]
+  rp_sample{
+    if (life >= 2 && probe_net == 1) {
+      rp_result = 1;
+      if (fault_budget == 1 && fresh_rp < 2) { fresh_rp++; }
+    } else { rp_result = 2; }
+  } -> ReadinessProbe();

@@ -1,0 +1,36 @@
+{
+  "suite": "Startup",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 3,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "24",
+      "seconds": "0.0109682",
+      "trace": "<init -> b_process_start -> b_controller_bind -> b_client_bind -> b_metadata_load -> b_unfence -> k_startup_sample -> lp_sample -> rp_sample -> k_readiness_commit>",
+      "id": "B01",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "83",
+      "seconds": "0.0053486",
+      "trace": "<init -> time_broker -> time_client -> c_poll -> b_process_start -> time_broker -> time_client -> c_poll -> b_controller_bind -> time_broker -> time_client -> c_poll -> b_client_bind -> time_broker -> time_client -> c_poll -> b_metadata_load -> time_broker -> time_client -> c_poll -> b_unfence -> time_broker -> time_client -> c_poll -> k_startup_sample -> time_broker -> time_client -> c_poll -> lp_sample -> time_broker -> time_client -> c_poll -> k_liveness_commit -> rp_sample -> time_broker -> time_client -> c_poll -> k_readiness_commit>",
+      "id": "B02",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "1950",
+      "seconds": "0.0683143",
+      "trace": null,
+      "id": "B03",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 0.547,
+  "input_sha256": "bb8a41960cfb91a17c61f93120dceade6f4355c926b7d934849669c9225b6ec2",
+  "output_sha256": "38b43fa41ba3feec00124c293ae931656b2d6551a09ea96eb894389c3fea95b2"
+}

@@ -1,0 +1,29 @@
+// 保留部署中的失败阈值 30/6/3。Startup 是 Kubelet 内部行为。
+// 原子消费探针结果对应 worker 阈值处理到状态缓存更新的压缩。
+Kubelet() = [started == 0 && life >= 1 && life <= 6 && sp_fail < 30]
+  k_startup_sample{
+    if (life >= 2 && probe_net == 1) { started = 1; sp_fail = 0; }
+    else { sp_fail++; }
+  } -> Kubelet()
+  [] [rp_result != 0] k_readiness_commit{
+    if (rp_result == 1) { rp_fail = 0; ready = 1; }
+    else {
+      if (rp_fail < 6) { rp_fail++; }
+      if (rp_fail == 6) { ready = 0; }
+    }
+    rp_result = 0;
+  } -> Kubelet()
+  [] [lp_result != 0] k_liveness_commit{
+    if (lp_result == 1) { lp_fail = 0; }
+    else { if (lp_fail < 3) { lp_fail++; } }
+    lp_result = 0;
+  } -> Kubelet()
+  // 仅保留一次容器重启。重启事务一次性取消旧容器请求/邮箱，避免旧结果跨代。
+  [] [restart_count == 0 && (life == 7 || sp_fail == 30 || lp_fail == 3)]
+  k_restart{
+    restart_count = 1; life = 0; started = 0; ready = 0;
+    sp_fail = 0; rp_fail = 0; lp_fail = 0; rp_result = 0; lp_result = 0;
+    bp = 0; response = 0; broker_expired = 0;
+    exec_ok = 1; local_leader = 0;
+    // 客户端在另一进程中；已收到的响应和最终结果不因 Broker 重启被撤销。
+  } -> Kubelet();

@@ -1,0 +1,9 @@
+// pgrep 仅观察进程存在，不读取执行线程、磁盘或 ISR。
+// 进程退出另由 Kubelet 生命周期观察处理，不依赖执行 exec 探针。
+LivenessProbe() = [started == 1 && lp_result == 0 && life != 7]
+  lp_sample{
+    if (life >= 1 && life <= 6) {
+      lp_result = 1;
+      if (fault_budget == 1 && fresh_lp < 2) { fresh_lp++; }
+    } else { lp_result = 2; }
+  } -> LivenessProbe();

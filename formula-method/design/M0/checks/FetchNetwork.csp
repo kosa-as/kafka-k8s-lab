@@ -1,0 +1,27 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 2;
+#define KIND 2;
+#define HAS_DATA 1;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+// F05：Broker 存有数据但 poll 截止时仍可无数据返回。
+#assert M0() reaches EmptyWithData;
+
+// F06：错误的业务推断：poll 返回空集合代表 Broker 没有数据。
+#assert M0() |= [] (PollEmpty -> !DataAvailable);
+
+// F07：时间与客户端线程公平推进时 poll 有终态，允许空集合。
+#assert M0() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished);

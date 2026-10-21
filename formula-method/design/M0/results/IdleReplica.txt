@@ -1,0 +1,34 @@
+=======================================================
+Assertion: M0() |= [] IsrIntact
+********Verification Result********
+The Assertion (M0() |= [] IsrIntact) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:193
+Total Transitions:986
+Time Used:0.0234921s
+Estimated Memory Used:11841.872KB
+
+
+=======================================================
+Assertion: M0() |= [](! UnderMin)
+********Verification Result********
+The Assertion (M0() |= [](! UnderMin)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:193
+Total Transitions:986
+Time Used:0.0050176s
+Estimated Memory Used:11687.736KB

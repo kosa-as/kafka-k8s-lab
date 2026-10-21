@@ -1,0 +1,45 @@
+// 五个内部组件仍可交错；使用共享的有限请求阶段代替重复递归握手状态。
+Lifecycle() = [life == 0] b_process_start{life = 1;} -> Lifecycle()
+  [] [life == 1] b_controller_bind{life = 2;} -> Lifecycle()
+  [] [life == 2] b_client_bind{life = 3;} -> Lifecycle()
+  [] [life == 3] b_metadata_load{life = 4;} -> Lifecycle()
+  [] [life == 4] b_unfence{life = 5;} -> Lifecycle()
+  [] [life == 5] b_enable{life = 6;} -> Lifecycle();
+
+NetworkHandler() = [life == 6 && bp == 0 && client == 1 && rx == 0 && client_net == 1]
+  b_accept{bp = 1; response = 0; broker_expired = 0;} -> NetworkHandler()
+  // 响应形成不等于客户端收到；断网后保留已形成响应。
+  [] [life == 6 && bp == 5 && client_net == 1 && rx == 0]
+  b_deliver{rx = response; bp = 6;} -> NetworkHandler();
+
+Execution() = [life == 6 && bp == 1 && exec_ok == 1]
+  b_dispatch{bp = 2;} -> Execution();
+
+RequestHandler() = [life == 6 && bp == 2 && local_leader == 0]
+  b_not_leader{response = 3; bp = 5;} -> RequestHandler()
+  [] [life == 6 && bp == 2 && local_leader == 1 && KIND == 1 && isr1 + isr2 == 0]
+  b_reject_isr{response = 2; bp = 5;} -> RequestHandler()
+  // 此事件同时检查 Leader、ISR 并取得分区读锁；bp=3 期间不能改变 ISR/Leader。
+  [] [life == 6 && bp == 2 && local_leader == 1 && (KIND == 2 || isr1 + isr2 >= 1)]
+  b_io_begin{bp = 3;} -> RequestHandler()
+  [] [life == 6 && bp == 4 && local_leader == 0]
+  b_leader_lost{response = 3; bp = 5;} -> RequestHandler()
+  // HW 达标与 DelayedProduce.tryComplete 是不同步骤，允许中间 ISR 改变。
+  [] [life == 6 && bp == 4 && KIND == 1 && local_leader == 1 && hw == 1 && isr1 + isr2 >= 1]
+  b_produce_ok{response = 1; success_authorized = 1; bp = 5;} -> RequestHandler()
+  [] [life == 6 && bp == 4 && KIND == 1 && local_leader == 1 && hw == 1 && isr1 + isr2 == 0]
+  b_after_append_error{response = 7; bp = 5;} -> RequestHandler()
+  [] [life == 6 && bp == 4 && KIND == 1 && broker_expired == 1 && hw == 0]
+  b_request_timeout{response = 4; bp = 5;} -> RequestHandler()
+  [] [life == 6 && bp == 4 && KIND == 2 && local_leader == 1 && data_available == 1]
+  b_fetch_data{response = 5; bp = 5;} -> RequestHandler()
+  [] [life == 6 && bp == 4 && KIND == 2 && local_leader == 1 && data_available == 0 && broker_expired == 1]
+  b_fetch_empty{response = 6; bp = 5;} -> RequestHandler();
+
+StorageAccess() = [life == 6 && bp == 3 && disk_ok == 1]
+  b_io_complete{
+    if (KIND == 1) { append_done = 1; }
+    bp = 4;
+  } -> StorageAccess();
+
+KafkaBroker() = Lifecycle() ||| NetworkHandler() ||| Execution() ||| RequestHandler() ||| StorageAccess();

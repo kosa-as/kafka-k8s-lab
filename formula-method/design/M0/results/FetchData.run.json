@@ -1,0 +1,28 @@
+{
+  "suite": "FetchData",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 2,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "109",
+      "seconds": "0.0169621",
+      "trace": "<init -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> time_broker -> b_fetch_data -> b_deliver -> c_poll>",
+      "id": "F01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "657",
+      "seconds": "0.0255367",
+      "trace": null,
+      "id": "F02",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 0.485,
+  "input_sha256": "88063bb46ece1f89d8090e52e8655712cb7a874cf885b2dde6d1fd2212954e3a",
+  "output_sha256": "1dceae44787d7d72c85720bb5ddd7fe395c4559125cf8649b326bbc85c602bdb"
+}

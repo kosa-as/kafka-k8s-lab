@@ -1,0 +1,20 @@
+// 已获得初始分区元数据的一个 send/poll。后续远端 Leader 路由不在本层展开。
+ClientWorkload() = [ISSUE == 1 && client == 0 && ready == 1]
+  c_begin{client = 1; client_expired = 0;} -> ClientWorkload()
+  // c_poll 表示客户端线程得到执行机会。结束后仍可调度，供公平性前提使用。
+  [] c_poll{
+    if (client == 1) {
+      if (client_expired == 1) {
+        if (KIND == 1) { client = 3; } else { client = 5; }
+      } else {
+        if (rx == 1) { client = 2; }
+        if (rx == 5) { client = 4; }
+        if (rx == 6) { client = 5; }
+        if (rx == 2 || rx == 3 || rx == 4 || rx == 7) {
+          error_seen = rx;
+          // 只保留一次重试；耗尽抽象预算后仍等交付期限，不伪造最终失败。
+          if (retry == 0) { retry = 1; bp = 0; rx = 0; }
+        }
+      }
+    }
+  } -> ClientWorkload();

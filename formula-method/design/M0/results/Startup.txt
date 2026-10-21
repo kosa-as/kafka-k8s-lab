@@ -1,0 +1,56 @@
+=======================================================
+Assertion: M0() reaches ReadyBeforeEnable
+********Verification Result********
+The Assertion (M0() reaches ReadyBeforeEnable) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> b_process_start -> b_controller_bind -> b_client_bind -> b_metadata_load -> b_unfence -> k_startup_sample -> lp_sample -> rp_sample -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:24
+Total Transitions:91
+Time Used:0.0109682s
+Estimated Memory Used:9511.128KB
+
+
+=======================================================
+Assertion: M0() |= []( Ready-> Enabled)
+********Verification Result********
+The Assertion (M0() |= []( Ready-> Enabled)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> c_poll -> b_process_start -> time_broker -> time_client -> c_poll -> b_controller_bind -> time_broker -> time_client -> c_poll -> b_client_bind -> time_broker -> time_client -> c_poll -> b_metadata_load -> time_broker -> time_client -> c_poll -> b_unfence -> time_broker -> time_client -> c_poll -> k_startup_sample -> time_broker -> time_client -> c_poll -> lp_sample -> time_broker -> time_client -> c_poll -> k_liveness_commit -> rp_sample -> time_broker -> time_client -> c_poll -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:83
+Total Transitions:420
+Time Used:0.0053486s
+Estimated Memory Used:12378.28KB
+
+
+=======================================================
+Assertion: M0() |= []( Ready-> Started)
+********Verification Result********
+The Assertion (M0() |= []( Ready-> Started)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1950
+Total Transitions:9830
+Time Used:0.0683143s
+Estimated Memory Used:16332.456KB

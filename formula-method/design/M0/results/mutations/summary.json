@@ -1,0 +1,75 @@
+[
+  {
+    "name": "one_remote_ack",
+    "changed_file": "ClusterContext.csp",
+    "replacements": [
+      [
+        " && (isr2 == 0 || ack2 == 1)]",
+        "]"
+      ]
+    ],
+    "config": {
+      "COLD": 0,
+      "FAULT": 0,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    },
+    "assertion": "|= [] SafeHW",
+    "detected": true,
+    "original_sha256": "450021b81958295ccd15ff2b9d8f27b25007de6ad289be3933a1ba47bf262633",
+    "mutant_sha256": "25c24e8b71307177b1e2c3b79ef958713866d90261a9956c3b217c696b68456d"
+  },
+  {
+    "name": "idle_isr_shrink",
+    "changed_file": "ClusterContext.csp",
+    "replacements": [
+      [
+        " && (tail_advanced == 1 || (append_done == 1 && ack1 == 0))",
+        ""
+      ],
+      [
+        " && (tail_advanced == 1 || (append_done == 1 && ack2 == 0))",
+        ""
+      ]
+    ],
+    "config": {
+      "COLD": 0,
+      "FAULT": 5,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 0,
+      "BACKGROUND": 0
+    },
+    "assertion": "|= [] IsrIntact",
+    "detected": true,
+    "original_sha256": "450021b81958295ccd15ff2b9d8f27b25007de6ad289be3933a1ba47bf262633",
+    "mutant_sha256": "d638e92ddc97bfdcd9c141242195903bf1a5041c070871786c5043127f3eb678"
+  },
+  {
+    "name": "no_inflight_timeout",
+    "changed_file": "FaultEnvironment.csp",
+    "replacements": [
+      [
+        "time_client{if (client == 1)",
+        "time_client{if (client == 1 && bp == 0)"
+      ]
+    ],
+    "config": {
+      "COLD": 0,
+      "FAULT": 4,
+      "KIND": 1,
+      "HAS_DATA": 0,
+      "RECOVER": 0,
+      "ISSUE": 1,
+      "BACKGROUND": 1
+    },
+    "assertion": "|= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+    "detected": true,
+    "original_sha256": "956d1ee74796d6c4f129c4cc6b1e9c11837cce6a545aea14014873a4bf5eacca",
+    "mutant_sha256": "29bb905d3409b3cef0b6f28dbbafce4c7fa794377d78518c821dd90fc5867501"
+  }
+]

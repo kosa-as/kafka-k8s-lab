@@ -1,0 +1,35 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 4;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+
+#define StoragePendingBlind client == 1 && client_expired == 0 && bp == 3 && disk_ok == 0 && fresh_lp == 2 && ready == 1;
+var observed_pending_io = 0;
+ObserveIO() = [bp == 3 && client == 1 && client_expired == 0 && disk_ok == 0]
+  observe_pending_io{observed_pending_io = 1;} -> Stop;
+Observed() = M0() ||| ObserveIO();
+#define OrderedTimeoutInIO observed_pending_io == 1 && client == 3 && bp == 3;
+
+// D01：请求仍等应用结果且持锁等待存储，新 LP 成功两次而 Ready 保持。
+#assert Observed() reaches StoragePendingBlind;
+
+// D02：候选健康契约：Ready 应蕴含存储可推进。
+#assert Observed() |= [] (Ready -> StorageCanProgress);
+
+// D03：先观察调用仍在等待且 Broker 困于 I/O，随后 Producer 独立交付超时。
+#assert Observed() reaches OrderedTimeoutInIO;

@@ -1,0 +1,37 @@
+[
+  {
+    "file": "Partition.scala",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.0.0/core/src/main/scala/kafka/cluster/Partition.scala",
+    "sha256": "a48045664321105047c5446a62caaccf9d7a4213f4f25e41b2790dd2d2c02156"
+  },
+  {
+    "file": "DelayedProduce.scala",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.0.0/core/src/main/scala/kafka/server/DelayedProduce.scala",
+    "sha256": "48220dd323bffb87105ff5b6cf80303e3794b0dba0779562143c842742734787"
+  },
+  {
+    "file": "Sender.java",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.3.1/clients/src/main/java/org/apache/kafka/clients/producer/internals/Sender.java",
+    "sha256": "88699c91309674364721de87d229ba6de0fb1616b943ebc5d863a6b39cea117c"
+  },
+  {
+    "file": "ProducerConfig.java",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.3.1/clients/src/main/java/org/apache/kafka/clients/producer/ProducerConfig.java",
+    "sha256": "464068167673e9c37f65083d55e72c0f58ddcffd66fa9f10a0ec5cfb2172c8b0"
+  },
+  {
+    "file": "worker.go",
+    "url": "https://raw.githubusercontent.com/kubernetes/kubernetes/v1.36.1/pkg/kubelet/prober/worker.go",
+    "sha256": "e32025d6357dea628e95c99f2b802c33a3dc10a402cc93ab07ff104a16beffc8"
+  },
+  {
+    "file": "KafkaConsumer.java",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.3.1/clients/src/main/java/org/apache/kafka/clients/consumer/KafkaConsumer.java",
+    "sha256": "20435a0586756b87c340cc77fd1582a7098ccde690a95cc3bf68828ca7843d3a"
+  },
+  {
+    "file": "BrokerServer.scala",
+    "url": "https://raw.githubusercontent.com/apache/kafka/4.0.0/core/src/main/scala/kafka/server/BrokerServer.scala",
+    "sha256": "f35eee7522dfd01d8601a44774502a17099902e48484668ed4e6ffe9fc5bbe24"
+  }
+]

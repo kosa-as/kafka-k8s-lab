@@ -1,0 +1,38 @@
+=======================================================
+Assertion: M0() reaches ExecutionPendingBlind
+********Verification Result********
+The Assertion (M0() reaches ExecutionPendingBlind) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_execution_stall -> c_begin -> b_accept -> lp_sample -> k_liveness_commit -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:117
+Total Transitions:559
+Time Used:0.0148292s
+Estimated Memory Used:13590.744KB
+
+
+=======================================================
+Assertion: M0() |= []( lp_sample-> ExecutionCanProgress)
+********Verification Result********
+The Assertion (M0() |= []( lp_sample-> ExecutionCanProgress)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_execution_stall -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> c_poll -> time_broker -> time_client -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:14
+Total Transitions:84
+Time Used:0.0035853s
+Estimated Memory Used:9150.632KB

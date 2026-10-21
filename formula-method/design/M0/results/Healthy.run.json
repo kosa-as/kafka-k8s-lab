@@ -1,0 +1,60 @@
+{
+  "suite": "Healthy",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 6,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "266",
+      "seconds": "0.0219184",
+      "trace": "<init -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> c_poll>",
+      "id": "H01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "96",
+      "seconds": "0.0023099",
+      "trace": "<init -> c_begin -> time_client -> b_accept -> c_poll -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica1_caught_up>",
+      "id": "H02",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "4989",
+      "seconds": "0.2512524",
+      "trace": null,
+      "id": "H03",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "4989",
+      "seconds": "0.2413394",
+      "trace": null,
+      "id": "H04",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "11417",
+      "seconds": "0.6593418",
+      "trace": null,
+      "id": "H05",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "85",
+      "seconds": "0.0083712",
+      "trace": "<init -> c_begin -> time_client -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> time_broker -> (time_broker)*>",
+      "id": "H06",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 1.75,
+  "input_sha256": "001406c461b7a6f9eb2dc4f69db5a161798fb614b9241dae81c778269e382641",
+  "output_sha256": "4371d415a29d716c3eb77588746af71407d831bcc50278b1aa5c369c8fa9c5d7"
+}

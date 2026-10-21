@@ -1,0 +1,58 @@
+=======================================================
+Assertion: Observed() reaches StoragePendingBlind
+********Verification Result********
+The Assertion (Observed() reaches StoragePendingBlind) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_storage_stall -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> observe_pending_io -> lp_sample -> k_liveness_commit -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:277
+Total Transitions:1427
+Time Used:0.0203708s
+Estimated Memory Used:10381.344KB
+
+
+=======================================================
+Assertion: Observed() |= []( Ready-> StorageCanProgress)
+********Verification Result********
+The Assertion (Observed() |= []( Ready-> StorageCanProgress)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_storage_stall>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:3
+Total Transitions:21
+Time Used:0.0033483s
+Estimated Memory Used:8700.072KB
+
+
+=======================================================
+Assertion: Observed() reaches OrderedTimeoutInIO
+********Verification Result********
+The Assertion (Observed() reaches OrderedTimeoutInIO) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_storage_stall -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> observe_pending_io -> time_client -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:227
+Total Transitions:1172
+Time Used:0.0061847s
+Estimated Memory Used:13736.408KB

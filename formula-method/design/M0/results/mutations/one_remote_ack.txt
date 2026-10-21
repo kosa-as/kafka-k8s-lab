@@ -1,0 +1,18 @@
+=======================================================
+Assertion: M0() |= [] SafeHW
+********Verification Result********
+The Assertion (M0() |= [] SafeHW) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> b_accept -> time_broker -> time_client -> c_poll -> time_broker -> time_client -> b_dispatch -> time_broker -> time_client -> c_poll -> b_io_begin -> time_broker -> time_client -> c_poll -> b_io_complete -> cc_replica1_caught_up -> cc_high_watermark>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:421
+Total Transitions:2528
+Time Used:0.0285361s
+Estimated Memory Used:14697.288KB

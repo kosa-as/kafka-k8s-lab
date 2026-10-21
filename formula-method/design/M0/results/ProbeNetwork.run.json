@@ -1,0 +1,44 @@
+{
+  "suite": "ProbeNetwork",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 4,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "27",
+      "seconds": "0.0142334",
+      "trace": "<init -> fe_probe_cut -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit>",
+      "id": "Q01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "4110",
+      "seconds": "0.2419684",
+      "trace": "<init -> fe_probe_cut -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> observe_notready_pending -> c_poll>",
+      "id": "Q02",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "21587",
+      "seconds": "1.0872384",
+      "trace": "<init -> time_broker -> time_client -> fe_probe_cut -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> c_poll -> b_accept -> time_broker -> c_poll -> b_dispatch -> time_broker -> c_poll -> b_io_begin -> time_broker -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> c_poll -> b_produce_ok -> time_broker -> c_poll -> b_deliver -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> time_broker -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> observe_notready_pending -> time_broker -> c_poll>",
+      "id": "Q03",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "114330",
+      "seconds": "5.0901588",
+      "trace": null,
+      "id": "Q04",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 6.922,
+  "input_sha256": "35f88bbc0bf8ff0ab98735a9f24f35809bb4e5ef30545253052ea4efe4ee5beb",
+  "output_sha256": "eeec91e50c1b04b25637ee0ec02634152d9c4c531c314946215875821f1095a2"
+}

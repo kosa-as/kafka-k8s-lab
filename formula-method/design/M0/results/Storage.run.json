@@ -1,0 +1,36 @@
+{
+  "suite": "Storage",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 3,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "277",
+      "seconds": "0.0203708",
+      "trace": "<init -> fe_storage_stall -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> observe_pending_io -> lp_sample -> k_liveness_commit -> lp_sample>",
+      "id": "D01",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "3",
+      "seconds": "0.0033483",
+      "trace": "<init -> time_broker -> time_client -> fe_storage_stall>",
+      "id": "D02",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "227",
+      "seconds": "0.0061847",
+      "trace": "<init -> fe_storage_stall -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> observe_pending_io -> time_client -> c_poll>",
+      "id": "D03",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 0.532,
+  "input_sha256": "037ef24396570415ec95700b63547dd61f192f3dbd792d886e9a24dbd4a32b12",
+  "output_sha256": "9ddaba690b995a8225175283eb6b9317c12c18822d568d3f6efb391a5d93f54c"
+}

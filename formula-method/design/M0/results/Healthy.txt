@@ -1,0 +1,110 @@
+=======================================================
+Assertion: M0() reaches ProduceSuccess
+********Verification Result********
+The Assertion (M0() reaches ProduceSuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:266
+Total Transitions:1484
+Time Used:0.0219184s
+Estimated Memory Used:9548.496KB
+
+
+=======================================================
+Assertion: M0() reaches TwoAckNeeded
+********Verification Result********
+The Assertion (M0() reaches TwoAckNeeded) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> c_begin -> time_client -> b_accept -> c_poll -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica1_caught_up>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:96
+Total Transitions:457
+Time Used:0.0023099s
+Estimated Memory Used:12665.048KB
+
+
+=======================================================
+Assertion: M0() |= [] SafeHW
+********Verification Result********
+The Assertion (M0() |= [] SafeHW) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4989
+Total Transitions:32298
+Time Used:0.2512524s
+Estimated Memory Used:15375.256KB
+
+
+=======================================================
+Assertion: M0() |= [] SafeSuccess
+********Verification Result********
+The Assertion (M0() |= [] SafeSuccess) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4989
+Total Transitions:32298
+Time Used:0.2413394s
+Estimated Memory Used:12796KB
+
+
+=======================================================
+Assertion: M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)
+********Verification Result********
+The Assertion (M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:11417
+Total Transitions:93779
+Time Used:0.6593418s
+Estimated Memory Used:52407.408KB
+
+
+=======================================================
+Assertion: M0() |= []( Pending-><> Finished)
+********Verification Result********
+The Assertion (M0() |= []( Pending-><> Finished)) is NOT valid.
+A counterexample is presented as follows.
+<init -> c_begin -> time_client -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> time_broker -> (time_broker)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:85
+Total Transitions:227
+Time Used:0.0083712s
+Estimated Memory Used:44251.224KB

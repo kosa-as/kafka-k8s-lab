@@ -1,0 +1,28 @@
+{
+  "suite": "Metadata",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 2,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "277",
+      "seconds": "0.0222735",
+      "trace": "<init -> fe_metadata_move -> cc_leader_move -> c_begin -> b_accept -> b_dispatch -> b_not_leader -> b_deliver -> c_poll>",
+      "id": "M01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "17205",
+      "seconds": "0.6779817",
+      "trace": null,
+      "id": "M02",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 1.188,
+  "input_sha256": "a24a9671e8e783b1e92185a6926fe86de9297ad21db4826aa6481198106643f1",
+  "output_sha256": "4417610f1f8d7fc14576caee369b1caa0e44917e7cf648f57dd4b20a4ae95904"
+}

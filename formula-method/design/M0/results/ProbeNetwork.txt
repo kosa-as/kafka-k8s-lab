@@ -1,0 +1,76 @@
+=======================================================
+Assertion: Observed() reaches ProbeHysteresis
+********Verification Result********
+The Assertion (Observed() reaches ProbeHysteresis) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_probe_cut -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:27
+Total Transitions:55
+Time Used:0.0142334s
+Estimated Memory Used:9208.024KB
+
+
+=======================================================
+Assertion: Observed() reaches OrderedNotReadySuccess
+********Verification Result********
+The Assertion (Observed() reaches OrderedNotReadySuccess) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_probe_cut -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> observe_notready_pending -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:4110
+Total Transitions:25470
+Time Used:0.2419684s
+Estimated Memory Used:14511.48KB
+
+
+=======================================================
+Assertion: Observed() |= [](! OrderedNotReadySuccess)
+********Verification Result********
+The Assertion (Observed() |= [](! OrderedNotReadySuccess)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_probe_cut -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> c_poll -> b_accept -> time_broker -> c_poll -> b_dispatch -> time_broker -> c_poll -> b_io_begin -> time_broker -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> c_poll -> b_produce_ok -> time_broker -> c_poll -> b_deliver -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> time_broker -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> time_broker -> lp_sample -> time_broker -> k_liveness_commit -> rp_sample -> time_broker -> k_readiness_commit -> observe_notready_pending -> time_broker -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:21587
+Total Transitions:135447
+Time Used:1.0872384s
+Estimated Memory Used:13349.6KB
+
+
+=======================================================
+Assertion: Observed() |= []( ReadinessThreshold->! Ready)
+********Verification Result********
+The Assertion (Observed() |= []( ReadinessThreshold->! Ready)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:114330
+Total Transitions:744233
+Time Used:5.0901588s
+Estimated Memory Used:14823.24KB

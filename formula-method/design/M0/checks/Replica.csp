@@ -1,0 +1,33 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 5;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+// R01：存在追加和超期未追平条件时，ISR 降至 1，持续 RP 成功。
+#assert M0() reaches ReplicaBlind;
+
+// R02：Ready 状态下客户端实际收到 ISR 不足协议错误。
+#assert M0() reaches IsrRejected;
+
+// R03：HW 已覆盖记录后、检查 DelayedProduce 前 ISR 缩小，可返回 AFTER_APPEND。
+#assert M0() reaches AfterAppendError;
+
+// R04：候选健康契约：Ready 蕴含本地分区满足最低 ISR。
+#assert M0() |= [] (Ready -> MinIsrSatisfied);
+
+// R05：错误的业务推断：Broker 返回错误就代表记录未提交。
+#assert M0() |= [] (BrokerError -> !Committed);

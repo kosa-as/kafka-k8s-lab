@@ -1,0 +1,28 @@
+{
+  "suite": "IdleReplica",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 2,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "193",
+      "seconds": "0.0234921",
+      "trace": null,
+      "id": "I01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "193",
+      "seconds": "0.0050176",
+      "trace": null,
+      "id": "I02",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 0.484,
+  "input_sha256": "cd8e0f41af50db594d1492bf59d99893ea26cac19268c114e24656e86d0c511b",
+  "output_sha256": "ca75e07316bb328e87cc8028cdd108a404e79507daa1b948702ac34a1579e370"
+}

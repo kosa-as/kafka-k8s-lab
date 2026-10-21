@@ -1,0 +1,36 @@
+{
+  "suite": "FetchNetwork",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 3,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "14",
+      "seconds": "0.0117341",
+      "trace": "<init -> fe_client_cut -> c_begin -> time_client -> c_poll>",
+      "id": "F05",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "11",
+      "seconds": "0.0038678",
+      "trace": "<init -> time_broker -> time_client -> fe_client_cut -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> c_poll>",
+      "id": "F06",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "13057",
+      "seconds": "0.637368",
+      "trace": null,
+      "id": "F07",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 1.094,
+  "input_sha256": "beb0dbcad1134545d085f597ccde2112f2e26de18819a9719e81a2fe509d3b47",
+  "output_sha256": "ef2f76e010c4f6122062e194fe5f5bd9962418f67a35e1571228c4c53f891479"
+}

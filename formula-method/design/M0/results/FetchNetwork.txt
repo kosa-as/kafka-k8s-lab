@@ -1,0 +1,55 @@
+=======================================================
+Assertion: M0() reaches EmptyWithData
+********Verification Result********
+The Assertion (M0() reaches EmptyWithData) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_client_cut -> c_begin -> time_client -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:14
+Total Transitions:23
+Time Used:0.0117341s
+Estimated Memory Used:8880.344KB
+
+
+=======================================================
+Assertion: M0() |= []( PollEmpty->! DataAvailable)
+********Verification Result********
+The Assertion (M0() |= []( PollEmpty->! DataAvailable)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_client_cut -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:11
+Total Transitions:65
+Time Used:0.0038678s
+Estimated Memory Used:9019.56KB
+
+
+=======================================================
+Assertion: M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)
+********Verification Result********
+The Assertion (M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:13057
+Total Transitions:91264
+Time Used:0.637368s
+Estimated Memory Used:57386.288KB

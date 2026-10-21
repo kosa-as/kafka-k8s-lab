@@ -1,0 +1,34 @@
+// 分别记录两个远端副本是否处于 ISR、是否已复制选中记录。
+// 无待加入副本、无未来 offset；maximal ISR 与当前 ISR 在本边界中相同。
+ClusterContext() = [append_done == 1 && replica_net == 1 && local_leader == 1 && ack1 == 0]
+  cc_replica1_caught_up{ack1 = 1;} -> ClusterContext()
+  [] [append_done == 1 && replica_net == 1 && local_leader == 1 && ack2 == 0]
+  cc_replica2_caught_up{ack2 = 1;} -> ClusterContext()
+  // 断网本身不意味着落后：LEO 相等时源码不会仅因没有 Fetch 就缩 ISR。
+  // 背景追加压缩其他请求的一条记录；仍遵守 minISR、执行、磁盘、分区读锁。
+  [] [BACKGROUND == 1 && life == 6 && replica_net == 0 && local_leader == 1 && isr1 + isr2 >= 1 && bp != 3 && disk_ok == 1 && exec_ok == 1 && tail_advanced == 0]
+  cc_background_append{tail_advanced = 1;} -> ClusterContext()
+  [] [replica_net == 0 && local_leader == 1 && isr1 == 1 && lag1 == 0 && (tail_advanced == 1 || (append_done == 1 && ack1 == 0))]
+  cc_replica1_lag_elapsed{lag1 = 1;} -> ClusterContext()
+  [] [replica_net == 0 && local_leader == 1 && isr2 == 1 && lag2 == 0 && (tail_advanced == 1 || (append_done == 1 && ack2 == 0))]
+  cc_replica2_lag_elapsed{lag2 = 1;} -> ClusterContext()
+  // 完成 AlterPartition 的效果压缩为事件。bp=3 时读锁阻止元数据写锁。
+  [] [replica_net == 0 && local_leader == 1 && isr1 == 1 && lag1 == 1 && bp != 3 && (tail_advanced == 1 || (append_done == 1 && ack1 == 0))]
+  cc_remove_replica1{isr1 = 0;} -> ClusterContext()
+  [] [replica_net == 0 && local_leader == 1 && isr2 == 1 && lag2 == 1 && bp != 3 && (tail_advanced == 1 || (append_done == 1 && ack2 == 0))]
+  cc_remove_replica2{isr2 = 0;} -> ClusterContext()
+  // 恢复不自动扩容 ISR；此步骤同时代表副本追平和 Controller 确认加入。
+  [] [replica_net == 1 && local_leader == 1 && isr1 == 0 && bp != 3]
+  cc_rejoin_replica1{isr1 = 1; ack1 = append_done; lag1 = 0;} -> ClusterContext()
+  [] [replica_net == 1 && local_leader == 1 && isr2 == 0 && bp != 3]
+  cc_rejoin_replica2{isr2 = 1; ack2 = append_done; lag2 = 0;} -> ClusterContext()
+  [] [life == 6 && append_done == 1 && hw == 0 && local_leader == 1 && isr1 + isr2 >= 1 && (isr1 == 0 || ack1 == 1) && (isr2 == 0 || ack2 == 1)]
+  cc_high_watermark{
+    hw = 1; data_available = 1;
+    if ((isr1 == 0 || ack1 == 1) && (isr2 == 0 || ack2 == 1)) { hw_all = 1; } else { hw_all = 0; }
+    if (isr1 + isr2 >= 1) { hw_min = 1; } else { hw_min = 0; }
+  } -> ClusterContext()
+  // 独立元数据场景允许 Leader 迁走；不固定所有组合中的 Leader。
+  // 只跟踪一次迁移，不允许旧请求经历迁出再迁回后混用世代。
+  [] [fault == 8 && local_leader == 1 && bp != 3]
+  cc_leader_move{local_leader = 0;} -> ClusterContext();

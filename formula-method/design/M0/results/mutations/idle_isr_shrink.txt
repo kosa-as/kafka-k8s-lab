@@ -1,0 +1,18 @@
+=======================================================
+Assertion: M0() |= [] IsrIntact
+********Verification Result********
+The Assertion (M0() |= [] IsrIntact) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_replica_cut -> cc_replica2_lag_elapsed -> cc_remove_replica2>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:5
+Total Transitions:32
+Time Used:0.0223288s
+Estimated Memory Used:8896.68KB

@@ -1,0 +1,22 @@
+// 所有故障均为环境假设；不是从源码推出故障根因。
+// 只在健康启动且曾 Ready 后注入。复制链路故障专指 9094，控制平面可用。
+FaultEnvironment() = [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 2)]
+  fe_client_cut{client_net = 0; fault = 2; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 3)]
+  fe_execution_stall{exec_ok = 0; fault = 3; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 4)]
+  fe_storage_stall{disk_ok = 0; fault = 4; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 5)]
+  fe_replica_cut{replica_net = 0; fault = 5; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 6)]
+  fe_probe_cut{probe_net = 0; fault = 6; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 7)]
+  fe_process_exit{life = 7; fault = 7; fault_budget = 1;} -> FaultEnvironment()
+  [] [fault_budget == 0 && life == 6 && ready == 1 && (FAULT == -1 || FAULT == 8)]
+  fe_metadata_move{fault = 8; fault_budget = 1;} -> FaultEnvironment()
+  [] [RECOVER == 1 && fault_budget == 1 && fault != 7 && fault != 8]
+  fe_recover{probe_net = 1; client_net = 1; exec_ok = 1; disk_ok = 1; replica_net = 1; fault = 0; fault_budget = 2;} -> FaultEnvironment()
+  // 两个独立期限事件，抽象真实时钟跨过相应截止时间；不代表一个 CSP 步就是若干秒。
+  // 公平活性前提中要求 time_client 持续发生，排除永远不流逝时间的路径。
+  [] time_client{if (client == 1) { client_expired = 1; }} -> FaultEnvironment()
+  [] time_broker{if (bp == 4) { broker_expired = 1; }} -> FaultEnvironment();

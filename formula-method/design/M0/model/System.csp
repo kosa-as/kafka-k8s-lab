@@ -1,0 +1,14 @@
+// 纯组合层，无 #assert。所有依赖均为相对路径。
+#include "State.csp";
+#include "ReadinessProbe.csp";
+#include "LivenessProbe.csp";
+#include "Kubelet.csp";
+#include "KafkaBroker.csp";
+#include "ClientWorkload.csp";
+#include "FaultEnvironment.csp";
+#include "ClusterContext.csp";
+
+// CSP# 的 ||| 表示交错并行。共享状态显式传递一槽邮箱和操作阶段。
+// 每个具名事件及其中的赋值是一个原子步骤；不依赖带赋值事件的隐式握手。
+M0() = ReadinessProbe() ||| LivenessProbe() ||| Kubelet() ||| KafkaBroker()
+       ||| ClientWorkload() ||| FaultEnvironment() ||| ClusterContext();

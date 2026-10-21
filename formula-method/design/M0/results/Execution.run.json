@@ -1,0 +1,28 @@
+{
+  "suite": "Execution",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 2,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "117",
+      "seconds": "0.0148292",
+      "trace": "<init -> fe_execution_stall -> c_begin -> b_accept -> lp_sample -> k_liveness_commit -> lp_sample>",
+      "id": "E01",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "14",
+      "seconds": "0.0035853",
+      "trace": "<init -> time_broker -> time_client -> fe_execution_stall -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> c_poll -> time_broker -> time_client -> lp_sample>",
+      "id": "E02",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 0.531,
+  "input_sha256": "5e9dd6018794697b416773a84fef09b19f1f607200d689a61c73de98755fe61c",
+  "output_sha256": "85689fa29fde6d3402f5c7a627d48c9a168db34fdb5e8b7b0e2032ee43c30947"
+}

@@ -1,5 +1,7 @@
 # M0 模型已检查的性质
 
+> **历史基线（2026-10-20）**：本文及对应日志保留原貌供追溯。2026-10-21 整体优化后的当前入口见 [M0-R2](M0/README.md)，当前性质与结果见 [M0/VERIFICATION.md](M0/VERIFICATION.md)。下文的“当前”均指历史运行时点；其中副本确认和 ISR 收缩抽象已在新版修正。
+
 本清单对应当前十五个带 `#assert` 的 CSP# 文件。共有 **133 条不同的断言声明**：ReadinessProbe 6 条、LivenessProbe 6 条、Kubelet 18 条、KafkaBroker 独立模型 11 条、Broker 与探针组合 9 条、候选 Ready Gap 1 条、ClientWorkload 独立模型 13 条、客户端组合模型 20 条、FaultEnvironment 独立模型 12 条、故障完整组合 11 条、聚焦执行故障 1 条、候选 Liveness Gap 1 条、ClusterContext 独立组合 11 条、七角色聚焦组合 10 条、候选副本 Ready Gap 3 条。各文件中的注释说明断言用途。
 
 `deadlockfree` 检查模型是否存在无法继续的可达状态；`reaches P` 只检查**存在一条**到达 `P` 的路径；`[] P` 检查所有路径上始终满足 `P`；`X P` 表示下一个模型状态满足 `P`；`<> P` 表示最终满足 `P`。可达性为 VALID 不表示每次请求最终都完成。

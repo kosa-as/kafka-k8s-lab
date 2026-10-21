@@ -1,0 +1,37 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 6;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+
+var observed_notready_pending = 0;
+ObserveNotReady() = [ready == 0 && client == 1 && rx == 1]
+  observe_notready_pending{observed_notready_pending = 1;} -> Stop;
+Observed() = M0() ||| ObserveNotReady();
+#define OrderedNotReadySuccess observed_notready_pending == 1 && client == 2 && ready == 0;
+
+// Q01：Readiness 连续失败未到六次时缓存 Ready 可以保留。
+#assert Observed() reaches ProbeHysteresis;
+
+// Q02：先在 NotReady 状态观察仍等待的调用和成功响应，随后调用返回成功。
+#assert Observed() reaches OrderedNotReadySuccess;
+
+// Q03：反向健康契约：NotReady 以后不应还能完成业务成功；独立路径可反驳。
+#assert Observed() |= [] (!OrderedNotReadySuccess);
+
+// Q04：六次已消费的连续失败后确实清除 Ready。
+#assert Observed() |= [] (ReadinessThreshold -> !Ready);

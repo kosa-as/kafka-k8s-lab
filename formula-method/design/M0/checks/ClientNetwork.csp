@@ -1,0 +1,46 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 2;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 1;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+
+var observed_commit_pending_cut = 0;
+ObserveNetwork() = [hw == 1 && response == 1 && client == 1 && client_expired == 0 && client_net == 0]
+  observe_committed_pending_cut{observed_commit_pending_cut = 1;} -> ObserveTimeout();
+ObserveTimeout() = [client == 3 && client_net == 0]
+  observe_timeout_during_cut{observed_commit_pending_cut = 2;} -> Stop;
+Observed() = M0() ||| ObserveNetwork();
+#define OrderedCommittedTimeout observed_commit_pending_cut >= 1 && client == 3;
+#define OrderedLateResponse observed_commit_pending_cut == 2 && client == 3 && bp == 6 && fault_budget == 2;
+
+// N01：新 RP/LP 均至少成功两次，客户端仍可因独立链路故障交付超时。
+#assert Observed() reaches ReadyClientTimeout;
+
+// N02：先观察已提交、调用尚未结束且链路中断，随后客户端才交付超时。
+#assert Observed() reaches OrderedCommittedTimeout;
+
+// N03：先已提交且链路中断，随后超时，最后恢复并送达迟到响应。
+#assert Observed() reaches OrderedLateResponse;
+
+// N04：错误的业务推断：超时就代表消息未提交。
+#assert Observed() |= [] (ProduceTimeout -> !Committed);
+
+// N05：链路及时恢复后仍存在成功路径。
+#assert Observed() reaches Recovered;
+
+// N06：终态稳定：迟到响应不会把已经超时的调用改成成功。
+#assert Observed() |= [] (ProduceTimeout -> [] ProduceTimeout);

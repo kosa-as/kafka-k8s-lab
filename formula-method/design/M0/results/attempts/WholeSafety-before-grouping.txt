@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M0() |= [] SafeHW
+********Verification Result********
+The Assertion (M0() |= [] SafeHW) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:2710020
+Total Transitions:19632639
+Time Used:113.0573835s
+Estimated Memory Used:121262.856KB

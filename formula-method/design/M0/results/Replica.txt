@@ -1,0 +1,98 @@
+=======================================================
+Assertion: M0() reaches ReplicaBlind
+********Verification Result********
+The Assertion (M0() reaches ReplicaBlind) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:102
+Time Used:0.0113924s
+Estimated Memory Used:9535.704KB
+
+
+=======================================================
+Assertion: M0() reaches IsrRejected
+********Verification Result********
+The Assertion (M0() reaches IsrRejected) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> c_begin -> b_accept -> b_dispatch -> b_reject_isr -> b_deliver -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:295
+Total Transitions:1504
+Time Used:0.0075305s
+Estimated Memory Used:9328.608KB
+
+
+=======================================================
+Assertion: M0() reaches AfterAppendError
+********Verification Result********
+The Assertion (M0() reaches AfterAppendError) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> c_begin -> time_client -> b_accept -> c_poll -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> b_after_append_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:20387
+Total Transitions:146470
+Time Used:0.9895974s
+Estimated Memory Used:16099.616KB
+
+
+=======================================================
+Assertion: M0() |= []( Ready-> MinIsrSatisfied)
+********Verification Result********
+The Assertion (M0() |= []( Ready-> MinIsrSatisfied)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:8
+Total Transitions:58
+Time Used:0.0036635s
+Estimated Memory Used:8929.448KB
+
+
+=======================================================
+Assertion: M0() |= []( BrokerError->! Committed)
+********Verification Result********
+The Assertion (M0() |= []( BrokerError->! Committed)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> b_accept -> time_broker -> time_client -> c_poll -> time_broker -> time_client -> b_dispatch -> time_broker -> time_client -> c_poll -> b_io_begin -> time_broker -> time_client -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> time_client -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> time_broker -> time_client -> c_poll -> b_after_append_error>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:121760
+Total Transitions:874748
+Time Used:5.3403905s
+Estimated Memory Used:18331.088KB

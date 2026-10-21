@@ -1,0 +1,25 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 0;
+#define FAULT 3;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+#define ExecutionPendingBlind client == 1 && client_expired == 0 && bp == 1 && exec_ok == 0 && fresh_lp == 2 && ready == 1;
+// E01：请求已接收且仍等应用结果、执行停滞，新 LP 成功两次而 Ready 保持。
+#assert M0() reaches ExecutionPendingBlind;
+
+// E02：候选健康契约：pgrep 成功应代表处理线程可推进；该蕴含不成立。
+#assert M0() |= [] (lp_sample -> ExecutionCanProgress);

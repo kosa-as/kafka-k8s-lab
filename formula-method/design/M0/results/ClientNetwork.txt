@@ -1,0 +1,116 @@
+=======================================================
+Assertion: Observed() reaches ReadyClientTimeout
+********Verification Result********
+The Assertion (Observed() reaches ReadyClientTimeout) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_client_cut -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:924
+Total Transitions:5854
+Time Used:0.0470481s
+Estimated Memory Used:9229.864KB
+
+
+=======================================================
+Assertion: Observed() reaches OrderedCommittedTimeout
+********Verification Result********
+The Assertion (Observed() reaches OrderedCommittedTimeout) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> c_begin -> b_accept -> fe_client_cut -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> observe_committed_pending_cut -> time_client -> fe_recover -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:10302
+Total Transitions:67735
+Time Used:0.6647756s
+Estimated Memory Used:10336.408KB
+
+
+=======================================================
+Assertion: Observed() reaches OrderedLateResponse
+********Verification Result********
+The Assertion (Observed() reaches OrderedLateResponse) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> c_begin -> b_accept -> fe_client_cut -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> observe_committed_pending_cut -> time_client -> c_poll -> observe_timeout_during_cut -> fe_recover -> b_deliver>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:10322
+Total Transitions:67836
+Time Used:0.4616402s
+Estimated Memory Used:11061.288KB
+
+
+=======================================================
+Assertion: Observed() |= []( ProduceTimeout->! Committed)
+********Verification Result********
+The Assertion (Observed() |= []( ProduceTimeout->! Committed)) is NOT valid.
+A counterexample is presented as follows.
+<init -> time_broker -> time_client -> fe_client_cut -> time_broker -> time_client -> fe_recover -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> b_accept -> time_broker -> time_client -> c_poll -> time_broker -> time_client -> b_dispatch -> time_broker -> time_client -> c_poll -> b_io_begin -> time_broker -> time_client -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51
+Total Transitions:293
+Time Used:0.0048837s
+Estimated Memory Used:11198.632KB
+
+
+=======================================================
+Assertion: Observed() reaches Recovered
+********Verification Result********
+The Assertion (Observed() reaches Recovered) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> fe_client_cut -> fe_recover -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:275
+Total Transitions:1498
+Time Used:0.0082383s
+Estimated Memory Used:10645.128KB
+
+
+=======================================================
+Assertion: Observed() |= []( ProduceTimeout->[] ProduceTimeout)
+********Verification Result********
+The Assertion (Observed() |= []( ProduceTimeout->[] ProduceTimeout)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:112553
+Total Transitions:756735
+Time Used:4.9232436s
+Estimated Memory Used:16120.456KB

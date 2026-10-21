@@ -1,0 +1,27 @@
+﻿// M0-R2 验证入口；由 build_checks.py 生成。模型文件不携带断言。
+#define COLD 1;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 1;
+#include "..\model\System.csp";
+
+#define ExecutionCanProgress exec_ok == 1;
+#define StorageCanProgress disk_ok == 1;
+#define MinIsrSatisfied isr1 + isr2 >= 1;
+#define BrokerError response == 2 || response == 3 || response == 4 || response == 7;
+#define TimeoutInIO client == 3 && bp == 3 && disk_ok == 0;
+#define ReadinessThreshold rp_fail == 6;
+#define DataAvailable data_available == 1;
+#define EmptyWithData client == 5 && data_available == 1 && fault == 2 && ready == 1;
+
+// B01：Controller TCP 已开放、Broker 处理尚未启用时，Ready 可先成立。
+#assert M0() reaches ReadyBeforeEnable;
+
+// B02：候选健康契约：Ready 应蕴含 Broker 处理启用；无时间模型给出反例。
+#assert M0() |= [] (Ready -> Enabled);
+
+// B03：冷启动路径仍遵守 Startup 门。
+#assert M0() |= [] (Ready -> Started);

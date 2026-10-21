@@ -1,0 +1,81 @@
+{
+  "run_at": "2026-10-21T02:31:50.676630+00:00",
+  "pat": "C:\\Program Files\\Process Analysis Toolkit\\Process Analysis Toolkit 3.5.1\\PAT3.Console.exe",
+  "pat_sha256": "2bf66b8b24ef93b53012721c2e24c4e34ab9c0aa97908a4231f015c2576a9e6c",
+  "suites": [
+    "ClientNetwork"
+  ],
+  "runs": [
+    {
+      "suite": "ClientNetwork",
+      "status": "completed",
+      "exit_code": 0,
+      "expected_count": 6,
+      "results": [
+        {
+          "result": "VALID",
+          "states": "924",
+          "seconds": "0.0470481",
+          "trace": "<init -> fe_client_cut -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample>",
+          "id": "N01",
+          "matches_expected": true
+        },
+        {
+          "result": "VALID",
+          "states": "10302",
+          "seconds": "0.6647756",
+          "trace": "<init -> c_begin -> b_accept -> fe_client_cut -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> observe_committed_pending_cut -> time_client -> fe_recover -> c_poll>",
+          "id": "N02",
+          "matches_expected": true
+        },
+        {
+          "result": "VALID",
+          "states": "10322",
+          "seconds": "0.4616402",
+          "trace": "<init -> c_begin -> b_accept -> fe_client_cut -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> observe_committed_pending_cut -> time_client -> c_poll -> observe_timeout_during_cut -> fe_recover -> b_deliver>",
+          "id": "N03",
+          "matches_expected": true
+        },
+        {
+          "result": "NOT valid",
+          "states": "51",
+          "seconds": "0.0048837",
+          "trace": "<init -> time_broker -> time_client -> fe_client_cut -> time_broker -> time_client -> fe_recover -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> b_accept -> time_broker -> time_client -> c_poll -> time_broker -> time_client -> b_dispatch -> time_broker -> time_client -> c_poll -> b_io_begin -> time_broker -> time_client -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark>",
+          "id": "N04",
+          "matches_expected": true
+        },
+        {
+          "result": "VALID",
+          "states": "275",
+          "seconds": "0.0082383",
+          "trace": "<init -> fe_client_cut -> fe_recover -> c_begin -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> b_produce_ok -> b_deliver -> c_poll>",
+          "id": "N05",
+          "matches_expected": true
+        },
+        {
+          "result": "VALID",
+          "states": "112553",
+          "seconds": "4.9232436",
+          "trace": null,
+          "id": "N06",
+          "matches_expected": true
+        }
+      ],
+      "matches_expected": true,
+      "wall_seconds": 6.625,
+      "input_sha256": "80060a621ac2404c4237d92f15acf720623c898ca5fb25fad768a9e17a46b8c6",
+      "output_sha256": "f35bda7136ea8f0e613641c1838f2807cb5e4f7dbd8092eb845cd87afb303645"
+    }
+  ],
+  "model_hashes": {
+    "ClientWorkload.csp": "628ce19f09f53740d8658ddeb4861683e0c8484b37b3251e8d1082c669939519",
+    "ClusterContext.csp": "450021b81958295ccd15ff2b9d8f27b25007de6ad289be3933a1ba47bf262633",
+    "FaultEnvironment.csp": "956d1ee74796d6c4f129c4cc6b1e9c11837cce6a545aea14014873a4bf5eacca",
+    "KafkaBroker.csp": "a8bb8be38a4a1a5e3c31e796284f49e62b25d3bf8eb1d4f7414ec1fb3fb3fae6",
+    "Kubelet.csp": "d6ee3ba7b12acfe14c1830cf7183592d77289b24e41d564634709c5008ae0315",
+    "LivenessProbe.csp": "73fea3f3b3a6486e84376c002fc33b367d577cbb8c0c4d309c4e6d7b3e81e9a0",
+    "ReadinessProbe.csp": "43739507d614bccb5cace79966ab4c3f6d82c7d555ffb97dad4f63b350d5d168",
+    "State.csp": "2432ad96968820bfbbe7cd1106d49904c2e4d2655aaf9279260794d001791917",
+    "System.csp": "79f652ae92230266cbdbc096c799ab1ab4d77772186ff3bb3b4be957245a58b2"
+  }
+}

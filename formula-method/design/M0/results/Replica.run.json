@@ -1,0 +1,52 @@
+{
+  "suite": "Replica",
+  "status": "completed",
+  "exit_code": 0,
+  "expected_count": 5,
+  "results": [
+    {
+      "result": "VALID",
+      "states": "51",
+      "seconds": "0.0113924",
+      "trace": "<init -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> c_begin -> time_client -> c_poll -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample>",
+      "id": "R01",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "295",
+      "seconds": "0.0075305",
+      "trace": "<init -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> c_begin -> b_accept -> b_dispatch -> b_reject_isr -> b_deliver -> c_poll>",
+      "id": "R02",
+      "matches_expected": true
+    },
+    {
+      "result": "VALID",
+      "states": "20387",
+      "seconds": "0.9895974",
+      "trace": "<init -> c_begin -> time_client -> b_accept -> c_poll -> b_dispatch -> b_io_begin -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> b_after_append_error>",
+      "id": "R03",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "8",
+      "seconds": "0.0036635",
+      "trace": "<init -> time_broker -> time_client -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1>",
+      "id": "R04",
+      "matches_expected": true
+    },
+    {
+      "result": "NOT valid",
+      "states": "121760",
+      "seconds": "5.3403905",
+      "trace": "<init -> time_broker -> time_client -> c_poll -> c_begin -> time_broker -> time_client -> time_broker -> b_accept -> time_broker -> time_client -> c_poll -> time_broker -> time_client -> b_dispatch -> time_broker -> time_client -> c_poll -> b_io_begin -> time_broker -> time_client -> c_poll -> b_io_complete -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> time_broker -> time_client -> fe_replica_cut -> cc_background_append -> cc_replica2_lag_elapsed -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> cc_remove_replica1 -> time_broker -> time_client -> c_poll -> b_after_append_error>",
+      "id": "R05",
+      "matches_expected": true
+    }
+  ],
+  "matches_expected": true,
+  "wall_seconds": 6.812,
+  "input_sha256": "a8dc8b2c09b0c0c2198f597ea7be116a642c82e8e046fc422cf5ce24c8a13020",
+  "output_sha256": "d4f4f73a355886eeab4cb8df9c7f5657e6fc778374f7d92e40763321c2065beb"
+}

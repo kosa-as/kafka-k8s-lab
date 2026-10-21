@@ -1,0 +1,17 @@
+=======================================================
+Assertion: M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)
+********Verification Result********
+The Assertion (M0() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)) is NOT valid.
+A counterexample is presented as follows.
+<init -> fe_storage_stall -> c_begin -> c_poll -> b_accept -> b_dispatch -> b_io_begin -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> (time_client -> c_poll -> time_client)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:1148
+Total Transitions:5814
+Time Used:0.0820176s
+Estimated Memory Used:43602.464KB
