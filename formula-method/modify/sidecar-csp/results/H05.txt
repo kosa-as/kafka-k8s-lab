@@ -1,0 +1,15 @@
+=======================================================
+Assertion: M1() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)
+********Verification Result********
+The Assertion (M1() |= (([]<> time_client)&&([]<> c_poll))->[]( Pending-><> Finished)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:119033
+Total Transitions:1130764
+Time Used:7.6385387s
+Estimated Memory Used:168033.248KB

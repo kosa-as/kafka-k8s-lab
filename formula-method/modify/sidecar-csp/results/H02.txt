@@ -1,0 +1,18 @@
+=======================================================
+Assertion: M1() reaches TwoAckNeeded
+********Verification Result********
+The Assertion (M1() reaches TwoAckNeeded) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> c_begin -> time_client -> sc_decide -> sc_begin -> b_accept -> c_poll -> sc_observe -> sc_decide -> b_dispatch -> b_io_begin -> sc_begin -> sc_observe -> b_io_complete -> time_broker -> sc_decide -> sc_begin -> cc_replica1_caught_up>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:243
+Total Transitions:1174
+Time Used:0.0216264s
+Estimated Memory Used:14815.192KB

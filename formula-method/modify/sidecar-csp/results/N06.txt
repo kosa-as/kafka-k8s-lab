@@ -1,0 +1,16 @@
+=======================================================
+Assertion: Observed() |= []( ProduceTimeout->[] ProduceTimeout)
+********Verification Result********
+The Assertion (Observed() |= []( ProduceTimeout->[] ProduceTimeout)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1168073
+Total Transitions:9026504
+Time Used:69.793068s
+Estimated Memory Used:37414.472KB

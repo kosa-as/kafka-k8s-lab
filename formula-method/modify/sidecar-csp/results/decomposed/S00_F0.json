@@ -1,0 +1,10 @@
+{
+  "id": "S00",
+  "fault": 0,
+  "status": "completed",
+  "result": "VALID",
+  "seconds": 4.25,
+  "formula": "M1() |= ([] (SafeHW && SafeSuccess && Bounds && AppendLockSafe && (Ready -> Started) && AfterAppendNotAssumed)) && ([] (ProduceSuccess -> [] ProduceSuccess))",
+  "input_sha256": "49f6cb277d3c3d429b765108070c538617c3685cd96f6ef2ee94ca34b140e73b",
+  "console": "PAT finished successfully.\r\n"
+}

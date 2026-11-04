@@ -1,0 +1,17 @@
+=======================================================
+Assertion: M1() |= []( Pending-><> Finished)
+********Verification Result********
+The Assertion (M1() |= []( Pending-><> Finished)) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> c_begin -> time_client -> b_accept -> b_dispatch -> b_io_begin -> b_io_complete -> time_broker -> cc_replica2_caught_up -> cc_replica1_caught_up -> cc_high_watermark -> b_produce_ok -> b_deliver -> sc_decide -> (sc_begin -> sc_observe -> sc_decide)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:363
+Total Transitions:847
+Time Used:0.0293407s
+Estimated Memory Used:48301.28KB

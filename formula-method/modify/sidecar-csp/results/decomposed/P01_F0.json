@@ -1,0 +1,10 @@
+{
+  "id": "P01",
+  "fault": 0,
+  "status": "completed",
+  "result": "VALID",
+  "seconds": 7.547,
+  "formula": "M1() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+  "input_sha256": "5b1e36ca9982249b4677177367409414016897825fcc46354351afc4344b4c65",
+  "console": "PAT finished successfully.\r\n"
+}

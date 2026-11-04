@@ -1,0 +1,128 @@
+=======================================================
+Assertion: StoragePost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady
+********Verification Result********
+The Assertion (StoragePost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:8744
+Total Transitions:29150
+Time Used:0.1971559s
+Estimated Memory Used:50285.192KB
+
+
+=======================================================
+Assertion: ReplicaPost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady
+********Verification Result********
+The Assertion (ReplicaPost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:8744
+Total Transitions:29150
+Time Used:0.1730097s
+Estimated Memory Used:50733.96KB
+
+
+=======================================================
+Assertion: NativeStoragePost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady
+********Verification Result********
+The Assertion (NativeStoragePost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady) is NOT valid.
+A counterexample is presented as follows.
+<init -> init_storage -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> (rp_sample -> sc_begin -> k_readiness_commit -> rp_sample -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> k_readiness_commit)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:262
+Total Transitions:754
+Time Used:0.0077138s
+Estimated Memory Used:46995.544KB
+
+
+=======================================================
+Assertion: NativeReplicaPost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady
+********Verification Result********
+The Assertion (NativeReplicaPost() |= (([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))-><> NotReady) is NOT valid.
+A counterexample is presented as follows.
+<init -> init_replica -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> (rp_sample -> sc_begin -> k_readiness_commit -> rp_sample -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> k_readiness_commit)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:262
+Total Transitions:754
+Time Used:0.0055259s
+Estimated Memory Used:47003.736KB
+
+
+=======================================================
+Assertion: StoragePost() |= !(([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))
+********Verification Result********
+The Assertion (StoragePost() |= !(([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))) is NOT valid.
+A counterexample is presented as follows.
+<init -> init_storage -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> (sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:333
+Total Transitions:846
+Time Used:0.0085528s
+Estimated Memory Used:41901.744KB
+
+
+=======================================================
+Assertion: ReplicaPost() |= !(([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))
+********Verification Result********
+The Assertion (ReplicaPost() |= !(([]<> sc_begin)&&([]<> sc_observe)&&([]<> sc_decide)&&([]<> rp_sample)&&([]<> k_readiness_commit))) is NOT valid.
+A counterexample is presented as follows.
+<init -> init_replica -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> (sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:333
+Total Transitions:846
+Time Used:0.0063281s
+Estimated Memory Used:41916.648KB
+
+
+=======================================================
+Assertion: ExecutionPost() reaches Restarted
+********Verification Result********
+The Assertion (ExecutionPost() reaches Restarted) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_exec -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> sc_begin -> rp_sample -> sc_observe -> lp_sample -> k_readiness_commit -> sc_decide -> k_liveness_commit -> sc_begin -> rp_sample -> lp_sample -> sc_observe -> k_readiness_commit -> sc_decide -> k_liveness_commit -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> k_restart>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:72
+Total Transitions:95
+Time Used:0.0025551s
+Estimated Memory Used:9158.872KB

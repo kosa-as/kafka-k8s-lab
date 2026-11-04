@@ -1,0 +1,30 @@
+{
+  "id": "F05",
+  "suite": "FetchNetwork",
+  "m0": "VALID",
+  "m1": "VALID",
+  "status": "completed",
+  "original_assertion": "M0() reaches EmptyWithData",
+  "model_hashes": {
+    "modify\\sidecar-csp\\model\\Kubelet.csp": "feff419a1b051d6aa16f4f597213970d0c39c2a81ef7708fff521c4d20707849",
+    "modify\\sidecar-csp\\model\\LivenessProbe.csp": "8e2f4ed07c847dc9793069bd954f63037579b3d76ab7156d0f6b48f6b05b9c6f",
+    "modify\\sidecar-csp\\model\\Observation.csp": "dff06c35a53d3eb0a000660703a12cf0ce8d98a81572813df5572a303e8a9745",
+    "modify\\sidecar-csp\\model\\ReadinessProbe.csp": "fa0eca160bdded8767604a1c5106759ed03b49ccb86351a5e27ae48d74691dd3",
+    "modify\\sidecar-csp\\model\\Sidecar.csp": "a5d02bcd94ab186887897330e072e3fc221b96f15a5a8505c3608c34dcd67176",
+    "modify\\sidecar-csp\\model\\State.csp": "905239cb5255ad3017fd3ccd7cb6481bf5765dabfb858db1f482c174d37745bf",
+    "modify\\sidecar-csp\\model\\System.csp": "75876f59b1e984b0e2fe19e51920eb3e11b2bde54ed747374ed36435eb3ecce4",
+    "design\\M0\\model\\ClientWorkload.csp": "628ce19f09f53740d8658ddeb4861683e0c8484b37b3251e8d1082c669939519",
+    "design\\M0\\model\\ClusterContext.csp": "450021b81958295ccd15ff2b9d8f27b25007de6ad289be3933a1ba47bf262633",
+    "design\\M0\\model\\FaultEnvironment.csp": "956d1ee74796d6c4f129c4cc6b1e9c11837cce6a545aea14014873a4bf5eacca",
+    "design\\M0\\model\\KafkaBroker.csp": "a8bb8be38a4a1a5e3c31e796284f49e62b25d3bf8eb1d4f7414ec1fb3fb3fae6",
+    "design\\M0\\model\\Kubelet.csp": "d6ee3ba7b12acfe14c1830cf7183592d77289b24e41d564634709c5008ae0315",
+    "design\\M0\\model\\LivenessProbe.csp": "73fea3f3b3a6486e84376c002fc33b367d577cbb8c0c4d309c4e6d7b3e81e9a0",
+    "design\\M0\\model\\ReadinessProbe.csp": "43739507d614bccb5cace79966ab4c3f6d82c7d555ffb97dad4f63b350d5d168",
+    "design\\M0\\model\\State.csp": "2432ad96968820bfbbe7cd1106d49904c2e4d2655aaf9279260794d001791917",
+    "design\\M0\\model\\System.csp": "79f652ae92230266cbdbc096c799ab1ab4d77772186ff3bb3b4be957245a58b2"
+  },
+  "input_sha256": "3caf843a23d46dee821e867c19b50218927ebb49ec8abe16564a4409311c585e",
+  "pat_sha256": "2bf66b8b24ef93b53012721c2e24c4e34ab9c0aa97908a4231f015c2576a9e6c",
+  "seconds": 0.547,
+  "console": "PAT finished successfully.\r\n"
+}

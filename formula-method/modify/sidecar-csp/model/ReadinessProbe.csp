@@ -1,0 +1,9 @@
+// Aggregate readiness: native Kafka condition AND sidecar readiness.
+// Both results still go through the original Kubelet threshold.
+ReadinessProbe() = [started == 1 && rp_result == 0 && life != 7]
+  rp_sample{
+    if (life >= 2 && probe_net == 1 && sc_started == 1 && sc_ready == 1) {
+      rp_result = 1;
+      if (fault_budget == 1 && fresh_rp < 2) { fresh_rp++; }
+    } else { rp_result = 2; }
+  } -> ReadinessProbe();

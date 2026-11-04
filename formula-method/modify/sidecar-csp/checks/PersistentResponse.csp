@@ -1,0 +1,36 @@
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 0;
+#include "..\model\System.csp";
+
+// These states are reached in the full M1 checks, then held persistent to
+// verify the response protocol with the same observation, Probe and Kubelet.
+StoragePost() = init_storage{disk_ok=0;fault=4;fault_budget=1;}
+ -> (Observation() ||| Sidecar() ||| ReadinessProbe() ||| LivenessProbe() ||| Kubelet());
+ReplicaPost() = init_replica{isr1=0;isr2=0;fault=5;fault_budget=1;}
+ -> (Observation() ||| Sidecar() ||| ReadinessProbe() ||| LivenessProbe() ||| Kubelet());
+ExecutionPost() = init_exec{exec_ok=0;fault=3;fault_budget=1;}
+ -> (Observation() ||| Sidecar() ||| ReadinessProbe() ||| LivenessProbe() ||| Kubelet());
+NativeStoragePost() = init_storage{disk_ok=0;fault=4;fault_budget=1;}
+ -> (Observation() ||| Sidecar() ||| NativeReadiness() ||| LivenessProbe() ||| Kubelet());
+NativeReplicaPost() = init_replica{isr1=0;isr2=0;fault=5;fault_budget=1;}
+ -> (Observation() ||| Sidecar() ||| NativeReadiness() ||| LivenessProbe() ||| Kubelet());
+NativeReadiness() = [started == 1 && rp_result == 0 && life != 7]
+  rp_sample{if(life>=2 && probe_net==1){rp_result=1;}else{rp_result=2;}}
+  -> NativeReadiness();
+
+#define NotReady ready == 0;
+#assert StoragePost() |= (([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> NotReady;
+#assert ReplicaPost() |= (([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> NotReady;
+#assert NativeStoragePost() |= (([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> NotReady;
+#assert NativeReplicaPost() |= (([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> NotReady;
+#assert StoragePost() |= !(([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit));
+#assert ReplicaPost() |= !(([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit));
+#assert ExecutionPost() reaches Restarted;

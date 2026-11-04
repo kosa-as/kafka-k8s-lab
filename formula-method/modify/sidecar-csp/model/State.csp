@@ -1,0 +1,18 @@
+// Original propositions, including Ready, Enabled, remain unchanged.
+#include "..\..\..\design\M0\model\State.csp";
+
+// Stable entry carries a successful previous observation; cold entry does not.
+var sc_started = 1-COLD;
+var sc_ready = 1-COLD;
+var sc_pending = 0;
+var sc_valid = 1-COLD;
+var sc_exec = 1-COLD;
+var sc_disk = 1-COLD;
+var sc_isr = 1;
+var sc_exec_fail = 0;
+var sc_disk_fail = 0;
+var sc_isr_fail = 0;
+var sc_unknown = 0;
+var sc_recover = 0;
+
+#define SidecarBounds sc_pending <= 2 && sc_exec_fail <= N && sc_disk_fail <= N && sc_isr_fail <= N && sc_unknown <= N && sc_recover <= R;

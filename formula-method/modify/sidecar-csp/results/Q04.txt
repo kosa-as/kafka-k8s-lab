@@ -1,0 +1,16 @@
+=======================================================
+Assertion: Observed() |= []( ReadinessThreshold->! Ready)
+********Verification Result********
+The Assertion (Observed() |= []( ReadinessThreshold->! Ready)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:1196690
+Total Transitions:8985515
+Time Used:81.1222252s
+Estimated Memory Used:50973.56KB

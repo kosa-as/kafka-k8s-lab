@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Observed() |= [](! OrderedNotReadySuccess)
+********Verification Result********
+The Assertion (Observed() |= [](! OrderedNotReadySuccess)) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> fe_probe_cut -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> c_begin -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_accept -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_dispatch -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_io_begin -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_io_complete -> sc_decide -> sc_begin -> sc_observe -> time_broker -> sc_decide -> sc_begin -> sc_observe -> c_poll -> cc_replica2_caught_up -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> cc_replica1_caught_up -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> cc_high_watermark -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_produce_ok -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> b_deliver -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> time_broker -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_liveness_commit -> rp_sample -> sc_decide -> sc_begin -> sc_observe -> time_broker -> k_readiness_commit -> observe_notready_pending -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:76808
+Total Transitions:558788
+Time Used:5.7670923s
+Estimated Memory Used:19191.264KB

@@ -1,0 +1,9 @@
+// A confirmed lack of local protocol progress makes the next LP sample fail.
+// The fault cause is never read here; only completed sidecar evidence is used.
+LivenessProbe() = [started == 1 && lp_result == 0 && life != 7]
+  lp_sample{
+    if (life >= 1 && life <= 6 && !(sc_valid == 1 && sc_exec_fail == N)) {
+      lp_result = 1;
+      if (fault_budget == 1 && fresh_lp < 2) { fresh_lp++; }
+    } else { lp_result = 2; }
+  } -> LivenessProbe();

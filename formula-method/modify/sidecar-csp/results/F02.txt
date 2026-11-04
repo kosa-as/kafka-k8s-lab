@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M1() |= []( PollData-> DataAvailable)
+********Verification Result********
+The Assertion (M1() |= []( PollData-> DataAvailable)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:6961
+Total Transitions:46819
+Time Used:0.3298944s
+Estimated Memory Used:18066.352KB

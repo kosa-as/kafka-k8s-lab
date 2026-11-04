@@ -1,0 +1,148 @@
+=======================================================
+Assertion: ExecDecision() |= [](( lp_sample&& ExecConfirmed)-> LpFailure)
+********Verification Result********
+The Assertion (ExecDecision() |= [](( lp_sample&& ExecConfirmed)-> LpFailure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:205
+Total Transitions:461
+Time Used:0.0150628s
+Estimated Memory Used:12058.792KB
+
+
+=======================================================
+Assertion: StorageDecision() |= [](( rp_sample&& StorageConfirmed)-> RpFailure)
+********Verification Result********
+The Assertion (StorageDecision() |= [](( rp_sample&& StorageConfirmed)-> RpFailure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:56
+Total Transitions:111
+Time Used:0.0006412s
+Estimated Memory Used:9396.392KB
+
+
+=======================================================
+Assertion: ReplicaDecision() |= [](( rp_sample&& ReplicaConfirmed)-> RpFailure)
+********Verification Result********
+The Assertion (ReplicaDecision() |= [](( rp_sample&& ReplicaConfirmed)-> RpFailure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:56
+Total Transitions:111
+Time Used:0.001221s
+Estimated Memory Used:9396.392KB
+
+
+=======================================================
+Assertion: ExecDecision() reaches Restarted
+********Verification Result********
+The Assertion (ExecDecision() reaches Restarted) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_exec -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> lp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> lp_sample -> k_liveness_commit -> k_restart>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:41
+Total Transitions:46
+Time Used:0.0015299s
+Estimated Memory Used:8863.96KB
+
+
+=======================================================
+Assertion: StorageDecision() reaches NotReady
+********Verification Result********
+The Assertion (StorageDecision() reaches NotReady) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_storage -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:26
+Total Transitions:25
+Time Used:0.0002482s
+Estimated Memory Used:8716.504KB
+
+
+=======================================================
+Assertion: ReplicaDecision() reaches NotReady
+********Verification Result********
+The Assertion (ReplicaDecision() reaches NotReady) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_replica -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:26
+Total Transitions:25
+Time Used:0.0002912s
+Estimated Memory Used:8716.504KB
+
+
+=======================================================
+Assertion: StorageDecision() |= [](! Restarted)
+********Verification Result********
+The Assertion (StorageDecision() |= [](! Restarted)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:56
+Total Transitions:111
+Time Used:0.0006456s
+Estimated Memory Used:9371.816KB
+
+
+=======================================================
+Assertion: ReplicaDecision() |= [](! Restarted)
+********Verification Result********
+The Assertion (ReplicaDecision() |= [](! Restarted)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:56
+Total Transitions:111
+Time Used:0.0005951s
+Estimated Memory Used:9371.816KB

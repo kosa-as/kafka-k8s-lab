@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M1() |= []( Ready-> Enabled)
+********Verification Result********
+The Assertion (M1() |= []( Ready-> Enabled)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:70682
+Total Transitions:452445
+Time Used:3.7118385s
+Estimated Memory Used:13981.8KB

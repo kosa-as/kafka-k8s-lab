@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M1() reaches ReadyBeforeEnable
+********Verification Result********
+The Assertion (M1() reaches ReadyBeforeEnable) is NOT valid.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:12396
+Total Transitions:78342
+Time Used:0.63147s
+Estimated Memory Used:17149.544KB

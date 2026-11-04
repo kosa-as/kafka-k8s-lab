@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Observed() |= []( ProduceTimeout->! Committed)
+********Verification Result********
+The Assertion (Observed() |= []( ProduceTimeout->! Committed)) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> fe_client_cut -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> fe_recover -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> c_begin -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> sc_decide -> sc_begin -> sc_observe -> time_broker -> b_accept -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> b_dispatch -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> b_io_begin -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> b_io_complete -> sc_decide -> sc_begin -> sc_observe -> time_broker -> sc_decide -> sc_begin -> sc_observe -> time_client -> c_poll -> cc_replica2_caught_up -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_replica1_caught_up -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_high_watermark>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:156
+Total Transitions:1067
+Time Used:0.0231921s
+Estimated Memory Used:14904.128KB

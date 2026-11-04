@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Observed() reaches ProbeHysteresis
+********Verification Result********
+The Assertion (Observed() reaches ProbeHysteresis) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_probe_cut -> c_begin -> sc_decide -> sc_begin -> time_client -> c_poll -> sc_observe -> sc_decide -> lp_sample -> k_liveness_commit -> sc_begin -> sc_observe -> lp_sample -> k_liveness_commit -> sc_decide -> sc_begin -> rp_sample -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:94
+Total Transitions:179
+Time Used:0.0130831s
+Estimated Memory Used:10633.432KB

@@ -1,0 +1,18 @@
+#define COLD 0;
+#define FAULT 4;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 1;
+#define BACKGROUND 1;
+#define N 2;
+#define R 2;
+#define LOSS 0;
+#include "..\model\System.csp";
+
+#define StorageConfirmed sc_valid == 1 && sc_disk_fail == N;
+#define RpFailure rp_result == 2;
+#define StorageNotReady sc_disk_fail == N && ready == 0;
+#assert M1() reaches StorageConfirmed;
+#assert M1() reaches StorageNotReady;
+#assert M1() |= [] ((rp_sample && StorageConfirmed) -> RpFailure);

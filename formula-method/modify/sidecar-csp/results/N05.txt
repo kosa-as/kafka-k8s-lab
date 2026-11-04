@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Observed() reaches Recovered
+********Verification Result********
+The Assertion (Observed() reaches Recovered) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_client_cut -> fe_recover -> sc_decide -> sc_begin -> c_begin -> b_accept -> sc_observe -> sc_decide -> b_dispatch -> b_io_begin -> sc_begin -> sc_observe -> b_io_complete -> time_broker -> sc_decide -> sc_begin -> cc_replica2_caught_up -> cc_replica1_caught_up -> sc_observe -> sc_decide -> cc_high_watermark -> b_produce_ok -> sc_begin -> sc_observe -> b_deliver -> c_poll>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:818
+Total Transitions:5166
+Time Used:0.0517105s
+Estimated Memory Used:10186.328KB

@@ -1,0 +1,14 @@
+#include "State.csp";
+#include "Observation.csp";
+#include "Sidecar.csp";
+#include "ReadinessProbe.csp";
+#include "Kubelet.csp";
+#include "..\..\..\design\M0\model\KafkaBroker.csp";
+#include "..\..\..\design\M0\model\ClusterContext.csp";
+#include "..\..\..\design\M0\model\ClientWorkload.csp";
+#include "..\..\..\design\M0\model\FaultEnvironment.csp";
+#include "LivenessProbe.csp";
+
+M1() = ReadinessProbe() ||| LivenessProbe() ||| Kubelet() ||| KafkaBroker()
+       ||| ClusterContext() ||| ClientWorkload() ||| FaultEnvironment()
+       ||| Observation() ||| Sidecar();

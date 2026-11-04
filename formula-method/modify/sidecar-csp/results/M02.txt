@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M1() |= [] AppendLockSafe
+********Verification Result********
+The Assertion (M1() |= [] AppendLockSafe) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:182677
+Total Transitions:1282460
+Time Used:9.2626438s
+Estimated Memory Used:11472.536KB

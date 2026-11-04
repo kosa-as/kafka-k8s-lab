@@ -1,0 +1,16 @@
+=======================================================
+Assertion: M1() |= [] SafeSuccess
+********Verification Result********
+The Assertion (M1() |= [] SafeSuccess) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:51965
+Total Transitions:388359
+Time Used:2.8394125s
+Estimated Memory Used:11691.472KB

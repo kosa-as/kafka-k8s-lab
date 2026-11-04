@@ -1,0 +1,10 @@
+{
+  "id": "S00",
+  "fault": 7,
+  "status": "timeout",
+  "result": null,
+  "seconds": 30.016,
+  "formula": "M1() |= ([] (SafeHW && SafeSuccess && Bounds && AppendLockSafe && (Ready -> Started) && AfterAppendNotAssumed)) && ([] (ProduceSuccess -> [] ProduceSuccess))",
+  "input_sha256": "d53ea2209d15b16b15b5210dea9bf267a76d855c1de450def26384cb8d0d2bc2",
+  "console": "Time limit reached; not a verdict."
+}

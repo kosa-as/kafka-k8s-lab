@@ -1,0 +1,18 @@
+=======================================================
+Assertion: Observed() |= []( Ready-> StorageCanProgress)
+********Verification Result********
+The Assertion (Observed() |= []( Ready-> StorageCanProgress)) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> fe_storage_stall>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:11
+Total Transitions:88
+Time Used:0.0188147s
+Estimated Memory Used:9486.504KB

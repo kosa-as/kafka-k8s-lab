@@ -1,0 +1,18 @@
+=======================================================
+Assertion: M1() |= []( Ready-> MinIsrSatisfied)
+********Verification Result********
+The Assertion (M1() |= []( Ready-> MinIsrSatisfied)) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> fe_replica_cut -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> c_begin -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> sc_decide -> sc_begin -> sc_observe -> time_broker -> c_poll -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> cc_background_append -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_replica2_lag_elapsed -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_remove_replica2 -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_replica1_lag_elapsed -> sc_decide -> sc_begin -> sc_observe -> time_broker -> time_client -> c_poll -> cc_remove_replica1>
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:62
+Total Transitions:476
+Time Used:0.0173016s
+Estimated Memory Used:12452.008KB

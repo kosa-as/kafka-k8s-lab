@@ -1,0 +1,10 @@
+{
+  "id": "P01",
+  "fault": 6,
+  "status": "timeout",
+  "result": null,
+  "seconds": 30.078,
+  "formula": "M1() |= (([] <> time_client) && ([] <> c_poll)) -> [] (Pending -> <> Finished)",
+  "input_sha256": "4537a6aac82ce0c9f8fa38f4ae2866cfa0f059fdf4d8c260e618d95e835e772e",
+  "console": "Time limit reached; not a verdict."
+}

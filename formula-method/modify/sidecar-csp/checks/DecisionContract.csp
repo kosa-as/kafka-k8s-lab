@@ -1,0 +1,36 @@
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 0;
+#include "..\model\System.csp";
+
+// Use the actual Probe and Kubelet processes at an already reached,
+// confirmed detector state. Full-system reachability is checked separately.
+ExecDecision() = init_exec{sc_valid=1;sc_exec_fail=N;sc_ready=0;}
+  -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
+StorageDecision() = init_storage{sc_valid=1;sc_disk_fail=N;sc_ready=0;}
+  -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
+ReplicaDecision() = init_replica{sc_valid=1;sc_isr_fail=N;sc_ready=0;}
+  -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
+
+#define ExecConfirmed sc_valid == 1 && sc_exec_fail == N;
+#define StorageConfirmed sc_valid == 1 && sc_disk_fail == N;
+#define ReplicaConfirmed sc_valid == 1 && sc_isr_fail == N;
+#define LpFailure lp_result == 2;
+#define RpFailure rp_result == 2;
+#define NotReady ready == 0;
+
+#assert ExecDecision() |= [] ((lp_sample && ExecConfirmed) -> LpFailure);
+#assert StorageDecision() |= [] ((rp_sample && StorageConfirmed) -> RpFailure);
+#assert ReplicaDecision() |= [] ((rp_sample && ReplicaConfirmed) -> RpFailure);
+#assert ExecDecision() reaches Restarted;
+#assert StorageDecision() reaches NotReady;
+#assert ReplicaDecision() reaches NotReady;
+#assert StorageDecision() |= [] (!Restarted);
+#assert ReplicaDecision() |= [] (!Restarted);
