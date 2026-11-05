@@ -41,9 +41,11 @@
 
 固定状态检查由 [DecisionContract.csp](checks/DecisionContract.csp) 使用相同的探针和 Kubelet 进程，共 8 条断言均 VALID。其结果不能替代完整 M1 的全空间结果。未完成的执行和 ISR 全组合性质**没有 PAT 结论**，不能写成 VALID。完整 M1 的三条可达性检查和存储安全性质已实际运行；原始输出在 `results/`。
 
+针对 E02 与 R04 增加了[聚焦验证与设计说明](E02_R04_FOCUSED.md)。`ExecutionFocused.csp` 保留原故障注入、实际观测、Sidecar、双探针和 Kubelet；`ReplicaFocused.csp` 还保留原 `ClusterContext` 的背景追加、落后和 ISR 移除过程。两组各有 5 条正面断言 **VALID**、3 条预期 **NOT valid** 的对照/非空真断言。此结果加强了 E/R 的端到端局部证据，但并未完成上述完整 M1 全组合安全性质。
+
 [PersistentResponse.csp](checks/PersistentResponse.csp) 从完整模型已证实可达的持续故障状态开始，保留相同的 Observation、Sidecar、Probe 和 Kubelet 过程。PAT 得到：存储和 ISR 的“公平采样及探针消费后最终 NotReady”均为 **VALID**；同条件原生探针均为 **NOT valid**；“公平前提不可满足”均为 **NOT valid**，说明正面性质不是空真；执行故障从持续状态进入 Kafka 重启的路径为 **VALID**。这是一项针对检测协议的有条件证明，故障如何到达该状态由完整 M1 的可达性检查支撑，不能替代完整组合的全空间活性检查。
 
-旧正确性性质的本版回归：H01—H04、B03、I01/I02、N06、Q04、M02 均为 VALID；其他旧正确性性质尚未全量检查。B01 是修复后应消失的坏路径见证。`results/ExecutionDecision.run.json` 和 `results/ReplicaDecision.run.json` 明确记录全空间安全检查在 300 秒限制内未完成，先前两项可达性检查有效，但不能将第三项写成 VALID。
+旧性质的全量回归已运行 43 项，其中 41 项有结论：31 项原 VALID 继续 VALID，8 项原 NOT valid 继续 NOT valid，B02 由 NOT valid 转为 VALID；B01 是修复后应消失的坏路径见证，由 VALID 转为 NOT valid。S00、P01 超时。`results/ExecutionDecision.run.json` 和 `results/ReplicaDecision.run.json` 明确记录全空间安全检查在 300 秒限制内未完成，先前两项可达性检查有效，但不能将第三项写成 VALID。
 
 ## 三条反例意味着什么
 

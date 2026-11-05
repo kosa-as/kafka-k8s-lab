@@ -1,0 +1,152 @@
+=======================================================
+Assertion: ExecutionFocused() reaches ExecConfirmed
+********Verification Result********
+The Assertion (ExecutionFocused() reaches ExecConfirmed) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> lp_sample -> rp_sample -> sc_begin -> k_liveness_commit -> sc_observe -> k_readiness_commit -> lp_sample -> sc_decide -> rp_sample -> sc_begin -> k_liveness_commit -> k_readiness_commit -> sc_observe -> lp_sample -> sc_decide -> rp_sample -> k_liveness_commit -> sc_begin -> k_readiness_commit -> sc_observe -> lp_sample -> rp_sample -> fe_execution_stall -> k_liveness_commit -> lp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> sc_decide -> rp_sample -> sc_begin -> lp_sample -> k_readiness_commit -> sc_observe -> k_liveness_commit -> sc_decide -> rp_sample -> lp_sample -> sc_begin -> k_readiness_commit -> sc_observe -> k_liveness_commit -> rp_sample -> sc_decide>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:111
+Total Transitions:278
+Time Used:0.0124927s
+Estimated Memory Used:10551.512KB
+
+
+=======================================================
+Assertion: ExecutionFocused() reaches ExecAction
+********Verification Result********
+The Assertion (ExecutionFocused() reaches ExecAction) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> lp_sample -> rp_sample -> sc_begin -> k_liveness_commit -> sc_observe -> k_readiness_commit -> lp_sample -> sc_decide -> rp_sample -> sc_begin -> k_liveness_commit -> k_readiness_commit -> sc_observe -> lp_sample -> sc_decide -> rp_sample -> k_liveness_commit -> sc_begin -> k_readiness_commit -> sc_observe -> lp_sample -> rp_sample -> fe_execution_stall -> k_liveness_commit -> lp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> sc_decide -> rp_sample -> sc_begin -> lp_sample -> k_readiness_commit -> sc_observe -> k_liveness_commit -> sc_decide -> rp_sample -> lp_sample -> sc_begin -> k_readiness_commit -> sc_observe -> k_liveness_commit -> rp_sample -> sc_decide -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:113
+Total Transitions:283
+Time Used:0.0014055s
+Estimated Memory Used:10485.976KB
+
+
+=======================================================
+Assertion: ExecutionFocused() |= [](( lp_sample&& ExecConfirmed)-> LpFailure)
+********Verification Result********
+The Assertion (ExecutionFocused() |= [](( lp_sample&& ExecConfirmed)-> LpFailure)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:20193
+Total Transitions:105057
+Time Used:0.5184957s
+Estimated Memory Used:18485.92KB
+
+
+=======================================================
+Assertion: ExecutionFocused() reaches Restarted
+********Verification Result********
+The Assertion (ExecutionFocused() reaches Restarted) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> lp_sample -> rp_sample -> sc_begin -> k_liveness_commit -> sc_observe -> k_readiness_commit -> lp_sample -> sc_decide -> rp_sample -> sc_begin -> k_liveness_commit -> k_readiness_commit -> sc_observe -> lp_sample -> sc_decide -> rp_sample -> k_liveness_commit -> sc_begin -> k_readiness_commit -> sc_observe -> lp_sample -> rp_sample -> fe_execution_stall -> k_liveness_commit -> lp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> k_liveness_commit -> sc_decide -> rp_sample -> sc_begin -> lp_sample -> k_readiness_commit -> sc_observe -> k_liveness_commit -> sc_decide -> rp_sample -> lp_sample -> sc_begin -> k_readiness_commit -> sc_observe -> k_liveness_commit -> rp_sample -> sc_decide -> lp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> k_restart>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:135
+Total Transitions:319
+Time Used:0.0015708s
+Estimated Memory Used:10936.536KB
+
+
+=======================================================
+Assertion: ExecutionFocused() |= ((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit)))-><> RestartThreshold
+********Verification Result********
+The Assertion (ExecutionFocused() |= ((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit)))-><> RestartThreshold) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:112846
+Total Transitions:758336
+Time Used:6.446927s
+Estimated Memory Used:135901.344KB
+
+
+=======================================================
+Assertion: ExecutionFocused() |= !((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit))))
+********Verification Result********
+The Assertion (ExecutionFocused() |= !((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit))))) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_execution_stall -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> sc_decide -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> lp_sample -> rp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> rp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> rp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> rp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> rp_sample -> k_liveness_commit -> k_readiness_commit -> lp_sample -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> k_liveness_commit -> sc_decide -> lp_sample -> k_restart -> time_broker -> (time_broker)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:5699
+Total Transitions:64913
+Time Used:0.3105044s
+Estimated Memory Used:82256.848KB
+
+
+=======================================================
+Assertion: NativeExecutionFocused() |= ((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit)))-><> RestartThreshold
+********Verification Result********
+The Assertion (NativeExecutionFocused() |= ((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit)))-><> RestartThreshold) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_execution_stall -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> (lp_sample -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> k_liveness_commit -> lp_sample -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> k_liveness_commit)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:984
+Total Transitions:4133
+Time Used:0.0574774s
+Estimated Memory Used:45462.536KB
+
+
+=======================================================
+Assertion: NativeExecutionFocused() |= !((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit))))
+********Verification Result********
+The Assertion (NativeExecutionFocused() |= !((<> fe_execution_stall)&&([]( AwaitThreshold-><> sc_begin))&&([]( AwaitThreshold-><> sc_observe))&&([]( AwaitThreshold-><> sc_decide))&&([]( AwaitThreshold-><> lp_sample))&&([]( AwaitThreshold-><> k_liveness_commit))))) is NOT valid.
+A counterexample is presented as follows.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_execution_stall -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> lp_sample -> k_liveness_commit -> lp_sample -> k_liveness_commit -> sc_decide -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> rp_sample -> k_readiness_commit -> (lp_sample -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> k_liveness_commit -> lp_sample -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> k_liveness_commit)*>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: Strongly Connected Component Based Search
+
+
+********Verification Statistics********
+Visited States:984
+Total Transitions:4133
+Time Used:0.0465101s
+Estimated Memory Used:49922.616KB
+
+

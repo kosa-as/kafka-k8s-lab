@@ -1,0 +1,40 @@
+#define COLD 0;
+#define FAULT 5;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 1;
+#define N 2;
+#define R 2;
+#define LOSS 0;
+#include "..\model\System.csp";
+
+// Retain actual replica cut, background append, lag expiry and ISR update.
+ReplicaFocused() = ClusterContext() ||| FaultEnvironment() ||| Observation()
+  ||| Sidecar() ||| ReadinessProbe() ||| LivenessProbe() ||| Kubelet();
+// M0 TCP readiness logic copied verbatim under a distinct process name.
+NativeReadiness() = [started == 1 && rp_result == 0 && life != 7]
+  rp_sample{
+    if (life >= 2 && probe_net == 1) {
+      rp_result = 1;
+      if (fault_budget == 1 && fresh_rp < 2) { fresh_rp++; }
+    } else { rp_result = 2; }
+  } -> NativeReadiness();
+NativeReplicaFocused() = ClusterContext() ||| FaultEnvironment() ||| Observation()
+  ||| Sidecar() ||| NativeReadiness() ||| LivenessProbe() ||| Kubelet();
+#define ReplicaConfirmed sc_valid == 1 && sc_isr_fail == N;
+#define RpFailure rp_result == 2;
+#define ConfirmedUnderMin sc_valid == 1 && sc_isr_fail == N && local_leader == 1 && isr1 + isr2 == 0;
+#define UnderMinNotReady local_leader == 1 && isr1 + isr2 == 0 && ready == 0;
+#assert ReplicaFocused() reaches ConfirmedUnderMin;
+#assert ReplicaFocused() reaches UnderMinNotReady;
+#assert ReplicaFocused() |= [] ((rp_sample && ReplicaConfirmed) -> RpFailure);
+#assert ReplicaFocused() |= [] (!Restarted);
+// Under continuing ISR loss and fair monitor/probe consumption, Ready clears.
+#assert ReplicaFocused() |= ((<> ConfirmedUnderMin) && ([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> UnderMinNotReady;
+// The continuing-fault and fair-sampling premise is satisfiable.
+#assert ReplicaFocused() |= !((<> ConfirmedUnderMin) && ([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit));
+// The same response obligation fails with M0's TCP-only readiness probe.
+#assert NativeReplicaFocused() |= ((<> ConfirmedUnderMin) && ([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit)) -> <> UnderMinNotReady;
+#assert NativeReplicaFocused() |= !((<> ConfirmedUnderMin) && ([] <> sc_begin) && ([] <> sc_observe) && ([] <> sc_decide) && ([] <> rp_sample) && ([] <> k_readiness_commit));

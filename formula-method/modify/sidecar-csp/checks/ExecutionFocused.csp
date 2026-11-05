@@ -1,0 +1,44 @@
+#define COLD 0;
+#define FAULT 3;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 0;
+#include "..\model\System.csp";
+
+// Retain the actual fault injection, observation, decision, both Probes and
+// Kubelet. The omitted Client/partition roles do not change exec_ok or LP.
+ExecutionFocused() = FaultEnvironment() ||| Observation() ||| Sidecar()
+  ||| ReadinessProbe() ||| LivenessProbe() ||| Kubelet();
+// M0 pgrep logic copied verbatim under a distinct process name for comparison.
+NativeLiveness() = [started == 1 && lp_result == 0 && life != 7]
+  lp_sample{
+    if (life >= 1 && life <= 6) {
+      lp_result = 1;
+      if (fault_budget == 1 && fresh_lp < 2) { fresh_lp++; }
+    } else { lp_result = 2; }
+  } -> NativeLiveness();
+NativeExecutionFocused() = FaultEnvironment() ||| Observation() ||| Sidecar()
+  ||| ReadinessProbe() ||| NativeLiveness() ||| Kubelet();
+#define ExecConfirmed sc_valid == 1 && sc_exec_fail == N;
+#define LpFailure lp_result == 2;
+#define ExecAction exec_ok == 0 && (lp_result == 2 || restart_count == 1);
+#define RestartThreshold lp_fail == 3;
+#assert ExecutionFocused() reaches ExecConfirmed;
+#assert ExecutionFocused() reaches ExecAction;
+#assert ExecutionFocused() |= [] ((lp_sample && ExecConfirmed) -> LpFailure);
+#assert ExecutionFocused() reaches Restarted;
+// Fair observation and LP consumption are required only while awaiting the
+// threshold. After restart, the one-shot M0 lifecycle disables further probes.
+// PAT does not assume fairness for the separately enabled k_restart action.
+#define AwaitThreshold lp_fail < 3 && restart_count == 0;
+#assert ExecutionFocused() |= ((<> fe_execution_stall) && ([] (AwaitThreshold -> <> sc_begin)) && ([] (AwaitThreshold -> <> sc_observe)) && ([] (AwaitThreshold -> <> sc_decide)) && ([] (AwaitThreshold -> <> lp_sample)) && ([] (AwaitThreshold -> <> k_liveness_commit))) -> <> RestartThreshold;
+// The fairness premise has a witness; a VALID implication alone can be vacuous.
+#assert ExecutionFocused() |= !((<> fe_execution_stall) && ([] (AwaitThreshold -> <> sc_begin)) && ([] (AwaitThreshold -> <> sc_observe)) && ([] (AwaitThreshold -> <> sc_decide)) && ([] (AwaitThreshold -> <> lp_sample)) && ([] (AwaitThreshold -> <> k_liveness_commit))));
+// The same response obligation fails with M0's process-only liveness probe.
+#assert NativeExecutionFocused() |= ((<> fe_execution_stall) && ([] (AwaitThreshold -> <> sc_begin)) && ([] (AwaitThreshold -> <> sc_observe)) && ([] (AwaitThreshold -> <> sc_decide)) && ([] (AwaitThreshold -> <> lp_sample)) && ([] (AwaitThreshold -> <> k_liveness_commit))) -> <> RestartThreshold;
+#assert NativeExecutionFocused() |= !((<> fe_execution_stall) && ([] (AwaitThreshold -> <> sc_begin)) && ([] (AwaitThreshold -> <> sc_observe)) && ([] (AwaitThreshold -> <> sc_decide)) && ([] (AwaitThreshold -> <> lp_sample)) && ([] (AwaitThreshold -> <> k_liveness_commit))));
