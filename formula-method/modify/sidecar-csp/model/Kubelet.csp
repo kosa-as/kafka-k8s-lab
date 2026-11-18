@@ -18,6 +18,7 @@ Kubelet() = [started == 0 && life >= 1 && life <= 6 && sp_fail < 30]
     sp_fail = 0; rp_fail = 0; lp_fail = 0; rp_result = 0; lp_result = 0;
     bp = 0; response = 0; broker_expired = 0; exec_ok = 1; local_leader = 0;
     sc_started = 0; sc_ready = 0; sc_pending = 0; sc_valid = 0;
+    sc_exec_valid = 0; sc_disk_valid = 0; sc_isr_valid = 0;
     sc_exec = 0; sc_disk = 0; sc_isr = 0;
-    sc_exec_fail = 0; sc_disk_fail = 0; sc_isr_fail = 0; sc_unknown = 0; sc_recover = 0;
+    sc_exec_fail = 0; sc_disk_fail = 0; sc_isr_fail = 0; sc_exec_unknown = 0; sc_disk_unknown = 0; sc_isr_unknown = 0; sc_recover = 0;
   } -> Kubelet();

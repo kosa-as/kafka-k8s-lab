@@ -1,0 +1,40 @@
+=======================================================
+Assertion: M1() reaches ReplicaConfirmed
+********Verification Result********
+The Assertion (M1() reaches ReplicaConfirmed) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_replica_cut -> c_begin -> sc_decide -> sc_begin -> time_client -> c_poll -> sc_observe -> sc_decide -> cc_background_append -> cc_replica2_lag_elapsed -> sc_begin -> sc_observe -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> sc_decide -> sc_begin -> cc_remove_replica1 -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:129
+Total Transitions:223
+Time Used:0.0120792s
+Estimated Memory Used:10993.88KB
+
+
+=======================================================
+Assertion: M1() reaches ReplicaNotReady
+********Verification Result********
+The Assertion (M1() reaches ReplicaNotReady) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> fe_replica_cut -> c_begin -> sc_decide -> sc_begin -> time_client -> c_poll -> sc_observe -> sc_decide -> cc_background_append -> cc_replica2_lag_elapsed -> sc_begin -> sc_observe -> cc_remove_replica2 -> cc_replica1_lag_elapsed -> sc_decide -> sc_begin -> cc_remove_replica1 -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_observe -> lp_sample -> k_liveness_commit -> sc_decide -> sc_begin -> lp_sample -> k_liveness_commit -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> lp_sample -> rp_sample -> sc_decide -> sc_begin -> k_readiness_commit -> k_liveness_commit -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> lp_sample -> rp_sample -> sc_decide -> sc_begin -> k_readiness_commit -> k_liveness_commit -> sc_observe -> sc_decide -> rp_sample -> k_readiness_commit -> sc_begin -> sc_observe -> lp_sample -> rp_sample -> sc_decide -> sc_begin -> k_readiness_commit>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:216
+Total Transitions:481
+Time Used:0.0026839s
+Estimated Memory Used:13328.6KB
+
+

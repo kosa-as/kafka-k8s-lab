@@ -10,7 +10,7 @@
 #define LOSS 0;
 #include "..\model\System.csp";
 
-#define StorageConfirmed sc_valid == 1 && sc_disk_fail == N;
+#define StorageConfirmed sc_disk_fail == N;
 #define RpFailure rp_result == 2;
 #define StorageNotReady sc_disk_fail == N && ready == 0;
 #assert M1() reaches StorageConfirmed;

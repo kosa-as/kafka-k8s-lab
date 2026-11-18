@@ -1,5 +1,7 @@
 # E02、R04 的机制收敛与聚焦验证
 
+2026-11-18 已在分项有效性与确认保持版本上复跑；以下聚焦入口均为 LOSS=0，部分缺失另由 PerMetric 系列检查。
+
 ## 设计目标与旧性质的边界
 
 E02 原式 `[](lp_sample -> ExecutionCanProgress)` 在执行停滞后，即便 LP 正确返回失败，也会因发生了采样而被反驳。R04 原式 `[](Ready -> MinIsrSatisfied)` 在最后一个 ISR 成员移出与 Kubelet 更新 Ready 之间必有异步窗口。因此，本设计不声称旧即时公式转为 VALID，而检验 sidecar 的**确认、探针动作、Kubelet 处置**是否形成闭环。这里没有修改 M0 的故障注入、ISR 变化或 Kubelet 阈值。
@@ -56,4 +58,4 @@ $pat = 'C:\Program Files\Process Analysis Toolkit\Process Analysis Toolkit 3.5.1
 & $pat -csp 'C:\Code\Kafka\formula-method\modify\sidecar-csp\checks\ReplicaFocused.csp' 'C:\Code\Kafka\formula-method\modify\sidecar-csp\results\ReplicaFocused.txt'
 ```
 
-M1 原模型文件未变；`verify.py --resume` 对 H01—H04、B03、I01/I02、N06、Q04、M02 的模型哈希核对后均复用 VALID 结果。
+本轮已变更M1的观测有效性、计数保持和LP判定；上述结果均实际复跑，未复用旧哈希结果。分项缺失检查详见PER_METRIC.md。

@@ -1,0 +1,38 @@
+=======================================================
+Assertion: Test() reaches Done
+********Verification Result********
+The Assertion (Test() reaches Done) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> input_0 -> sc_decide -> input_1 -> sc_decide>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:5
+Total Transitions:4
+Time Used:0.0100057s
+Estimated Memory Used:8601.816KB
+
+
+=======================================================
+Assertion: Test() |= []( Done-> Expected)
+********Verification Result********
+The Assertion (Test() |= []( Done-> Expected)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:6
+Total Transitions:6
+Time Used:0.0033203s
+Estimated Memory Used:8577.192KB
+
+

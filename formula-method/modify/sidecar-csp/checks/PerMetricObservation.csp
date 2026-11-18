@@ -1,0 +1,21 @@
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 1;
+#include "..\model\System.csp";
+
+
+PartialSystem() = init_partial{exec_ok=0;} -> (Observation() ||| Sidecar() ||| LivenessProbe());
+#define PartialConfirmed sc_exec_fail == N && sc_isr_valid == 0;
+#define PartialLp sc_exec_fail == N && sc_isr_valid == 0 && lp_result == 2;
+#define CompleteFlag sc_valid == sc_exec_valid * sc_disk_valid * sc_isr_valid;
+#assert PartialSystem() reaches PartialConfirmed;
+#assert PartialSystem() reaches PartialLp;
+#assert PartialSystem() |= [] CompleteFlag;
+#assert PartialSystem() |= [] SidecarBounds;

@@ -10,7 +10,7 @@
 #define LOSS 0;
 #include "..\model\System.csp";
 
-#define ExecConfirmed sc_valid == 1 && sc_exec_fail == N;
+#define ExecConfirmed sc_exec_fail == N;
 #define LpFailure lp_result == 2;
 #define ExecutionAction exec_ok == 0 && (lp_result == 2 || restart_count == 1);
 #assert M1() reaches ExecConfirmed;

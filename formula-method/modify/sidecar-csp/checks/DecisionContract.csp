@@ -12,16 +12,16 @@
 
 // Use the actual Probe and Kubelet processes at an already reached,
 // confirmed detector state. Full-system reachability is checked separately.
-ExecDecision() = init_exec{sc_valid=1;sc_exec_fail=N;sc_ready=0;}
+ExecDecision() = init_exec{sc_valid=1;sc_exec_valid=1;sc_disk_valid=1;sc_isr_valid=1;sc_exec_fail=N;sc_ready=0;}
   -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
-StorageDecision() = init_storage{sc_valid=1;sc_disk_fail=N;sc_ready=0;}
+StorageDecision() = init_storage{sc_valid=1;sc_exec_valid=1;sc_disk_valid=1;sc_isr_valid=1;sc_disk_fail=N;sc_ready=0;}
   -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
-ReplicaDecision() = init_replica{sc_valid=1;sc_isr_fail=N;sc_ready=0;}
+ReplicaDecision() = init_replica{sc_valid=1;sc_exec_valid=1;sc_disk_valid=1;sc_isr_valid=1;sc_isr_fail=N;sc_ready=0;}
   -> (LivenessProbe() ||| ReadinessProbe() ||| Kubelet());
 
-#define ExecConfirmed sc_valid == 1 && sc_exec_fail == N;
-#define StorageConfirmed sc_valid == 1 && sc_disk_fail == N;
-#define ReplicaConfirmed sc_valid == 1 && sc_isr_fail == N;
+#define ExecConfirmed sc_exec_fail == N;
+#define StorageConfirmed sc_disk_fail == N;
+#define ReplicaConfirmed sc_isr_fail == N;
 #define LpFailure lp_result == 2;
 #define RpFailure rp_result == 2;
 #define NotReady ready == 0;

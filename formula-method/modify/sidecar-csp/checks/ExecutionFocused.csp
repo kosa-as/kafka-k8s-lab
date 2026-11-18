@@ -24,7 +24,7 @@ NativeLiveness() = [started == 1 && lp_result == 0 && life != 7]
   } -> NativeLiveness();
 NativeExecutionFocused() = FaultEnvironment() ||| Observation() ||| Sidecar()
   ||| ReadinessProbe() ||| NativeLiveness() ||| Kubelet();
-#define ExecConfirmed sc_valid == 1 && sc_exec_fail == N;
+#define ExecConfirmed sc_exec_fail == N;
 #define LpFailure lp_result == 2;
 #define ExecAction exec_ok == 0 && (lp_result == 2 || restart_count == 1);
 #define RestartThreshold lp_fail == 3;

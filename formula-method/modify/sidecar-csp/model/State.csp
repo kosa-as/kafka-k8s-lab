@@ -5,14 +5,19 @@
 var sc_started = 1-COLD;
 var sc_ready = 1-COLD;
 var sc_pending = 0;
-var sc_valid = 1-COLD;
+var sc_valid = 1-COLD; // Derived completeness; never gates independent fault evidence.
+var sc_exec_valid = 1-COLD;
+var sc_disk_valid = 1-COLD;
+var sc_isr_valid = 1-COLD;
 var sc_exec = 1-COLD;
 var sc_disk = 1-COLD;
 var sc_isr = 1;
 var sc_exec_fail = 0;
 var sc_disk_fail = 0;
 var sc_isr_fail = 0;
-var sc_unknown = 0;
+var sc_exec_unknown = 0;
+var sc_disk_unknown = 0;
+var sc_isr_unknown = 0;
 var sc_recover = 0;
 
-#define SidecarBounds sc_pending <= 2 && sc_exec_fail <= N && sc_disk_fail <= N && sc_isr_fail <= N && sc_unknown <= N && sc_recover <= R;
+#define SidecarBounds sc_pending <= 2 && sc_exec_fail <= N && sc_disk_fail <= N && sc_isr_fail <= N && sc_exec_unknown <= N && sc_disk_unknown <= N && sc_isr_unknown <= N && sc_recover <= R;

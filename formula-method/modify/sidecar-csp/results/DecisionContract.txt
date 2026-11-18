@@ -12,8 +12,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:205
 Total Transitions:461
-Time Used:0.0150628s
-Estimated Memory Used:12058.792KB
+Time Used:0.0154872s
+Estimated Memory Used:12198.056KB
 
 
 =======================================================
@@ -30,8 +30,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:56
 Total Transitions:111
-Time Used:0.0006412s
-Estimated Memory Used:9396.392KB
+Time Used:0.0009689s
+Estimated Memory Used:9429.16KB
 
 
 =======================================================
@@ -48,8 +48,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:56
 Total Transitions:111
-Time Used:0.001221s
-Estimated Memory Used:9396.392KB
+Time Used:0.00062s
+Estimated Memory Used:9429.16KB
 
 
 =======================================================
@@ -68,8 +68,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:41
 Total Transitions:46
-Time Used:0.0015299s
-Estimated Memory Used:8863.96KB
+Time Used:0.0012887s
+Estimated Memory Used:8880.344KB
 
 
 =======================================================
@@ -88,8 +88,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:26
 Total Transitions:25
-Time Used:0.0002482s
-Estimated Memory Used:8716.504KB
+Time Used:0.0002659s
+Estimated Memory Used:8724.696KB
 
 
 =======================================================
@@ -108,8 +108,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:26
 Total Transitions:25
-Time Used:0.0002912s
-Estimated Memory Used:8716.504KB
+Time Used:0.0002441s
+Estimated Memory Used:8724.696KB
 
 
 =======================================================
@@ -126,8 +126,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:56
 Total Transitions:111
-Time Used:0.0006456s
-Estimated Memory Used:9371.816KB
+Time Used:0.0007006s
+Estimated Memory Used:9412.776KB
 
 
 =======================================================
@@ -144,5 +144,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:56
 Total Transitions:111
-Time Used:0.0005951s
-Estimated Memory Used:9371.816KB
+Time Used:0.0006298s
+Estimated Memory Used:9412.776KB
+
+

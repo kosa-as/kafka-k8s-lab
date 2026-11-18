@@ -23,9 +23,9 @@ NativeReadiness() = [started == 1 && rp_result == 0 && life != 7]
   } -> NativeReadiness();
 NativeReplicaFocused() = ClusterContext() ||| FaultEnvironment() ||| Observation()
   ||| Sidecar() ||| NativeReadiness() ||| LivenessProbe() ||| Kubelet();
-#define ReplicaConfirmed sc_valid == 1 && sc_isr_fail == N;
+#define ReplicaConfirmed sc_isr_fail == N;
 #define RpFailure rp_result == 2;
-#define ConfirmedUnderMin sc_valid == 1 && sc_isr_fail == N && local_leader == 1 && isr1 + isr2 == 0;
+#define ConfirmedUnderMin sc_isr_fail == N && local_leader == 1 && isr1 + isr2 == 0;
 #define UnderMinNotReady local_leader == 1 && isr1 + isr2 == 0 && ready == 0;
 #assert ReplicaFocused() reaches ConfirmedUnderMin;
 #assert ReplicaFocused() reaches UnderMinNotReady;

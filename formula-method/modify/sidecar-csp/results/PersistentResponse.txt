@@ -11,8 +11,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:8744
 Total Transitions:29150
-Time Used:0.1971559s
-Estimated Memory Used:50285.192KB
+Time Used:0.4974309s
+Estimated Memory Used:50595.448KB
 
 
 =======================================================
@@ -28,8 +28,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:8744
 Total Transitions:29150
-Time Used:0.1730097s
-Estimated Memory Used:50733.96KB
+Time Used:0.3331119s
+Estimated Memory Used:50956.384KB
 
 
 =======================================================
@@ -47,8 +47,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:262
 Total Transitions:754
-Time Used:0.0077138s
-Estimated Memory Used:46995.544KB
+Time Used:0.0142591s
+Estimated Memory Used:41421.68KB
 
 
 =======================================================
@@ -66,8 +66,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:262
 Total Transitions:754
-Time Used:0.0055259s
-Estimated Memory Used:47003.736KB
+Time Used:0.0093145s
+Estimated Memory Used:41426.664KB
 
 
 =======================================================
@@ -85,8 +85,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:333
 Total Transitions:846
-Time Used:0.0085528s
-Estimated Memory Used:41901.744KB
+Time Used:0.0143616s
+Estimated Memory Used:44189.208KB
 
 
 =======================================================
@@ -104,8 +104,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:333
 Total Transitions:846
-Time Used:0.0063281s
-Estimated Memory Used:41916.648KB
+Time Used:0.0122017s
+Estimated Memory Used:44197.896KB
 
 
 =======================================================
@@ -124,5 +124,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:72
 Total Transitions:95
-Time Used:0.0025551s
-Estimated Memory Used:9158.872KB
+Time Used:0.0034236s
+Estimated Memory Used:9224.408KB
+
+

@@ -11,5 +11,7 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:119033
 Total Transitions:1130764
-Time Used:7.6385387s
-Estimated Memory Used:168033.248KB
+Time Used:9.7402504s
+Estimated Memory Used:173102.144KB
+
+

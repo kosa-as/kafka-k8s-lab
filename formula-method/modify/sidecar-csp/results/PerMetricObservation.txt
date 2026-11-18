@@ -1,0 +1,76 @@
+=======================================================
+Assertion: PartialSystem() reaches PartialConfirmed
+********Verification Result********
+The Assertion (PartialSystem() reaches PartialConfirmed) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_partial -> lp_sample -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_disk_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_disk_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_disk_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_disk_isr_missing -> sc_decide>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:174
+Total Transitions:209
+Time Used:0.0137683s
+Estimated Memory Used:9928.92KB
+
+
+=======================================================
+Assertion: PartialSystem() reaches PartialLp
+********Verification Result********
+The Assertion (PartialSystem() reaches PartialLp) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_partial -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_disk_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_disk_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_isr_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_disk_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_exec_missing -> sc_decide -> sc_begin -> sc_missing -> sc_decide -> sc_begin -> sc_observe -> sc_decide -> sc_begin -> sc_disk_isr_missing -> sc_decide -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:804
+Total Transitions:1367
+Time Used:0.0099655s
+Estimated Memory Used:11212.664KB
+
+
+=======================================================
+Assertion: PartialSystem() |= [] CompleteFlag
+********Verification Result********
+The Assertion (PartialSystem() |= [] CompleteFlag) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:2160
+Total Transitions:4302
+Time Used:0.0439564s
+Estimated Memory Used:15272.88KB
+
+
+=======================================================
+Assertion: PartialSystem() |= [] SidecarBounds
+********Verification Result********
+The Assertion (PartialSystem() |= [] SidecarBounds) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:2160
+Total Transitions:4302
+Time Used:0.0317457s
+Estimated Memory Used:10798.68KB
+
+

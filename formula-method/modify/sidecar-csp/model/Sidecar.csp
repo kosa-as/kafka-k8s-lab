@@ -1,25 +1,38 @@
-// Only completed observations are inputs. No fault labels or true fault flags.
+// Counters saturated at N also represent confirmed event labels.
+// Missing evidence interrupts an unconfirmed streak, but cannot clear a confirmed event.
 Sidecar() = [sc_pending == 2]
   sc_decide{
-    if (sc_valid == 0) {
-      if (sc_unknown < N) { sc_unknown++; }
-      sc_exec_fail = 0; sc_disk_fail = 0; sc_isr_fail = 0; sc_recover = 0;
-      if (sc_unknown == N) { sc_ready = 0; }
-    } else {
-      sc_unknown = 0;
+    if (sc_exec_valid == 1) {
+      sc_exec_unknown = 0;
       if (sc_exec == 1) { sc_started = 1; sc_exec_fail = 0; }
       else { if (sc_exec_fail < N) { sc_exec_fail++; } }
-      // An unavailable execution path is not independently diagnosed as I/O.
-      if (sc_exec == 1 && sc_disk == 0) {
-        if (sc_disk_fail < N) { sc_disk_fail++; }
-      } else { sc_disk_fail = 0; }
-      if (sc_isr == 0) { if (sc_isr_fail < N) { sc_isr_fail++; } }
-      else { sc_isr_fail = 0; }
-      if (sc_exec == 1 && sc_disk == 1 && sc_isr == 1) {
-        if (sc_recover < R) { sc_recover++; }
-        if (sc_recover == R) { sc_ready = 1; }
-      } else { sc_recover = 0; }
-      if (sc_exec_fail == N || sc_disk_fail == N || sc_isr_fail == N) { sc_ready = 0; }
+    } else {
+      if (sc_exec_unknown < N) { sc_exec_unknown++; }
+      if (sc_exec_fail < N) { sc_exec_fail = 0; }
+    }
+    if (sc_disk_valid == 1) { sc_disk_unknown = 0; }
+    else { if (sc_disk_unknown < N) { sc_disk_unknown++; } }
+    // Only an available execution path permits independent storage attribution/recovery.
+    if (sc_exec_valid == 1 && sc_exec == 1 && sc_disk_valid == 1) {
+      if (sc_disk == 1) { sc_disk_fail = 0; }
+      else { if (sc_disk_fail < N) { sc_disk_fail++; } }
+    } else { if (sc_disk_fail < N) { sc_disk_fail = 0; } }
+    if (sc_isr_valid == 1) {
+      sc_isr_unknown = 0;
+      if (sc_isr == 1) { sc_isr_fail = 0; }
+      else { if (sc_isr_fail < N) { sc_isr_fail++; } }
+    } else {
+      if (sc_isr_unknown < N) { sc_isr_unknown++; }
+      if (sc_isr_fail < N) { sc_isr_fail = 0; }
+    }
+    if (sc_exec_valid == 1 && sc_disk_valid == 1 && sc_isr_valid == 1
+        && sc_exec == 1 && sc_disk == 1 && sc_isr == 1) {
+      if (sc_recover < R) { sc_recover++; }
+      if (sc_recover == R) { sc_ready = 1; }
+    } else { sc_recover = 0; }
+    if (sc_exec_fail == N || sc_disk_fail == N || sc_isr_fail == N
+        || sc_exec_unknown == N || sc_disk_unknown == N || sc_isr_unknown == N) {
+      sc_ready = 0;
     }
     sc_pending = 0;
   } -> Sidecar();

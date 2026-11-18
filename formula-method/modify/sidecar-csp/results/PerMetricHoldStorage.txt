@@ -1,0 +1,76 @@
+=======================================================
+Assertion: Test() reaches Done
+********Verification Result********
+The Assertion (Test() reaches Done) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> input_0 -> sc_decide -> input_1 -> sc_decide -> input_2 -> sc_decide -> input_3 -> sc_decide>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:9
+Total Transitions:8
+Time Used:0.0101556s
+Estimated Memory Used:8634.584KB
+
+
+=======================================================
+Assertion: Test() |= []( Done-> Expected)
+********Verification Result********
+The Assertion (Test() |= []( Done-> Expected)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:10
+Total Transitions:10
+Time Used:0.003318s
+Estimated Memory Used:8609.96KB
+
+
+=======================================================
+Assertion: ProbeTest() reaches ProbeExpected
+********Verification Result********
+The Assertion (ProbeTest() reaches ProbeExpected) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> input_0 -> sc_decide -> input_1 -> sc_decide -> input_2 -> sc_decide -> input_3 -> sc_decide -> test_probe_start -> lp_sample>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:11
+Total Transitions:12
+Time Used:0.0001718s
+Estimated Memory Used:8610.008KB
+
+
+=======================================================
+Assertion: ProbeTest() |= [] NoOppositeLp
+********Verification Result********
+The Assertion (ProbeTest() |= [] NoOppositeLp) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:14
+Total Transitions:18
+Time Used:0.0001892s
+Estimated Memory Used:8642.728KB
+
+

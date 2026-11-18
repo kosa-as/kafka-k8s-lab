@@ -1,0 +1,21 @@
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 1;
+#include "..\model\System.csp";
+
+ResetTest() = init_reset{
+  sc_exec_valid=1;sc_disk_valid=1;sc_isr_valid=1;sc_valid=1;
+  sc_exec_fail=N;sc_disk_fail=N;sc_isr_fail=N;
+  sc_exec_unknown=N;sc_disk_unknown=N;sc_isr_unknown=N;
+  sc_recover=R;sc_pending=2;lp_fail=3;
+} -> Kubelet();
+#define AllReset sc_started == 0 && sc_ready == 0 && sc_pending == 0 && sc_valid == 0 && sc_exec_valid == 0 && sc_disk_valid == 0 && sc_isr_valid == 0 && sc_exec_fail == 0 && sc_disk_fail == 0 && sc_isr_fail == 0 && sc_exec_unknown == 0 && sc_disk_unknown == 0 && sc_isr_unknown == 0 && sc_recover == 0 && rp_result == 0 && lp_result == 0;
+#assert ResetTest() reaches Restarted;
+#assert ResetTest() |= [] (Restarted -> AllReset);

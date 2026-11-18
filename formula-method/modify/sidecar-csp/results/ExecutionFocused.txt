@@ -14,8 +14,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:111
 Total Transitions:278
-Time Used:0.0124927s
-Estimated Memory Used:10551.512KB
+Time Used:0.0200498s
+Estimated Memory Used:10797.272KB
 
 
 =======================================================
@@ -34,8 +34,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:113
 Total Transitions:283
-Time Used:0.0014055s
-Estimated Memory Used:10485.976KB
+Time Used:0.0018632s
+Estimated Memory Used:10649.816KB
 
 
 =======================================================
@@ -52,8 +52,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:20193
 Total Transitions:105057
-Time Used:0.5184957s
-Estimated Memory Used:18485.92KB
+Time Used:0.659911s
+Estimated Memory Used:15462.288KB
 
 
 =======================================================
@@ -72,8 +72,8 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:135
 Total Transitions:319
-Time Used:0.0015708s
-Estimated Memory Used:10936.536KB
+Time Used:0.0022147s
+Estimated Memory Used:11124.952KB
 
 
 =======================================================
@@ -89,8 +89,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:112846
 Total Transitions:758336
-Time Used:6.446927s
-Estimated Memory Used:135901.344KB
+Time Used:7.5433463s
+Estimated Memory Used:135120.176KB
 
 
 =======================================================
@@ -108,8 +108,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:5699
 Total Transitions:64913
-Time Used:0.3105044s
-Estimated Memory Used:82256.848KB
+Time Used:0.5380016s
+Estimated Memory Used:80423.256KB
 
 
 =======================================================
@@ -127,8 +127,8 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:984
 Total Transitions:4133
-Time Used:0.0574774s
-Estimated Memory Used:45462.536KB
+Time Used:0.1051987s
+Estimated Memory Used:48609.656KB
 
 
 =======================================================
@@ -146,7 +146,7 @@ Search Engine: Strongly Connected Component Based Search
 ********Verification Statistics********
 Visited States:984
 Total Transitions:4133
-Time Used:0.0465101s
-Estimated Memory Used:49922.616KB
+Time Used:0.0773768s
+Estimated Memory Used:52286.024KB
 
 

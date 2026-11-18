@@ -1,0 +1,23 @@
+#define COLD 0;
+#define FAULT 0;
+#define KIND 1;
+#define HAS_DATA 0;
+#define RECOVER 0;
+#define ISSUE 0;
+#define BACKGROUND 0;
+#define N 2;
+#define R 2;
+#define LOSS 1;
+#include "..\model\System.csp";
+var test_step = 0;
+
+// Directed submitted observations; actual Sidecar/Probe code is included above.
+Inputs() =   [test_step == 0 && sc_pending == 0] input_0{sc_exec_valid=1;sc_exec=0;sc_disk_valid=0;sc_disk=0;sc_isr_valid=0;sc_isr=0;sc_valid=0;sc_pending=2;test_step=1;} -> Inputs()
+  []   [test_step == 1 && sc_pending == 0] input_1{sc_exec_valid=0;sc_exec=0;sc_disk_valid=0;sc_disk=0;sc_isr_valid=0;sc_isr=0;sc_valid=0;sc_pending=2;test_step=2;} -> Inputs()
+  []   [test_step == 2 && sc_pending == 0] input_2{sc_exec_valid=1;sc_exec=0;sc_disk_valid=0;sc_disk=0;sc_isr_valid=0;sc_isr=0;sc_valid=0;sc_pending=2;test_step=3;} -> Inputs()
+  []   [test_step == 3 && sc_pending == 0] test_idle -> Inputs();
+Test() = Inputs() ||| Sidecar();
+#define Done test_step == 3 && sc_pending == 0;
+#define Expected sc_exec_fail == 1 && sc_exec_fail < N;
+#assert Test() reaches Done;
+#assert Test() |= [] (Done -> Expected);

@@ -1,17 +1,77 @@
-// Abstract completion of local protocol, local append and replica observations.
-// These guards express how the system affects probe outcomes. Decision logic
-// is in Sidecar.csp and cannot read these ground-truth flags.
-// Individual Kafka protocol frames and real-time deadlines are not expanded.
+// Per-item validity: collection loss cannot discard another item's evidence.
+// LOSS=0: complete observations only. LOSS=1: any missing subset is possible.
+// Ground-truth flags are used here only; Sidecar reads submitted observations.
 Observation() = [life >= 1 && life <= 6 && sc_pending == 0]
   sc_begin{sc_pending = 1;} -> Observation()
   [] [sc_pending == 1]
   sc_observe{
+    sc_exec_valid = 1; sc_disk_valid = 1; sc_isr_valid = 1;
     sc_valid = 1;
-    if (life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
-    if (sc_exec == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
-    if (local_leader == 0 || isr1 + isr2 >= 1) { sc_isr = 1; } else { sc_isr = 0; }
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
     sc_pending = 2;
   } -> Observation()
-  // Optional collector failure. Unknown must not become a restart instruction.
-  [] [LOSS == 1 && sc_pending == 1]
-  sc_missing{sc_valid = 0; sc_pending = 2;} -> Observation();
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_exec_missing{
+    sc_exec_valid = 0; sc_disk_valid = 1; sc_isr_valid = 1;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_disk_missing{
+    sc_exec_valid = 1; sc_disk_valid = 0; sc_isr_valid = 1;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_isr_missing{
+    sc_exec_valid = 1; sc_disk_valid = 1; sc_isr_valid = 0;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_exec_disk_missing{
+    sc_exec_valid = 0; sc_disk_valid = 0; sc_isr_valid = 1;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_exec_isr_missing{
+    sc_exec_valid = 0; sc_disk_valid = 1; sc_isr_valid = 0;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_disk_isr_missing{
+    sc_exec_valid = 1; sc_disk_valid = 0; sc_isr_valid = 0;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation()
+  [] [sc_pending == 1 && LOSS == 1]
+  sc_missing{
+    sc_exec_valid = 0; sc_disk_valid = 0; sc_isr_valid = 0;
+    sc_valid = 0;
+    if (sc_exec_valid == 1 && life == 6 && exec_ok == 1) { sc_exec = 1; } else { sc_exec = 0; }
+    if (sc_disk_valid == 1 && life == 6 && exec_ok == 1 && disk_ok == 1) { sc_disk = 1; } else { sc_disk = 0; }
+    if (sc_isr_valid == 1 && (local_leader == 0 || isr1 + isr2 >= 1)) { sc_isr = 1; } else { sc_isr = 0; }
+    sc_pending = 2;
+  } -> Observation();

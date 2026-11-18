@@ -14,5 +14,7 @@ System Abstraction: False
 ********Verification Statistics********
 Visited States:28
 Total Transitions:197
-Time Used:0.0153678s
-Estimated Memory Used:10264.744KB
+Time Used:0.0208451s
+Estimated Memory Used:10436.776KB
+
+

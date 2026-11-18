@@ -10,7 +10,7 @@
 #define LOSS 0;
 #include "..\model\System.csp";
 
-#define ReplicaConfirmed sc_valid == 1 && sc_isr_fail == N;
+#define ReplicaConfirmed sc_isr_fail == N;
 #define RpFailure rp_result == 2;
 #define ReplicaNotReady sc_isr_fail == N && ready == 0;
 #assert M1() reaches ReplicaConfirmed;

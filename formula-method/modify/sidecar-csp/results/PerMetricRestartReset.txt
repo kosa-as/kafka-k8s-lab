@@ -1,0 +1,38 @@
+=======================================================
+Assertion: ResetTest() reaches Restarted
+********Verification Result********
+The Assertion (ResetTest() reaches Restarted) is VALID.
+The following trace leads to a state where the condition is satisfied.
+<init -> init_reset -> k_restart>
+
+********Verification Setting********
+Admissible Behavior: All
+Search Engine: First Witness Trace using Depth First Search
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:3
+Total Transitions:2
+Time Used:0.013117s
+Estimated Memory Used:8593.624KB
+
+
+=======================================================
+Assertion: ResetTest() |= []( Restarted-> AllReset)
+********Verification Result********
+The Assertion (ResetTest() |= []( Restarted-> AllReset)) is VALID.
+
+********Verification Setting********
+Admissible Behavior: All
+Method: Refinement Based Safety Analysis using DFS - The LTL formula is a safety property!
+System Abstraction: False
+
+
+********Verification Statistics********
+Visited States:3
+Total Transitions:2
+Time Used:0.0053867s
+Estimated Memory Used:8552.616KB
+
+
