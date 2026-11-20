@@ -1,5 +1,7 @@
 # Docker Desktop Kafka 实验环境
 
+论文相关工作以 [当前研究与写作约束](docs/THESIS_CONSTRAINTS.md) 为入口（2026-11-10，依据作者最新稿第一、二章）。[本次一二章审查意见](docs/reviews/2026-11-10-chapters-1-2.md) 单独保存；意见尚未写入论文。
+
 本仓库在 Docker Desktop 的 Kubernetes 集群中部署一个三节点 Kafka 实验环境。Kafka 使用 `bitnamilegacy/kafka:4.0.0-debian-12-r10`，由 Bitnami Kafka Helm Chart 32.5.0 管理。三个 Pod 均同时承担 KRaft controller 和 broker 角色；仓库还提供 Prometheus 指标采集、运行日志 sidecar、健康状态 sidecar、Java 生产者与消费者，以及可选的 Dashboard 和 Chaos Mesh 示例。
 
 本配置面向单机开发和故障演练。Kafka 监听器使用 PLAINTEXT，Dashboard 的本地管理员拥有集群管理权限；请勿将这些端口直接暴露到不可信网络。Bitnami Legacy 镜像是归档镜像，不再获得更新。

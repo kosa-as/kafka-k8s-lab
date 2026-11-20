@@ -1,5 +1,9 @@
 # M0-R2 结构与建模约束
 
+## 与最新论文基线的关系（2026-11-10）
+
+本模型承接最新第一、二章的 RQ1：解释固定部署中原生健康检查的观测范围。研究问题、后续比较与写作口径统一见 [论文约束](../../../docs/THESIS_CONSTRAINTS.md)。以下是当前模型的技术事实与抽象限制，不因论文计划调整而改写。Kubelet 重启作为环境行为保留；模型中的重启路径不证明真实恢复效果。M1 应同条件回归原性质，并将异常确认后的响应性质单列。
+
 ## 七个角色与四层关系
 
 仍保留 ReadinessProbe、LivenessProbe、Kubelet、KafkaBroker、ClientWorkload、FaultEnvironment、ClusterContext 七个角色。按本次模型语义，业务调用由 ClientWorkload 表示，Kafka 服务由 KafkaBroker 与 ClusterContext 表示，健康观测由两个 Probe 表示，容器控制由 Kubelet 表示；FaultEnvironment 横跨这些行为。这里的角色划分没有把跨层关系压成一个“服务正常”布尔量。
