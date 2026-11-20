@@ -1,0 +1,154 @@
+{
+  "controller": {
+    "updateStrategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": {
+        "partition": 2
+      }
+    },
+    "sidecars": [
+      {
+        "args": [
+          "until [ -f /opt/bitnami/kafka/logs/server.log ]; do sleep 1; done; exec tail -n+1 -F /opt/bitnami/kafka/logs/server.log"
+        ],
+        "command": [
+          "/bin/sh",
+          "-c"
+        ],
+        "image": "docker.io/bitnamilegacy/os-shell:12-debian-12-r51",
+        "imagePullPolicy": "IfNotPresent",
+        "name": "log-agent",
+        "resources": {
+          "limits": {
+            "cpu": "100m",
+            "memory": "64Mi"
+          },
+          "requests": {
+            "cpu": "10m",
+            "memory": "16Mi"
+          }
+        },
+        "securityContext": {
+          "allowPrivilegeEscalation": false,
+          "readOnlyRootFilesystem": true,
+          "runAsGroup": 1001,
+          "runAsNonRoot": true,
+          "runAsUser": 1001
+        },
+        "volumeMounts": [
+          {
+            "mountPath": "/opt/bitnami/kafka/logs",
+            "name": "logs",
+            "readOnly": true
+          }
+        ]
+      },
+      {
+        "args": [
+          "-Xms24m",
+          "-Xmx80m",
+          "-cp",
+          "/opt/m1/m1.jar:/opt/bitnami/kafka/libs/*",
+          "lab.m1.Sidecar"
+        ],
+        "command": [
+          "/opt/bitnami/java/bin/java"
+        ],
+        "image": "docker.io/bitnamilegacy/kafka:4.0.0-debian-12-r10",
+        "imagePullPolicy": "IfNotPresent",
+        "name": "health-sidecar",
+        "resources": {
+          "requests": {
+            "cpu": "50m",
+            "memory": "96Mi"
+          },
+          "limits": {
+            "cpu": "500m",
+            "memory": "256Mi"
+          }
+        },
+        "securityContext": {
+          "allowPrivilegeEscalation": false,
+          "readOnlyRootFilesystem": true,
+          "runAsGroup": 1001,
+          "runAsNonRoot": true,
+          "runAsUser": 1001
+        },
+        "volumeMounts": [
+          {
+            "mountPath": "/var/run/kafka-health",
+            "name": "kafka-health"
+          },
+          {
+            "name": "m1-program",
+            "mountPath": "/opt/m1",
+            "readOnly": true
+          }
+        ],
+        "env": [
+          {
+            "name": "M1_BROKER_ID",
+            "value": "2"
+          }
+        ]
+      }
+    ],
+    "extraEnvVars": [
+      {
+        "name": "KAFKA_OPTS",
+        "value": "-javaagent:/opt/m1/m1.jar"
+      }
+    ],
+    "extraVolumes": [
+      {
+        "emptyDir": {},
+        "name": "kafka-health"
+      },
+      {
+        "name": "m1-program",
+        "configMap": {
+          "name": "kafka-m1-observer"
+        }
+      }
+    ],
+    "extraVolumeMounts": [
+      {
+        "name": "m1-program",
+        "mountPath": "/opt/m1",
+        "readOnly": true
+      },
+      {
+        "name": "kafka-health",
+        "mountPath": "/var/run/kafka-health"
+      }
+    ],
+    "customReadinessProbe": {
+      "failureThreshold": 6,
+      "initialDelaySeconds": 5,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "timeoutSeconds": 5,
+      "exec": {
+        "command": [
+          "/bin/bash",
+          "/opt/m1/probe.sh",
+          "ready"
+        ]
+      }
+    },
+    "customLivenessProbe": {
+      "exec": {
+        "command": [
+          "/bin/bash",
+          "/opt/m1/probe.sh",
+          "live"
+        ]
+      },
+      "failureThreshold": 3,
+      "initialDelaySeconds": 10,
+      "periodSeconds": 10,
+      "successThreshold": 1,
+      "timeoutSeconds": 5
+    }
+  }
+}

@@ -1,3 +1,5 @@
+param([switch]$M1)
+
 $ErrorActionPreference = 'Stop'
 
 $ScriptRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -99,11 +101,17 @@ $SecretManifest = @{
 $SecretManifest | ConvertTo-Json -Depth 8 | kubectl apply -f - | Out-Null
 if ($LASTEXITCODE -ne 0) { throw 'Failed to apply the stable KRaft Secret.' }
 
-helm lint $ChartDir --values (Join-Path $BitnamiRoot 'helm-values.yaml') --quiet
+$KafkaValues = @('--values', (Join-Path $BitnamiRoot 'helm-values.yaml'))
+if ($M1) {
+    kubectl -n kafka get configmap kafka-m1-observer -o name | Out-Null
+    if ($LASTEXITCODE -ne 0) { throw 'Prepare the M1 program ConfigMap using m1/deploy.py first.' }
+    $KafkaValues += @('--values', (Join-Path $RepoRoot 'm1/helm-values.json'))
+}
+helm lint $ChartDir @KafkaValues --quiet
 if ($LASTEXITCODE -ne 0) { throw 'Bitnami chart lint failed.' }
 helm upgrade --install bitnami-kafka $ChartDir `
   --namespace kafka `
-  --values (Join-Path $BitnamiRoot 'helm-values.yaml') `
+  @KafkaValues `
   --wait `
   --timeout 15m
 if ($LASTEXITCODE -ne 0) { throw 'Bitnami Kafka Helm deployment failed.' }
