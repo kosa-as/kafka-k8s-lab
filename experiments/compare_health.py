@@ -3,6 +3,7 @@
 import argparse
 import json
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 import re
 
@@ -29,6 +30,10 @@ def load(folder, manifest=None):
     result = summarize(manifest, events)
     if manifest["scenario"] in STALL_SCENARIOS:
         result["stall_platform"] = stall_platform(manifest, events)
+        event_snapshot = folder / "kube-events.json"
+        if event_snapshot.is_file():
+            records = json.loads(event_snapshot.read_text(encoding="utf-8-sig"))["items"]
+            result["stall_platform"]["liveness_restart_events"] = liveness_restart_events(manifest, events, records)
     for window in result.get("windows", {}).values():
         begin, end = window["bounds_ms"]
         window["observed_diagnostic_deliveries"] = len({
@@ -37,6 +42,27 @@ def load(folder, manifest=None):
             and DIAGNOSTIC_ID.fullmatch(event["id"])
         })
     return manifest, result
+
+
+def liveness_restart_events(manifest, events, records):
+    starts = [e["at_ms"] for e in events if e["kind"] == "fault_requested"]
+    if not starts:
+        return []
+    start, end = min(starts), max(e["at_ms"] for e in events)
+    selected = []
+    for record in records:
+        target = record.get("involvedObject", {})
+        if (target.get("uid") != manifest["initial"]["uid"] or record.get("reason") != "Killing"
+                or "Container kafka failed liveness probe" not in record.get("message", "")):
+            continue
+        stamp = record.get("firstTimestamp") or record.get("eventTime")
+        if not stamp:
+            continue
+        timestamp = int(datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp() * 1000)
+        # Core Events usually carry only whole seconds.
+        if timestamp + 999 >= start and timestamp <= end:
+            selected.append({"at_ms": timestamp, "message": record["message"], "count": record.get("count", 1)})
+    return selected
 
 
 def stall_platform(manifest, data):

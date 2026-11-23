@@ -175,6 +175,15 @@ def record_clock(args, trial, phase):
                offset_bounds_ms=[broker - finished, broker - started])
 
 
+def collect_platform_events(args, trial):
+    try:
+        output = kubectl(args, "get", "events", "--field-selector", f"involvedObject.uid={args.uid}",
+                         "-o", "json")
+        save(trial.folder / "kube-events.json", json.loads(output))
+    except (RuntimeError, ValueError, subprocess.TimeoutExpired) as failure:
+        trial.emit("collector_error", source="kube_events", error=str(failure))
+
+
 def collect_platform(args, trial, stop):
     def capture(kind, sampler):
         try:
@@ -590,6 +599,7 @@ def run(args):
         trial.emit("window_end")
         wait_window(max(5.2, 2 * args.poll_seconds), trial, workers)
         record_clock(args, trial, "after")
+        collect_platform_events(args, trial)
     finally:
         try:
             if restore_needed:
