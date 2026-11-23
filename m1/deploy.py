@@ -196,7 +196,9 @@ def main():
         command([*K,"patch","cm",CM,"--type=merge","--patch-file",str(cleared)])
     else:
         if current!=original:
+            previous_uid = get("pod", POD)["metadata"]["uid"]
             replace_fields(args.state,"restore",expected,original)
+            wait_pod(previous_uid)
         command(["kubectl","--context","docker-desktop","-n","kafka","rollout","status",
                  "sts/"+STS,"--timeout=180s"],timeout=195)
         command([*K,"delete","cm",CM,"--ignore-not-found"])

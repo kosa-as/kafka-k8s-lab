@@ -83,8 +83,19 @@ def identity(group):
     return {"image": kafka["image"], "probes": probes}
 
 
+def verify_peers():
+    command = [*CONTEXT, "--request-timeout=5s", "get", "pods",
+               "bitnami-kafka-controller-0", "bitnami-kafka-controller-1", "-o", "json"]
+    pods = json.loads(subprocess.check_output(command, timeout=8))["items"]
+    if not all(any(c["type"] == "Ready" and c["status"] == "True"
+                   for c in pod["status"]["conditions"]) and not pod["metadata"].get("deletionTimestamp")
+               for pod in pods):
+        raise RuntimeError("Both non-target Kafka Pods must be Ready before restarting Broker 2.")
+
+
 def run(args):
     args.output.mkdir(parents=True, exist_ok=False)
+    verify_peers()
     metadata = {"pair_id": args.pair_id, "group": args.group, "initial": pod_status(),
                 "configuration": identity(args.group)}
     before = metadata["initial"]
@@ -131,7 +142,8 @@ def observe(pool, stream, before, forward, restart_at, timeout):
         status = row["pod"]["value"]
         if status and status["uid"] != before["uid"]:
             raise RuntimeError("The Pod UID changed; this run does not isolate a Kafka container restart.")
-        if status and status["container"] and status["container"] != before["container"]:
+        if (status and status["started_at"] and status["container"]
+                and status["container"] != before["container"]):
             generation_seen = True
         for key in ("produce", "controller"):
             if row[key]["value"] is not True:
