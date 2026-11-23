@@ -67,15 +67,19 @@ def default_target():
                "--replica-assignment", "2:0:1", "--config", "min.insync.replicas=2",
                "--config", "retention.ms=3600000")
     deadline = time.monotonic() + 90
+    last_error = None
     while time.monotonic() < deadline:
-        description = kafka_tool("kafka-topics", "--describe", "--topic", topic)
-        match = re.search(r"Leader:\s*(\d+)\s+Replicas:\s*([\d,]+)\s+Isr:\s*([\d,]+)", description)
-        if match and match[2] == "2,0,1" and len(match[3].split(",")) == 3:
-            if match[1] == "2":
-                return
-            kafka_tool("kafka-leader-election", "--election-type", "preferred", "--topic", topic, "--partition", "0")
+        try:
+            description = kafka_tool("kafka-topics", "--describe", "--topic", topic)
+            match = re.search(r"Leader:\s*(\d+)\s+Replicas:\s*([\d,]+)\s+Isr:\s*([\d,]+)", description)
+            if match and match[2] == "2,0,1" and len(match[3].split(",")) == 3:
+                if match[1] == "2":
+                    return
+                kafka_tool("kafka-leader-election", "--election-type", "preferred", "--topic", topic, "--partition", "0")
+        except RuntimeError as error:
+            last_error = error
         time.sleep(1)
-    raise RuntimeError("The dedicated M1 diagnostic partition is not fully replicated on Broker 2.")
+    raise RuntimeError("The dedicated M1 diagnostic partition is not fully replicated on Broker 2.") from last_error
 
 
 def set_mode(state, mode):

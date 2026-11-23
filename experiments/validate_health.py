@@ -17,13 +17,16 @@ import threading
 import time
 import uuid
 
+from replication_path import partition_resource, verify_pod_rules
+
 
 ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / "clients" / "producer" / "target"
 JAVA_SOURCE = ROOT / "clients/producer/src/main/java/com/example/kafka/producer/ValidationClient.java"
 PROBE_TYPES = ("Readiness", "Liveness")
 STALL_SCENARIOS = {"execution-stall": "execution_enter", "storage-stall": "append_enter"}
-ISR_SCENARIOS = {"min-isr": 3, "isr-at-threshold": 2}
+PORT_SCOPED_ISR = "isr-below-threshold"
+ISR_SCENARIOS = {"min-isr": 3, "isr-at-threshold": 2, PORT_SCOPED_ISR: 2}
 FIELDS = {
     "partition": ("started_ms", "leader", "isr", "min_isr", "replicas"),
     "send": ("id",),
@@ -238,10 +241,10 @@ def stop_workers(workers):
         process.stdout.close()
 
 
-def inject_partition(args, trial, name):
+def single_follower_partition(args, name):
     leader_label = {"statefulset.kubernetes.io/pod-name": args.pod}
     follower_label = {"statefulset.kubernetes.io/pod-name": args.follower_pod}
-    resource = {
+    return {
         "apiVersion": "chaos-mesh.org/v1alpha1",
         "kind": "NetworkChaos",
         "metadata": {"name": name, "namespace": args.namespace},
@@ -253,6 +256,14 @@ def inject_partition(args, trial, name):
                        "selector": {"namespaces": [args.namespace], "labelSelectors": leader_label}},
         },
     }
+
+
+def inject_partition(args, trial, name):
+    if args.scenario == PORT_SCOPED_ISR:
+        resource = partition_resource(name, args.namespace, args.replication_followers,
+                                      args.replication_address, args.replication_port, args.fault_seconds + 20)
+    else:
+        resource = single_follower_partition(args, name)
     save(trial.folder / "injection.json", resource)
     trial.emit("fault_requested", follower_pod=args.follower_pod)
     kubectl(args, "create", "-f", str(trial.folder / "injection.json"))
@@ -263,6 +274,13 @@ def inject_partition(args, trial, name):
         if any(condition["type"] == "AllInjected" and condition["status"] == "True"
                for condition in conditions):
             save(trial.folder / "injection-status.json", state["status"])
+            if args.scenario == PORT_SCOPED_ISR:
+                scopes = {}
+                for pod in args.replication_followers:
+                    scope = json.loads(kubectl(args, "get", "podnetworkchaos", pod, "-o", "json"))
+                    verify_pod_rules(scope, resource)
+                    scopes[pod] = scope["spec"]
+                save(trial.folder / "applied-replication-rules.json", scopes)
             trial.emit("fault_acknowledged", follower_pod=args.follower_pod)
             return
         time.sleep(1)
@@ -358,6 +376,43 @@ def collect_m1_rounds(args, trial):
         raise RuntimeError("No M1 decision rounds for this trial.")
 
 
+def broker_quorum(args, pod):
+    output = kubectl(args, "exec", pod, "-c", "kafka", "--", "env", "-u", "JMX_PORT",
+                     "-u", "KAFKA_JMX_OPTS", "/opt/bitnami/kafka/bin/kafka-metadata-quorum.sh",
+                     "--bootstrap-server", "localhost:9092", "describe", "--status")
+    match = re.search(r"(?m)^LeaderId:\s*(\d+)", output)
+    if not match:
+        raise RuntimeError("KRaft status did not contain a Controller Leader.")
+    return int(match[1])
+
+
+def record_quorum(args, trial, phase):
+    observer = f"bitnami-kafka-controller-{args.observer_port - 32001}"
+    try:
+        trial.emit("quorum", phase=phase, controller=broker_quorum(args, observer), observer=observer)
+    except (RuntimeError, subprocess.TimeoutExpired) as failure:
+        trial.emit("collector_error", source="quorum", phase=phase, error=str(failure))
+
+
+def prepare_replication_path(args, partition, kafka):
+    args.replication_followers = [f"bitnami-kafka-controller-{broker}"
+                                 for broker in sorted(set(partition["isr"]) - {args.broker})]
+    listeners = {item["name"]: item["containerPort"] for item in kafka["ports"]}
+    args.replication_port = listeners["interbroker"]
+    if listeners["controller"] == args.replication_port or listeners["client"] == args.replication_port:
+        raise RuntimeError("The replication listener must be separate from the Controller and client listeners.")
+    pod = json.loads(kubectl(args, "get", "pod", args.pod, "-o", "json"))
+    args.replication_address = pod["status"]["podIP"]
+    properties = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "grep",
+                         "-E", "^(listeners|inter.broker.listener.name)=",
+                         "/opt/bitnami/kafka/config/server.properties").splitlines()
+    if "inter.broker.listener.name=INTERNAL" not in properties or not any(
+        line.startswith("listeners=") and f"INTERNAL://:{args.replication_port}" in line.split("=", 1)[1].split(",")
+        for line in properties
+    ):
+        raise RuntimeError("The configured interbroker listener does not match the target port.")
+
+
 def prepare(args, trial):
     if args.topic is None:
         args.topic = "health-validation-" + trial.run_id
@@ -419,29 +474,31 @@ def prepare(args, trial):
         else:
             raise RuntimeError("M1 did not establish healthy coverage for this target.")
     args.follower_pod = None
+    args.replication_followers = []
     if args.scenario in ISR_SCENARIOS:
         if partition["min_isr"] != ISR_SCENARIOS[args.scenario] or partition["replicas"] != 3:
             raise RuntimeError("Unexpected minISR or replica count for the selected follower-loss scenario.")
         if kubectl(args, "get", "networkchaos", "-o", "name").strip():
             raise RuntimeError("Another NetworkChaos exists in the trial namespace.")
-        quorum = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "env", "-u", "JMX_PORT",
-                          "-u", "KAFKA_JMX_OPTS", "/opt/bitnami/kafka/bin/kafka-metadata-quorum.sh",
-                          "--bootstrap-server", "localhost:9092", "describe", "--status")
-        controller = int(re.search(r"(?m)^LeaderId:\s*(\d+)", quorum)[1])
-        candidates = set(partition["isr"]) - {args.broker, controller}
-        if args.observer_port:
-            candidates.discard(args.observer_port - 32001)
-        if args.follower_id is not None:
-            candidates &= {args.follower_id}
-        if not candidates:
-            raise RuntimeError("No requested follower can be isolated while keeping the observer and controller connected.")
-        follower = min(candidates)
-        args.follower_pod = f"bitnami-kafka-controller-{follower}"
-        if not json.loads(kubectl(args, "get", "pod", args.follower_pod, "-o", "json"))["status"]["containerStatuses"]:
-            raise RuntimeError("The selected follower does not have a running Kafka container.")
+        if args.scenario == PORT_SCOPED_ISR:
+            prepare_replication_path(args, partition, kafka)
+        else:
+            controller = broker_quorum(args, args.pod)
+            candidates = set(partition["isr"]) - {args.broker, controller}
+            if args.observer_port:
+                candidates.discard(args.observer_port - 32001)
+            if args.follower_id is not None:
+                candidates &= {args.follower_id}
+            if not candidates:
+                raise RuntimeError("No requested follower can be isolated while keeping the observer and controller connected.")
+            follower = min(candidates)
+            args.follower_pod = f"bitnami-kafka-controller-{follower}"
+            if not json.loads(kubectl(args, "get", "pod", args.follower_pod, "-o", "json"))["status"]["containerStatuses"]:
+                raise RuntimeError("The selected follower does not have a running Kafka container.")
     return dict(run_id=trial.run_id, group=args.group, scenario=args.scenario, bootstrap=args.bootstrap,
                 topic=args.topic, partition=args.partition, target_broker=args.broker, pod=args.pod,
                 follower_pod=args.follower_pod,
+                replication_followers=args.replication_followers, replication_port=getattr(args, "replication_port", None),
                 initial=status, kafka_image=kafka["image"], probes=probes, original_min_isr=partition["min_isr"],
                 initial_replicas=partition["replicas"], pair_id=args.pair_id, resource_seconds=args.resource_seconds,
                 stall_seconds=args.stall_seconds if args.scenario in STALL_SCENARIOS else None,
@@ -452,7 +509,7 @@ def prepare(args, trial):
                 recovery_seconds=args.recovery_seconds, started_utc=datetime.now(timezone.utc).isoformat(),
                 source_commit=command(["git", "-C", str(ROOT), "rev-parse", "HEAD"]).strip(),
                 source_hashes={path.name: hashlib.sha256(path.read_bytes()).hexdigest()
-                               for path in (Path(__file__), JAVA_SOURCE)})
+                               for path in (Path(__file__), JAVA_SOURCE, Path(__file__).with_name("replication_path.py"))})
 
 
 def run(args):
@@ -472,6 +529,9 @@ def run(args):
         raise ValueError("The min-isr pilot requires the default Docker Desktop topology, a fresh topic and a bounded fault window.")
     if args.pod and args.broker_id is None:
         raise ValueError("--pod requires --broker-id for independent Leader validation.")
+    if args.scenario == PORT_SCOPED_ISR and (args.broker_id != 2 or args.observer_port not in (32001, 32002)
+                                            or args.follower_id is not None):
+        raise ValueError("The port-scoped trial requires Broker 2 and a separate independent observer.")
     if not args.topic and args.partition != 0:
         raise ValueError("A new experiment topic has only partition 0.")
     args.classpath = os.pathsep.join((str(TARGET / "classes"),
@@ -500,13 +560,23 @@ def run(args):
         trial.emit("window_start")
         wait_window(args.healthy_seconds, trial, workers)
         if args.scenario in ISR_SCENARIOS:
+            if args.scenario == PORT_SCOPED_ISR:
+                record_quorum(args, trial, "before")
             restore_needed = True
             inject_partition(args, trial, fault_name)
             print("Follower-to-Leader link isolation confirmed by Chaos Mesh.", flush=True)
-            wait_window(args.fault_seconds, trial, workers)
+            if args.scenario == PORT_SCOPED_ISR:
+                fault_deadline = time.monotonic() + args.fault_seconds
+                wait_window(args.fault_seconds / 2, trial, workers)
+                record_quorum(args, trial, "during")
+                wait_window(max(0, fault_deadline - time.monotonic()), trial, workers)
+            else:
+                wait_window(args.fault_seconds, trial, workers)
             restore_partition(args, trial, fault_name)
             print("Experiment link isolation removed.", flush=True)
             wait_window(args.recovery_seconds, trial, workers)
+            if args.scenario == PORT_SCOPED_ISR:
+                record_quorum(args, trial, "after")
         if stage_trial:
             restore_needed = True
             arm_stall(args, trial)
@@ -734,6 +804,8 @@ def assess_stall(events, manifest):
 def isr_target(scenario, metadata):
     size = len(metadata["isr"])
     threshold = effective_min_isr(metadata)
+    if scenario == PORT_SCOPED_ISR:
+        return size == 1 and threshold == 2
     return size < threshold if scenario == "min-isr" else size == threshold == 2
 
 
@@ -753,6 +825,10 @@ def summarize(manifest, data):
     broker = manifest["target_broker"]
     scenario = manifest["scenario"]
     if scenario in ISR_SCENARIOS:
+        if scenario == PORT_SCOPED_ISR:
+            quorum = [e for e in events if e["kind"] == "quorum"]
+            output["quorum"] = {"samples": quorum, "same_controller_observed":
+                                len(quorum) == 3 and len({e["controller"] for e in quorum}) == 1}
         fault_end = markers["restore_requested"]
         affected = [e for e in metadata if e["started_ms"] >= first_control and e["at_ms"] < fault_end
                     and e["leader"] == broker and isr_target(scenario, e)]
@@ -783,7 +859,7 @@ def summarize(manifest, data):
                     and all(right["at_ms"] - left["at_ms"] <= max(5000, manifest["poll_seconds"] * 3000)
                             for left, right in zip(intervening, intervening[1:]))
                     and first["at_ms"] < last["started_ms"]):
-                phase = "fault_confirmed" if scenario == "min-isr" else "isr_at_threshold"
+                phase = "isr_at_threshold" if scenario == "isr-at-threshold" else "fault_confirmed"
                 phases[phase] = [first["at_ms"], last["started_ms"]]
         else:
             observed = [e for e in metadata if first_control <= e["started_ms"] and e["at_ms"] <= fault_end]

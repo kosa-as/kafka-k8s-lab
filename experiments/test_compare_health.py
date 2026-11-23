@@ -1,6 +1,7 @@
 import unittest
 
-from compare_health import MATCHED, compare
+from compare_health import MATCHED, compare, stall_platform
+from replication_path import partition_resource, verify_pod_rules
 from validate_health import assess_stall, isr_target, resources, workload
 
 
@@ -38,6 +39,8 @@ class CalibrationScoringTest(unittest.TestCase):
         self.assertFalse(isr_target("min-isr", metadata))
         self.assertTrue(isr_target("isr-at-threshold", metadata))
         self.assertFalse(isr_target("isr-at-threshold", dict(metadata, isr=[2])))
+        self.assertFalse(isr_target("isr-below-threshold", metadata))
+        self.assertTrue(isr_target("isr-below-threshold", dict(metadata, isr=[2])))
 
     def test_one_held_record_does_not_qualify_as_multi_request_stall(self):
         events = [{"kind": "broker_stage", "stage": "stall_enter", "id": "first", "at_ms": 100}]
@@ -45,3 +48,40 @@ class CalibrationScoringTest(unittest.TestCase):
         result = assess_stall(events, manifest)
         self.assertEqual("indeterminate", result["classification"])
         self.assertEqual("first", result["records"][0]["record_id"])
+
+    def test_interrupted_hold_preserves_old_generation_probe_failure(self):
+        identity = {"uid": "pod", "container_id": "old"}
+        manifest = {"initial": identity, "poll_seconds": 1}
+        events = [
+            {"kind": "fault_requested", "at_ms": 1000},
+            {"kind": "broker_stage", "stage": "stall_enter", "id": "one", "at_ms": 1400},
+        ]
+        for at_ms in range(0, 7000, 1000):
+            pod = dict(identity, kind="pod", at_ms=at_ms, started_ms=at_ms - 100,
+                       restart_count=0)
+            probe = {"kind": "probe", "at_ms": at_ms, "started_ms": at_ms - 100,
+                     "counts": {kind: {"successful": 1, "failed": int(at_ms >= 3000)}
+                                for kind in ("Readiness", "Liveness")}}
+            events.extend((pod, probe))
+        events.append(dict(identity, kind="pod", container_id="new", restart_count=1,
+                           at_ms=7000, started_ms=6900))
+        result = stall_platform(manifest, events)
+        self.assertTrue(result["container_changed"])
+        self.assertEqual({}, result["observed_hold_ms"])
+        self.assertEqual([5900, 7000], result["first_container_change_bounds_ms"])
+        self.assertEqual("detected", result["pre_change_probes"]["Liveness"]["classification"])
+
+    def test_replication_fixture_requires_port_scoped_egress(self):
+        resource = partition_resource("calibration", "kafka", ["follower0", "follower1"],
+                                      "10.1.2.170", 9094, 120)
+        self.assertEqual({"kafka": ["follower0", "follower1"]}, resource["spec"]["selector"]["pods"])
+        self.assertEqual(["10.1.2.170:9094"], resource["spec"]["externalTargets"])
+        self.assertNotIn("target", resource["spec"])
+        raw = {"spec": {
+            "ipsets": [{"source": "kafka/calibration", "cidrAndPorts": [{"cidr": "10.1.2.170/32", "port": 9094}]}],
+            "iptables": [{"source": "kafka/calibration", "direction": "output", "ipsets": ["scope"]}],
+        }}
+        verify_pod_rules(raw, resource)
+        raw["spec"]["iptables"][0]["direction"] = "input"
+        with self.assertRaises(ValueError):
+            verify_pod_rules(raw, resource)
