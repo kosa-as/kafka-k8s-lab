@@ -10,6 +10,7 @@ import math
 import os
 from pathlib import Path
 import re
+from statistics import median
 import subprocess
 import sys
 import threading
@@ -147,6 +148,17 @@ def probe_sample(args):
     return dict(started_ms=started, at_ms=now_ms(), uid=args.uid, counts=counts)
 
 
+def resource_sample(args):
+    data = json.loads(kubectl(args, "get", f"--raw=/api/v1/nodes/{args.node}/proxy/stats/summary"))
+    pod = next(p for p in data["pods"] if p["podRef"]["uid"] == args.uid)
+    return {"uid": args.uid, "containers": {
+        c["name"]: {"cpu_at": c.get("cpu", {}).get("time"),
+                    "cpu_cores": (value / 1e9 if (value := c.get("cpu", {}).get("usageNanoCores")) is not None else None),
+                    "memory_at": c.get("memory", {}).get("time"),
+                    "working_set_mib": (value / 2**20 if (value := c.get("memory", {}).get("workingSetBytes")) is not None else None)}
+        for c in pod["containers"]}}
+
+
 def collect_platform(args, trial, stop):
     def capture(kind, sampler):
         try:
@@ -154,10 +166,14 @@ def collect_platform(args, trial, stop):
         except Exception as failure:
             trial.emit("collector_error", source=kind, error=str(failure))
 
-    with ThreadPoolExecutor(max_workers=2) as pool:
+    next_resource = 0
+    with ThreadPoolExecutor(max_workers=3) as pool:
         while not stop.is_set():
             start = time.monotonic()
             jobs = [pool.submit(capture, "pod", pod_sample), pool.submit(capture, "probe", probe_sample)]
+            if args.resource_seconds and start >= next_resource:
+                jobs.append(pool.submit(capture, "resource", resource_sample))
+                next_resource = start + args.resource_seconds
             for job in jobs:
                 job.result()
             stop.wait(max(0, args.poll_seconds - (time.monotonic() - start)))
@@ -283,10 +299,48 @@ def collect_broker_stages(args, trial):
     (trial.folder / "broker-stage.log").write_text("\n".join(selected) + "\n", encoding="utf-8")
 
 
+def select_m1_target(args, topic):
+    if not re.fullmatch(r"[A-Za-z0-9_.-]{1,249}", topic):
+        raise ValueError("Invalid Kafka topic name.")
+    kubectl(args, "exec", args.pod, "-c", "kafka", "--", "sh", "-c",
+            'printf "%s" "$1" > /var/run/kafka-health/target.new && '
+            'mv /var/run/kafka-health/target.new /var/run/kafka-health/target', "sh", topic)
+
+
+def parse_m1_round(line):
+    content = line.removeprefix("M1_ROUND {").removesuffix("}")
+    # Role contains its own comma-separated fields and nested replica sets.
+    role = re.search(r"metadata=(Role\[leader=.*?, min=\d+\])", content)
+    if role:
+        content = content[:role.start(1)] + "ROLE" + content[role.end(1):]
+    fields = dict(pair.split("=", 1) for pair in content.split(", "))
+    if role:
+        fields["metadata"] = role[1]
+    return fields
+
+
+def collect_m1_rounds(args, trial):
+    since = datetime.fromtimestamp(trial.latest()["window_start"]["at_ms"] / 1000 - 5, timezone.utc)
+    logs = kubectl(args, "logs", args.pod, "-c", "health-sidecar",
+                   "--since-time=" + since.isoformat(timespec="seconds"))
+    selected = []
+    for line in logs.splitlines():
+        if not line.startswith("M1_ROUND "):
+            continue
+        fields = parse_m1_round(line)
+        if fields.get("topic") == args.topic:
+            selected.append(line)
+            trial.emit("m1_round", at_ms=int(fields["time"]), snapshot=fields)
+    (trial.folder / "m1-rounds.log").write_text("\n".join(selected) + "\n", encoding="utf-8")
+    if not selected:
+        raise RuntimeError("No M1 decision rounds for this trial.")
+
+
 def prepare(args, trial):
     if args.topic is None:
         args.topic = "health-validation-" + trial.run_id
-        placement = [2] if args.scenario in STALL_SCENARIOS else []
+        fixed_broker = 2 if args.scenario in STALL_SCENARIOS or args.group == "M1" else args.broker_id
+        placement = [fixed_broker] if fixed_broker is not None else []
         command(kafka_command(args, "create", 3 if args.scenario == "min-isr" else 2, *placement))
         trial.emit("topic_created", topic=args.topic)
     deadline = time.monotonic() + 15
@@ -302,7 +356,7 @@ def prepare(args, trial):
     args.broker = partition["leader"]
     if not args.pod:
         args.pod = f"bitnami-kafka-controller-{args.broker}"
-    elif args.broker_id != args.broker:
+    if args.broker_id is not None and args.broker_id != args.broker:
         raise RuntimeError(f"Requested Broker {args.broker_id} is not the target Leader {args.broker}.")
     status = pod_sample(args)
     if not status["ready"]:
@@ -315,18 +369,51 @@ def prepare(args, trial):
               and probes["livenessProbe"].get("exec", {}).get("command") == ["pgrep", "-f", "kafka"])
     if (args.group == "M0") != native:
         raise RuntimeError("The selected group does not match the Kafka container's probe configuration.")
+    if args.group == "M1":
+        mode = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "cat", "/opt/m1/mode").strip()
+        if mode != "enforce":
+            raise RuntimeError(f"M1 comparison requires enforce mode, found {mode!r}.")
     if args.scenario in STALL_SCENARIOS:
         if args.broker != 2:
             raise RuntimeError("The unique experiment topic must be led by the instrumented Broker 2.")
         if "HEALTH_STALL_AGENT_READY" not in kubectl(args, "logs", args.pod, "-c", "kafka"):
             raise RuntimeError("Install the temporary experiment agent on Broker 2 first.")
+    if args.group == "M1":
+        if args.broker != 2:
+            raise RuntimeError("M1 is installed only on Broker 2.")
+        kubectl(args, "exec", args.pod, "-c", "kafka", "--", "sh", "-ec",
+                'mkdir /var/run/kafka-health/trial-lock; printf "%s" "$1" > /var/run/kafka-health/trial-lock/owner',
+                "sh", trial.run_id)
+        args.owns_target = True
+        args.previous_target = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "sh", "-c",
+                                      "cat /var/run/kafka-health/target 2>/dev/null || echo health-validation-m1-b2").strip()
+        select_m1_target(args, args.topic)
+        deadline = time.monotonic() + 30
+        while time.monotonic() < deadline:
+            snapshot = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "cat", "/var/run/kafka-health/decision")
+            if "topic=" + args.topic in snapshot.splitlines() and "ready=true" in snapshot.splitlines():
+                break
+            time.sleep(1)
+        else:
+            raise RuntimeError("M1 did not establish healthy coverage for this target.")
     args.follower_pod = None
     if args.scenario == "min-isr":
         if partition["min_isr"] != 3 or partition["replicas"] != 3:
             raise RuntimeError("The follower-loss pilot requires initial minISR=3 and RF=3.")
         if kubectl(args, "get", "networkchaos", "-o", "name").strip():
             raise RuntimeError("Another NetworkChaos exists in the trial namespace.")
-        follower = min(set(partition["isr"]) - {args.broker})
+        quorum = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "env", "-u", "JMX_PORT",
+                          "-u", "KAFKA_JMX_OPTS", "/opt/bitnami/kafka/bin/kafka-metadata-quorum.sh",
+                          "--bootstrap-server", "localhost:9092", "describe", "--status")
+        controller = int(re.search(r"(?m)^LeaderId:\s*(\d+)", quorum)[1])
+        candidates = set(partition["isr"]) - {args.broker, controller}
+        if args.observer_port:
+            candidates.discard(args.observer_port - 32001)
+        if args.follower_id is not None:
+            candidates &= {args.follower_id}
+        if not candidates:
+            raise RuntimeError("No requested follower can be isolated while keeping the observer and controller connected.")
+        follower = min(candidates)
         args.follower_pod = f"bitnami-kafka-controller-{follower}"
         if not json.loads(kubectl(args, "get", "pod", args.follower_pod, "-o", "json"))["status"]["containerStatuses"]:
             raise RuntimeError("The selected follower does not have a running Kafka container.")
@@ -334,7 +421,8 @@ def prepare(args, trial):
                 topic=args.topic, partition=args.partition, target_broker=args.broker, pod=args.pod,
                 follower_pod=args.follower_pod,
                 initial=status, kafka_image=kafka["image"], probes=probes, original_min_isr=partition["min_isr"],
-                context=args.context, namespace=args.namespace, load_interval_ms=args.load_interval_ms, producer_retries=0 if args.scenario in STALL_SCENARIOS else 1,
+                initial_replicas=partition["replicas"], pair_id=args.pair_id, resource_seconds=args.resource_seconds,
+                context=args.context, observer_port=args.observer_port, namespace=args.namespace, load_interval_ms=args.load_interval_ms, producer_retries=0 if args.scenario in STALL_SCENARIOS else 1,
                 poll_seconds=args.poll_seconds,
                 healthy_seconds=args.healthy_seconds, fault_seconds=args.fault_seconds,
                 recovery_seconds=args.recovery_seconds, started_utc=datetime.now(timezone.utc).isoformat(),
@@ -374,7 +462,8 @@ def run(args):
     try:
         manifest = prepare(args, trial)
         save(folder / "run.json", manifest)
-        workers.append(trial.worker("metadata", kafka_command(args, "observe", int(args.poll_seconds * 1000))))
+        observer = [args.observer_port] if args.observer_port else []
+        workers.append(trial.worker("metadata", kafka_command(args, "observe", int(args.poll_seconds * 1000), *observer)))
         workers.append(trial.worker("load", kafka_command(args, "load", args.load_interval_ms, str(stage_trial).lower())))
         platform = threading.Thread(target=collect_platform, args=(args, trial, stop), name="platform")
         platform.start()
@@ -397,6 +486,8 @@ def run(args):
             disarm_stall(args, trial)
             wait_window(args.recovery_seconds, trial, workers)
             collect_broker_stages(args, trial)
+        if args.group == "M1":
+            collect_m1_rounds(args, trial)
         trial.emit("window_end")
         wait_window(max(5.2, 2 * args.poll_seconds), trial, workers)
     finally:
@@ -420,6 +511,12 @@ def run(args):
             if platform is not None:
                 platform.join()
             stop_workers(workers)
+            if getattr(args, "owns_target", False):
+                previous = getattr(args, "previous_target", "") or "health-validation-m1-b2"
+                kubectl(args, "exec", args.pod, "-c", "kafka", "--", "sh", "-ec",
+                        'root=/var/run/kafka-health; test "$(cat "$root/trial-lock/owner")" = "$1"; '
+                        'printf "%s" "$2" > "$root/target.new"; mv "$root/target.new" "$root/target"; '
+                        'rm "$root/trial-lock/owner"; rmdir "$root/trial-lock"', "sh", trial.run_id, previous)
             trial.file.close()
             if manifest:
                 save(folder / "summary.json", summarize(manifest, trial.events))
@@ -482,11 +579,14 @@ def workload(events, start, end):
     acknowledgments = sorted(e["elapsed_us"] for e in outcomes.values() if e["kind"] == "ack")
     ack_ids = {e["id"] for e in outcomes.values() if e["kind"] == "ack"}
     deliveries = {}
+    observed = {}
     for event in events:
-        if event["kind"] == "consume" and event["id"] in ack_ids:
+        if event["kind"] == "consume" and event["id"] in attempts:
             elapsed = event["at_ms"] - attempts[event["id"]]["at_ms"]
-            if 0 <= elapsed <= 5000:
-                deliveries.setdefault(event["id"], elapsed)
+            if elapsed >= 0:
+                observed.setdefault(event["id"], elapsed)
+    deliveries = {message: elapsed for message, elapsed in observed.items()
+                  if message in ack_ids and elapsed <= 5000}
 
     def p99(values):
         return sorted(values)[math.ceil(0.99 * len(values)) - 1] if values else None
@@ -496,8 +596,26 @@ def workload(events, start, end):
                 send_errors=dict(errors), unresolved=len(attempts) - len(outcomes),
                 ack_p99_us=p99(acknowledgments), delivered_within_5s=len(deliveries),
                 delivery_denominator=len(ack_ids),
+                acknowledged_late=sum(observed[i] > 5000 for i in ack_ids & observed.keys()),
+                acknowledged_not_observed=len(ack_ids - observed.keys()),
+                unacknowledged_observed=len(observed.keys() - ack_ids),
                 delivery_rate_within_5s=len(deliveries) / len(ack_ids) if ack_ids else None,
                 delivery_p99_ms=p99(list(deliveries.values())))
+
+
+def resources(events, begin, finish):
+    values = {}
+    for event in events:
+        if event["kind"] != "resource" or not begin <= event["at_ms"] < finish:
+            continue
+        for name, container in event["containers"].items():
+            series = values.setdefault(name, {"cpu_cores": {}, "working_set_mib": {}})
+            for metric, timestamp in (("cpu_cores", "cpu_at"), ("working_set_mib", "memory_at")):
+                if container[metric] is not None and container[timestamp]:
+                    series[metric][container[timestamp]] = container[metric]
+    return {name: {metric: {"samples": len(series), "median": median(series.values()) if series else None}
+                   for metric, series in metrics.items()}
+            for name, metrics in values.items()}
 
 
 def effective_min_isr(metadata):
@@ -625,11 +743,24 @@ def summarize(manifest, data):
         pods = [e for e in events if e["kind"] == "pod" and begin <= e["at_ms"] < finish]
         output["windows"][phase] = {
             "bounds_ms": [begin, finish], "workload": workload(events, begin, finish),
+            "resources": resources(events, begin, finish),
             "probes": {kind: probe_result(events, manifest, kind, begin, finish) for kind in PROBE_TYPES},
             "pod_samples": len(pods), "pod_not_ready_samples": sum(not e["ready"] for e in pods),
             "restart_count_range": [min(e["restart_count"] for e in pods), max(e["restart_count"] for e in pods)]
             if pods else None,
         }
+    if manifest["group"] == "M1":
+        rounds = [e for e in events if e["kind"] == "m1_round" and start <= e["at_ms"] <= end]
+        output["m1"] = {"rounds": len(rounds), "confirmed": {}}
+        for signal in ("exec", "disk", "isr"):
+            confirmed = [e for e in rounds if e["snapshot"][signal + "Fault"] == "2"]
+            later = [e for e in rounds if confirmed and e["at_ms"] > confirmed[-1]["at_ms"]
+                     and e["snapshot"]["ready"] == "true"]
+            output["m1"]["confirmed"][signal] = {
+                "count": len(confirmed),
+                "first_ms": confirmed[0]["at_ms"] if confirmed else None,
+                "subsequent_ready_ms": later[0]["at_ms"] if later else None,
+            }
     return output
 
 
@@ -646,6 +777,12 @@ def main():
     live.add_argument("--partition", type=int, default=0)
     live.add_argument("--pod")
     live.add_argument("--broker-id", type=int)
+    live.add_argument("--pair-id", help="Identifier shared by the matched M0 and M1 runs")
+    live.add_argument("--follower-id", type=int, choices=(0, 1, 2))
+    live.add_argument("--resource-seconds", type=int, default=0,
+                      help="Sample kubelet container resources every N seconds (0 disables)")
+    live.add_argument("--observer-port", type=int, choices=(32001,32002,32003),
+                      help="Use a dedicated localhost Kafka peer for independent metadata sampling")
     live.add_argument("--rate", type=int, default=2)
     live.add_argument("--poll-seconds", type=float, default=2)
     live.add_argument("--healthy-seconds", type=int, default=20)
@@ -657,7 +794,8 @@ def main():
     args = cli.parse_args()
     if args.action == "run":
         if not (1 <= args.poll_seconds <= 30 and 1 <= args.rate <= 100 and args.partition >= 0
-                and min(args.healthy_seconds, args.fault_seconds, args.recovery_seconds) >= 10):
+                and min(args.healthy_seconds, args.fault_seconds, args.recovery_seconds) >= 10
+                and (args.resource_seconds == 0 or args.resource_seconds >= 5)):
             cli.error("Sampling, rate, partition or window is outside its supported range.")
         run(args)
     else:

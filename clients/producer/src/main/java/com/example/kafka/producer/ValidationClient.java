@@ -57,7 +57,11 @@ public final class ValidationClient {
                         while (running.get()) {
                             long start = System.nanoTime();
                             try {
-                                collectMetadata(admin, resource, partition);
+                                if (args.length > 5) {
+                                    collectFromObserverBroker(topic, partition, Integer.parseInt(args[5]));
+                                } else {
+                                    collectMetadata(admin, resource, partition);
+                                }
                             } catch (Exception failure) {
                                 event("metadata_error", failure.getClass().getSimpleName());
                             }
@@ -100,6 +104,53 @@ public final class ValidationClient {
         String members = target.isr().stream().map(Node::idString).collect(Collectors.joining(","));
         event("partition", started, target.leader() == null ? -1 : target.leader().id(),
                 members.isEmpty() ? "-" : members, minIsr, target.replicas().size());
+    }
+
+    // Read-only Kafka APIs routed to a specific healthy peer in this localhost lab.
+    // The observer must remain independent of a deliberately stalled target Broker.
+    private static org.apache.kafka.common.requests.AbstractResponse fetch(
+            java.net.Socket socket, org.apache.kafka.common.requests.AbstractRequest request, int correlation)
+            throws java.io.IOException {
+        var header = new org.apache.kafka.common.requests.RequestHeader(
+                request.apiKey(), request.version(), "validation-metadata", correlation);
+        var payload = request.serializeWithHeader(header);
+        byte[] body = new byte[payload.remaining()];
+        payload.get(body);
+        var output = new java.io.DataOutputStream(socket.getOutputStream());
+        output.writeInt(body.length);
+        output.write(body);
+        output.flush();
+        var input = new java.io.DataInputStream(socket.getInputStream());
+        int size = input.readInt();
+        if (size < 4 || size > 1048576) throw new java.io.IOException("Invalid Kafka response size");
+        byte[] response = new byte[size];
+        input.readFully(response);
+        return org.apache.kafka.common.requests.AbstractResponse.parseResponse(java.nio.ByteBuffer.wrap(response), header);
+    }
+
+    private static void collectFromObserverBroker(String topic, int partition, int port) throws Exception {
+        long start = System.currentTimeMillis();
+        try (var socket = new java.net.Socket()) {
+            socket.connect(new java.net.InetSocketAddress("localhost", port), 1200);
+            socket.setSoTimeout(1200);
+            var metadataRequest = new org.apache.kafka.common.requests.MetadataRequest.Builder(List.of(topic), false)
+                    .build((short) 5);
+            var metadata = (org.apache.kafka.common.requests.MetadataResponse) fetch(socket, metadataRequest, 1);
+            var entry = metadata.data().topics().stream().filter(t -> topic.equals(t.name())).findFirst().orElseThrow();
+            var part = entry.partitions().stream().filter(t -> t.partitionIndex() == partition).findFirst().orElseThrow();
+            var resource = new org.apache.kafka.common.message.DescribeConfigsRequestData.DescribeConfigsResource()
+                    .setResourceType(ConfigResource.Type.TOPIC.id()).setResourceName(topic)
+                    .setConfigurationKeys(List.of(MIN_ISR));
+            var request = new org.apache.kafka.common.requests.DescribeConfigsRequest(
+                    new org.apache.kafka.common.message.DescribeConfigsRequestData().setResources(List.of(resource)), (short) 2);
+            var config = (org.apache.kafka.common.requests.DescribeConfigsResponse) fetch(socket, request, 2);
+            var result = config.data().results().stream().filter(x -> topic.equals(x.resourceName())).findFirst().orElseThrow();
+            if (entry.errorCode()!=0 || part.errorCode()!=0 || result.errorCode()!=0)
+                throw new java.io.IOException("Observer Broker returned a metadata error");
+            String min = result.configs().stream().filter(c -> MIN_ISR.equals(c.name())).findFirst().orElseThrow().value();
+            String members = part.isrNodes().stream().map(Object::toString).collect(Collectors.joining(","));
+            event("partition", start, part.leaderId(), members.isEmpty() ? "-" : members, min, part.replicaNodes().size());
+        }
     }
 
     private static void runLoad(String bootstrap, String topic, int partition, long intervalMs, boolean singleAttempt) throws Exception {
