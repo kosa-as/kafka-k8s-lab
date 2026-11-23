@@ -28,6 +28,20 @@ python -m unittest discover -s experiments
 - `summary.json` 按发送时所在窗口统计生产确认。生产 P99 使用成功确认的单调时钟耗时。消费以成功确认的消息 ID 为分母，统计发送后五秒内的交付，并计算相应的 P99。负载在窗口结束后短暂继续，以便接住窗口尾部的确认和消费。
 - 此处参数及实机结果属于预实验。共用事件和评分先在 M0 验收，M1 接入后用同一入口做正式配对。
 
+## RQ3 同条件校准
+
+在各组对应的工作树运行采集，先确认 Broker 2 实际部署的是该组。M1 采集要求 enforce。每对使用相同的 `--pair-id`、Broker、观察对端、窗口和负载。ISR 试次还需指定同一个可隔离 follower，且独立观察对端与当前 Controller 不得落在被隔离的一侧。以下以对端 Broker 1、可隔离 follower 0 为例，校准前核对实际拓扑。
+
+```powershell
+python experiments/validate_health.py run --group M0 --scenario healthy --pair-id H-01 --broker-id 2 --observer-port 32002 --healthy-seconds 60 --resource-seconds 5 --output .planning/calibration
+python experiments/validate_health.py run --group M0 --scenario min-isr --pair-id I3-01 --broker-id 2 --observer-port 32002 --follower-id 0 --healthy-seconds 60 --fault-seconds 120 --recovery-seconds 120 --resource-seconds 5 --output .planning/calibration
+python experiments/compare_health.py <M0试次目录> <M1试次目录> --output .planning/calibration/pair.json
+```
+
+在 M1 工作树用相同参数执行 `--group M1`。配对脚本直接复算两份事件，核对采集源码散列、负载、目标、对端和探针周期阈值。资源统计使用 Kubelet 的 `stats/summary`，分别给出每个容器的 CPU 核数及内存工作集样本数和中位数。重复返回的 Kubelet 时间戳只算一次。汇总同时记录迟到消费、确认后未观测到的消息，以及未获生产确认却已观测到的消息。
+
+冷启动用 `python experiments/cold_start.py --group M0 --pair-id B-01 --output .planning/calibration/start-M0`。在 M1 工作树用 M1 参数重复。该命令只重启 Kafka 容器，观察 Pod UID、容器代际、Controller 协议响应、Startup 状态和 Ready。通过 Pod 端口转发直接发送无记录的 Produce 请求，以独立于 Service 是否转发流量的方式测试 Produce 处理入口。该请求只验证协议处理，完整生产确认及消费仍由业务基准测量。
+
 ## 执行停滞与本地追加停滞
 
 两个场景使用 Kafka 4.0.0 运行字节码中的明确处理边界。用独立试验 Topic 的分区 0，副本数 3、minISR=2，Leader 固定为临时取证的 Broker 2。Producer 每四秒发送，关闭单次发送的自动重试。Agent 只在 Broker 主进程启动，并按 Topic、客户端和消息标记限定选中请求。
