@@ -42,6 +42,12 @@ python experiments/compare_health.py <M0试次目录> <M1试次目录> --output 
 
 冷启动用 `python experiments/cold_start.py --group M0 --pair-id B-01 --output .planning/calibration/start-M0`。在 M1 工作树用 M1 参数重复。该命令只重启 Kafka 容器，观察 Pod UID、容器代际、Controller 协议响应、Startup 状态和 Ready。通过 Pod 端口转发直接发送无记录的 Produce 请求，以独立于 Service 是否转发流量的方式测试 Produce 处理入口。该请求只验证协议处理，完整生产确认及消费仍由业务基准测量。
 
+对 ISR 门槛的负对照可将场景替换为 `isr-at-threshold`。该场景创建 `minISR=2` 的 Topic，记录目标 Leader 保持时 ISR 从 3 降到 2 的窗口。低于门槛的 `minISR=2、ISR=1` 仍需验证能独立于控制面建立该条件。
+
+用重新构建的试验 agent，可为执行停滞指定 `--stall-records 3 --stall-seconds 80 --fault-seconds 100`。评分要求独立验证三条消息的阶段证据、持有时长及重叠窗口。追加停滞可保持单条记录并延长到 `--stall-seconds 80 --fault-seconds 100`，检验平台累计阈值。容器更换导致阶段释放不可见时保留原始重启及动作记录，并标记停滞时长无法确认。窗口参数须在正式采数前单独校准。
+
+健康场景可用 `--rate 0` 关闭业务发送，仅保留消费观察、元数据、探针与资源采样。M1 的诊断写入仍通过消费观察单独计量。无业务分母的成功率和延迟为空。
+
 ## 执行停滞与本地追加停滞
 
 两个场景使用 Kafka 4.0.0 运行字节码中的明确处理边界。用独立试验 Topic 的分区 0，副本数 3、minISR=2，Leader 固定为临时取证的 Broker 2。Producer 每四秒发送，关闭单次发送的自动重试。Agent 只在 Broker 主进程启动，并按 Topic、客户端和消息标记限定选中请求。

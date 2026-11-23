@@ -23,6 +23,7 @@ TARGET = ROOT / "clients" / "producer" / "target"
 JAVA_SOURCE = ROOT / "clients/producer/src/main/java/com/example/kafka/producer/ValidationClient.java"
 PROBE_TYPES = ("Readiness", "Liveness")
 STALL_SCENARIOS = {"execution-stall": "execution_enter", "storage-stall": "append_enter"}
+ISR_SCENARIOS = {"min-isr": 3, "isr-at-threshold": 2}
 FIELDS = {
     "partition": ("started_ms", "leader", "isr", "min_isr", "replicas"),
     "send": ("id",),
@@ -159,6 +160,18 @@ def resource_sample(args):
         for c in pod["containers"]}}
 
 
+def record_clock(args, trial, phase):
+    started = now_ms()
+    try:
+        broker = int(kubectl(args, "exec", args.pod, "-c", "kafka", "--", "date", "+%s%3N").strip())
+    except (ValueError, RuntimeError, subprocess.TimeoutExpired) as failure:
+        trial.emit("collector_error", source="broker_clock", error=str(failure))
+        return
+    finished = now_ms()
+    trial.emit("broker_clock", phase=phase, host_bounds_ms=[started, finished], broker_ms=broker,
+               offset_bounds_ms=[broker - finished, broker - started])
+
+
 def collect_platform(args, trial, stop):
     def capture(kind, sampler):
         try:
@@ -179,9 +192,11 @@ def collect_platform(args, trial, stop):
             stop.wait(max(0, args.poll_seconds - (time.monotonic() - start)))
 
 
-def wait_for_sources(trial, workers):
+def wait_for_sources(trial, workers, idle=False):
     deadline = time.monotonic() + 20
-    required = {"partition", "pod", "probe", "ack", "consumer_ready", "producer_ready", "consume"}
+    required = {"partition", "pod", "probe", "consumer_ready"}
+    if not idle:
+        required.update(("ack", "producer_ready", "consume"))
     while time.monotonic() < deadline:
         check_workers(trial, workers)
         if required <= trial.latest().keys():
@@ -269,11 +284,11 @@ def restore_partition(args, trial, name):
 def arm_stall(args, trial):
     stage = STALL_SCENARIOS[args.scenario]
     trial.emit("fault_requested", stage=stage)
-    deadline = now_ms() + 12_000
+    deadline = now_ms() + max(12_000, 4000 * (args.stall_records + 1))
     kubectl(args, "exec", args.pod, "-c", "kafka", "--", "sh", "-c",
-            'umask 077; printf "%s %s %s\\n" "$1" "$2" "$3" > /tmp/health-validation-stall.new && '
+            'umask 077; printf "%s %s %s %s %s\\n" "$1" "$2" "$3" "$4" "$5" > /tmp/health-validation-stall.new && '
             'mv /tmp/health-validation-stall.new /tmp/health-validation-stall',
-            "sh", args.topic, stage, str(deadline))
+            "sh", args.topic, stage, str(deadline), str(args.stall_seconds * 1000), str(args.stall_records))
     trial.emit("fault_acknowledged", stage=stage)
 
 
@@ -286,6 +301,13 @@ def disarm_stall(args, trial):
 
 def collect_broker_stages(args, trial):
     logs = kubectl(args, "logs", args.pod, "-c", "kafka")
+    pods = [event for event in trial.events if event["kind"] == "pod"]
+    if pods and pods[-1]["container_id"] != pods[0]["container_id"]:
+        try:
+            previous = kubectl(args, "logs", args.pod, "-c", "kafka", "--previous")
+            logs = previous + "\n" + logs
+        except RuntimeError as failure:
+            trial.emit("collector_error", source="broker_stage", error=str(failure))
     selected = []
     for line in logs.splitlines():
         if line.startswith("HEALTH_STALL_HOOK_ERROR"):
@@ -341,7 +363,7 @@ def prepare(args, trial):
         args.topic = "health-validation-" + trial.run_id
         fixed_broker = 2 if args.scenario in STALL_SCENARIOS or args.group == "M1" else args.broker_id
         placement = [fixed_broker] if fixed_broker is not None else []
-        command(kafka_command(args, "create", 3 if args.scenario == "min-isr" else 2, *placement))
+        command(kafka_command(args, "create", ISR_SCENARIOS.get(args.scenario, 2), *placement))
         trial.emit("topic_created", topic=args.topic)
     deadline = time.monotonic() + 15
     while True:
@@ -397,9 +419,9 @@ def prepare(args, trial):
         else:
             raise RuntimeError("M1 did not establish healthy coverage for this target.")
     args.follower_pod = None
-    if args.scenario == "min-isr":
-        if partition["min_isr"] != 3 or partition["replicas"] != 3:
-            raise RuntimeError("The follower-loss pilot requires initial minISR=3 and RF=3.")
+    if args.scenario in ISR_SCENARIOS:
+        if partition["min_isr"] != ISR_SCENARIOS[args.scenario] or partition["replicas"] != 3:
+            raise RuntimeError("Unexpected minISR or replica count for the selected follower-loss scenario.")
         if kubectl(args, "get", "networkchaos", "-o", "name").strip():
             raise RuntimeError("Another NetworkChaos exists in the trial namespace.")
         quorum = kubectl(args, "exec", args.pod, "-c", "kafka", "--", "env", "-u", "JMX_PORT",
@@ -422,6 +444,8 @@ def prepare(args, trial):
                 follower_pod=args.follower_pod,
                 initial=status, kafka_image=kafka["image"], probes=probes, original_min_isr=partition["min_isr"],
                 initial_replicas=partition["replicas"], pair_id=args.pair_id, resource_seconds=args.resource_seconds,
+                stall_seconds=args.stall_seconds if args.scenario in STALL_SCENARIOS else None,
+                stall_records=args.stall_records if args.scenario in STALL_SCENARIOS else None,
                 context=args.context, observer_port=args.observer_port, namespace=args.namespace, load_interval_ms=args.load_interval_ms, producer_retries=0 if args.scenario in STALL_SCENARIOS else 1,
                 poll_seconds=args.poll_seconds,
                 healthy_seconds=args.healthy_seconds, fault_seconds=args.fault_seconds,
@@ -437,8 +461,12 @@ def run(args):
                         or args.namespace != "kafka" or args.bootstrap != "localhost:32000" or args.pod
                         or args.fault_seconds < 24):
         raise ValueError("The stage pilot requires instrumented Broker 2, a fresh topic and at least 24s.")
-    args.load_interval_ms = 4000 if stage_trial else round(1000 / args.rate)
-    if args.scenario == "min-isr" and (args.topic or args.partition != 0 or args.context != "docker-desktop"
+    if stage_trial and args.fault_seconds < args.stall_seconds + 4 * (args.stall_records + 1):
+        raise ValueError("The fault window must leave time for all selected records to complete their hold.")
+    if args.stall_records != 1 and args.scenario != "execution-stall":
+        raise ValueError("Multiple held records are supported for execution-stall only.")
+    args.load_interval_ms = 4000 if stage_trial else round(1000 / args.rate) if args.rate else 0
+    if args.scenario in ISR_SCENARIOS and (args.topic or args.partition != 0 or args.context != "docker-desktop"
                                        or args.namespace != "kafka" or args.bootstrap != "localhost:32000"
                                        or args.pod or args.fault_seconds > 120):
         raise ValueError("The min-isr pilot requires the default Docker Desktop topology, a fresh topic and a bounded fault window.")
@@ -462,15 +490,16 @@ def run(args):
     try:
         manifest = prepare(args, trial)
         save(folder / "run.json", manifest)
+        record_clock(args, trial, "before")
         observer = [args.observer_port] if args.observer_port else []
         workers.append(trial.worker("metadata", kafka_command(args, "observe", int(args.poll_seconds * 1000), *observer)))
         workers.append(trial.worker("load", kafka_command(args, "load", args.load_interval_ms, str(stage_trial).lower())))
         platform = threading.Thread(target=collect_platform, args=(args, trial, stop), name="platform")
         platform.start()
-        wait_for_sources(trial, workers)
+        wait_for_sources(trial, workers, idle=args.rate == 0)
         trial.emit("window_start")
         wait_window(args.healthy_seconds, trial, workers)
-        if args.scenario == "min-isr":
+        if args.scenario in ISR_SCENARIOS:
             restore_needed = True
             inject_partition(args, trial, fault_name)
             print("Follower-to-Leader link isolation confirmed by Chaos Mesh.", flush=True)
@@ -481,7 +510,7 @@ def run(args):
         if stage_trial:
             restore_needed = True
             arm_stall(args, trial)
-            print(f"{args.scenario} armed for one tagged Produce record.", flush=True)
+            print(f"{args.scenario} armed for up to {args.stall_records} tagged Produce records.", flush=True)
             wait_window(args.fault_seconds, trial, workers)
             disarm_stall(args, trial)
             wait_window(args.recovery_seconds, trial, workers)
@@ -490,6 +519,7 @@ def run(args):
             collect_m1_rounds(args, trial)
         trial.emit("window_end")
         wait_window(max(5.2, 2 * args.poll_seconds), trial, workers)
+        record_clock(args, trial, "after")
     finally:
         try:
             if restore_needed:
@@ -622,11 +652,12 @@ def effective_min_isr(metadata):
     return min(metadata["min_isr"], metadata["replicas"])
 
 
-def assess_stall(events, manifest):
+def assess_single_stall(events, manifest, selected_id=None):
     stages = [event for event in events if event["kind"] == "broker_stage"]
     if any(event["kind"] == "collector_error" and event["source"] == "broker_stage" for event in events):
         return {"classification": "indeterminate", "reason": "broker stage evidence failure"}
-    gated = [event for event in stages if event["stage"] == "stall_enter"]
+    gated = [event for event in stages if event["stage"] == "stall_enter"
+             and (selected_id is None or event["id"] == selected_id)]
     if not gated:
         return {"classification": "injection_not_achieved" if stages else "indeterminate",
                 "reason": "no targeted broker gate entry recorded"}
@@ -634,7 +665,11 @@ def assess_stall(events, manifest):
     related = [event for event in stages if event["id"] == entered["id"]]
     released = next((event for event in related if event["stage"] == "stall_release"), None)
     if not released:
-        return {"classification": "indeterminate", "reason": "missing gate release"}
+        restarted = any(event["kind"] == "pod" and event["at_ms"] >= entered["at_ms"]
+                        and event["container_id"] != manifest["initial"]["container_id"] for event in events)
+        return {"classification": "indeterminate", "reason": "missing gate release",
+                "record_id": entered["id"], "gate_entry_ms": entered["at_ms"],
+                "container_changed_after_gate_entry": restarted}
     start, end = entered["at_ms"], released["at_ms"]
     append_begin = next((event for event in related if event["stage"] == "append_enter"), None)
     append_end = next((event for event in related if event["stage"] == "append_complete"), None)
@@ -656,7 +691,10 @@ def assess_stall(events, manifest):
     ) and not any(event["kind"] == "metadata_error" and start <= event["at_ms"] <= end for event in events)
     control_dispatches = sum(event["stage"] == "execution_enter" and event["id"] != entered["id"]
                              and start <= event["at_ms"] < end for event in stages)
-    decision = (correct_boundary and attempts and results and end - start >= 12_000 and paths_healthy
+    minimum_hold_ms = max(12_000, (manifest.get("stall_seconds") or 16) * 1000 - 1500)
+    if not manifest.get("stall_seconds"):
+        minimum_hold_ms = 12_000  # Previous manifests used a lower eligibility threshold.
+    decision = (correct_boundary and attempts and results and end - start >= minimum_hold_ms and paths_healthy
                 and (execution_fault or control_dispatches > 0))
     return {
         "classification": "achieved" if decision else "indeterminate",
@@ -675,6 +713,30 @@ def assess_stall(events, manifest):
     }
 
 
+def assess_stall(events, manifest):
+    required = manifest.get("stall_records") or 1
+    if required == 1:
+        return assess_single_stall(events, manifest)
+    selected = dict.fromkeys(event["id"] for event in events
+                             if event["kind"] == "broker_stage" and event["stage"] == "stall_enter")
+    if not selected:
+        return assess_single_stall(events, manifest)
+    records = [assess_single_stall(events, manifest, message) for message in selected]
+    result = {"scope": "multiple tagged Produce records", "records": records, "classification": "indeterminate"}
+    if len(records) == required and all(record["classification"] == "achieved" for record in records):
+        start = max(record["gate_bounds_ms"][0] for record in records)
+        end = min(record["gate_bounds_ms"][1] for record in records)
+        if end > start:
+            result.update(classification="achieved", gate_bounds_ms=[start, end])
+    return result
+
+
+def isr_target(scenario, metadata):
+    size = len(metadata["isr"])
+    threshold = effective_min_isr(metadata)
+    return size < threshold if scenario == "min-isr" else size == threshold == 2
+
+
 def summarize(manifest, data):
     events = sorted(data, key=lambda event: event["at_ms"])
     markers = {event["kind"]: event["at_ms"] for event in events}
@@ -683,25 +745,27 @@ def summarize(manifest, data):
               "window_end" in markers, "event_counts": dict(Counter(e["kind"] for e in events))}
     if "window_end" not in markers:
         return output
+    output["broker_clock"] = [event for event in events if event["kind"] == "broker_clock"]
     start, end = markers["window_start"], markers["window_end"]
     first_control = markers.get("fault_requested", end)
     phases = {"healthy": [start, first_control]}
     metadata = [e for e in events if e["kind"] == "partition"]
     broker = manifest["target_broker"]
-    if manifest["scenario"] == "min-isr":
+    scenario = manifest["scenario"]
+    if scenario in ISR_SCENARIOS:
         fault_end = markers["restore_requested"]
         affected = [e for e in metadata if e["started_ms"] >= first_control and e["at_ms"] < fault_end
-                    and e["leader"] == broker and len(e["isr"]) < effective_min_isr(e)]
+                    and e["leader"] == broker and isr_target(scenario, e)]
         observed_restored = [e for e in metadata if e["started_ms"] >= fault_end
                              and e["at_ms"] <= end and e["leader"] == broker
-                             and e["min_isr"] == manifest["original_min_isr"] and len(e["isr"]) >= effective_min_isr(e)]
+                             and e["min_isr"] == manifest["original_min_isr"] and len(e["isr"]) == e["replicas"]]
         if observed_restored:
             phases["recovered"] = [observed_restored[0]["at_ms"], end]
         output["restored_on_target_leader"] = bool(observed_restored)
         if affected:
             first, last = affected[0], affected[-1]
             healthy_before = [e for e in metadata if e["at_ms"] <= first["started_ms"]
-                              and e["leader"] == broker and len(e["isr"]) >= effective_min_isr(e)]
+                              and e["leader"] == broker and len(e["isr"]) == e["replicas"]]
             previous = healthy_before[-1]["started_ms"] if healthy_before else None
             output["condition"] = {"classification": "achieved", "onset_bounds_ms": [previous, first["at_ms"]],
                                    "first_confirmed": first, "last_confirmed": last}
@@ -709,7 +773,7 @@ def summarize(manifest, data):
                 restored = observed_restored[0]
                 before_recovery = max(
                     e["started_ms"] for e in metadata if first["at_ms"] <= e["at_ms"] <= restored["started_ms"]
-                    and e["leader"] == broker and len(e["isr"]) < effective_min_isr(e)
+                    and e["leader"] == broker and isr_target(scenario, e)
                 )
                 output["condition"]["recovery_bounds_ms"] = [before_recovery, restored["at_ms"]]
             intervening = [e for e in metadata if first["at_ms"] <= e["at_ms"] <= last["at_ms"]]
@@ -719,7 +783,8 @@ def summarize(manifest, data):
                     and all(right["at_ms"] - left["at_ms"] <= max(5000, manifest["poll_seconds"] * 3000)
                             for left, right in zip(intervening, intervening[1:]))
                     and first["at_ms"] < last["started_ms"]):
-                phases["fault_confirmed"] = [first["at_ms"], last["started_ms"]]
+                phase = "fault_confirmed" if scenario == "min-isr" else "isr_at_threshold"
+                phases[phase] = [first["at_ms"], last["started_ms"]]
         else:
             observed = [e for e in metadata if first_control <= e["started_ms"] and e["at_ms"] <= fault_end]
             timestamps = [markers["fault_acknowledged"],
@@ -769,21 +834,23 @@ def main():
     actions = cli.add_subparsers(dest="action", required=True)
     live = actions.add_parser("run", help="collect a live trial")
     live.add_argument("--group", choices=("M0", "M1"), required=True)
-    live.add_argument("--scenario", choices=("healthy", "min-isr", *STALL_SCENARIOS), required=True)
+    live.add_argument("--scenario", choices=("healthy", *ISR_SCENARIOS, *STALL_SCENARIOS), required=True)
     live.add_argument("--context", default="docker-desktop")
     live.add_argument("--namespace", default="kafka")
     live.add_argument("--bootstrap", default="localhost:32000")
     live.add_argument("--topic")
     live.add_argument("--partition", type=int, default=0)
     live.add_argument("--pod")
-    live.add_argument("--broker-id", type=int)
+    live.add_argument("--broker-id", type=int, choices=(0, 1, 2))
     live.add_argument("--pair-id", help="Identifier shared by the matched M0 and M1 runs")
     live.add_argument("--follower-id", type=int, choices=(0, 1, 2))
     live.add_argument("--resource-seconds", type=int, default=0,
                       help="Sample kubelet container resources every N seconds (0 disables)")
+    live.add_argument("--stall-seconds", type=int, choices=range(16, 91), default=16)
+    live.add_argument("--stall-records", type=int, choices=(1, 2, 3), default=1)
     live.add_argument("--observer-port", type=int, choices=(32001,32002,32003),
                       help="Use a dedicated localhost Kafka peer for independent metadata sampling")
-    live.add_argument("--rate", type=int, default=2)
+    live.add_argument("--rate", type=int, default=2, help="Business sends per second; 0 with healthy observes only.")
     live.add_argument("--poll-seconds", type=float, default=2)
     live.add_argument("--healthy-seconds", type=int, default=20)
     live.add_argument("--fault-seconds", type=int, default=65)
@@ -793,7 +860,8 @@ def main():
     replay.add_argument("folder", type=Path)
     args = cli.parse_args()
     if args.action == "run":
-        if not (1 <= args.poll_seconds <= 30 and 1 <= args.rate <= 100 and args.partition >= 0
+        valid_rate = 1 <= args.rate <= 100 or args.rate == 0 and args.scenario == "healthy"
+        if not (1 <= args.poll_seconds <= 30 and valid_rate and args.partition >= 0
                 and min(args.healthy_seconds, args.fault_seconds, args.recovery_seconds) >= 10
                 and (args.resource_seconds == 0 or args.resource_seconds >= 5)):
             cli.error("Sampling, rate, partition or window is outside its supported range.")

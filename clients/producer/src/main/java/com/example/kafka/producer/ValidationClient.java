@@ -44,9 +44,14 @@ public final class ValidationClient {
                 case "create" -> {
                     requireExperimentTopic(topic);
                     int minIsr = Integer.parseInt(args[4]);
-                    NewTopic experiment = args.length > 5
-                            ? new NewTopic(topic, Map.of(0, List.of(Integer.parseInt(args[5]), 0, 1)))
-                            : new NewTopic(topic, 1, (short) 3);
+                    NewTopic experiment;
+                    if (args.length > 5) {
+                        int preferred = Integer.parseInt(args[5]);
+                        List<Integer> replicas = List.of(preferred, (preferred + 1) % 3, (preferred + 2) % 3);
+                        experiment = new NewTopic(topic, Map.of(0, replicas));
+                    } else {
+                        experiment = new NewTopic(topic, 1, (short) 3);
+                    }
                     experiment.configs(Map.of(MIN_ISR, Integer.toString(minIsr), "retention.ms", "3600000"));
                     admin.createTopics(List.of(experiment)).all().get(6, TimeUnit.SECONDS);
                 }
@@ -154,12 +159,16 @@ public final class ValidationClient {
     }
 
     private static void runLoad(String bootstrap, String topic, int partition, long intervalMs, boolean singleAttempt) throws Exception {
-        if (intervalMs < 10 || intervalMs > 5000) {
-            throw new IllegalArgumentException("Send interval must be in 10..5000 ms.");
+        if (intervalMs != 0 && (intervalMs < 10 || intervalMs > 5000)) {
+            throw new IllegalArgumentException("Send interval must be zero (consumer only) or 10..5000 ms.");
         }
         AtomicBoolean running = stopOnInput();
         Thread consumer = new Thread(() -> consume(bootstrap, topic, partition, running), "validation-consumer");
         consumer.start();
+        if (intervalMs == 0) {
+            consumer.join();
+            return;
+        }
         Properties config = connection(bootstrap);
         config.put("client.id", "health-validation-workload");
         config.put("acks", "all");

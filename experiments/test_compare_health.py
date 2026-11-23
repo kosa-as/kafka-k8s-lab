@@ -1,7 +1,7 @@
 import unittest
 
 from compare_health import MATCHED, compare
-from validate_health import resources, workload
+from validate_health import assess_stall, isr_target, resources, workload
 
 
 class CalibrationScoringTest(unittest.TestCase):
@@ -32,3 +32,16 @@ class CalibrationScoringTest(unittest.TestCase):
         result = compare((dict(template, group="M0"), {}), (dict(template, group="M1", follower_pod="b"), {}))
         self.assertEqual(["follower_pod"], result["mismatches"])
         self.assertNotIn("m1_minus_m0", result)
+
+    def test_replica_loss_that_still_meets_threshold_is_separate(self):
+        metadata = {"isr": [2, 1], "min_isr": 2, "replicas": 3}
+        self.assertFalse(isr_target("min-isr", metadata))
+        self.assertTrue(isr_target("isr-at-threshold", metadata))
+        self.assertFalse(isr_target("isr-at-threshold", dict(metadata, isr=[2])))
+
+    def test_one_held_record_does_not_qualify_as_multi_request_stall(self):
+        events = [{"kind": "broker_stage", "stage": "stall_enter", "id": "first", "at_ms": 100}]
+        manifest = {"stall_records": 3, "initial": {"container_id": "old"}}
+        result = assess_stall(events, manifest)
+        self.assertEqual("indeterminate", result["classification"])
+        self.assertEqual("first", result["records"][0]["record_id"])
