@@ -42,7 +42,7 @@ python experiments/compare_health.py <M0试次目录> <M1试次目录> --output 
 
 冷启动用 `python experiments/cold_start.py --group M0 --pair-id B-01 --output .planning/calibration/start-M0`。在 M1 工作树用 M1 参数重复。该命令只重启 Kafka 容器，观察 Pod UID、容器代际、Controller 协议响应、Startup 状态和 Ready。通过 Pod 端口转发直接发送无记录的 Produce 请求，以独立于 Service 是否转发流量的方式测试 Produce 处理入口。该请求只验证协议处理，完整生产确认及消费仍由业务基准测量。
 
-对 ISR 门槛的负对照可将场景替换为 `isr-at-threshold`。该场景创建 `minISR=2` 的 Topic，记录目标 Leader 保持时 ISR 从 3 降到 2 的窗口。低于门槛的 `minISR=2、ISR=1` 仍需验证能独立于控制面建立该条件。
+对 ISR 门槛的负对照可将场景替换为 `isr-at-threshold`。该场景创建 `minISR=2` 的 Topic，记录目标 Leader 保持时 ISR 从 3 降到 2 的窗口。低于门槛的试次使用 `isr-below-threshold`，传入 `--broker-id 2 --observer-port 32002`。它只扰动两个 follower 到 Broker 2 的 9094 复制监听，保存 Chaos Mesh 的实际端口规则，并在故障前、中、后读取 Controller 状态。只有独立元数据取得 Broker 2 仍为 Leader 且 ISR=1 才计入目标故障。目标 Broker 的其他分区也共用复制监听，记录受影响的部署范围。
 
 用重新构建的试验 agent，可为执行停滞指定 `--stall-records 3 --stall-seconds 80 --fault-seconds 100`。评分要求独立验证三条消息的阶段证据、持有时长及重叠窗口。追加停滞可保持单条记录并延长到 `--stall-seconds 80 --fault-seconds 100`，检验平台累计阈值。容器更换导致阶段释放不可见时保留原始重启及动作记录，并标记停滞时长无法确认。窗口参数须在正式采数前单独校准。
 

@@ -3,10 +3,11 @@
 import argparse
 import json
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 import re
 
-from validate_health import summarize
+from validate_health import PROBE_TYPES, STALL_SCENARIOS, probe_result, summarize
 
 
 MATCHED = (
@@ -27,6 +28,12 @@ def load(folder, manifest=None):
     if not events or any(event["run_id"] != manifest["run_id"] for event in events):
         raise ValueError(f"Events do not match {folder / 'run.json'}")
     result = summarize(manifest, events)
+    if manifest["scenario"] in STALL_SCENARIOS:
+        result["stall_platform"] = stall_platform(manifest, events)
+        event_snapshot = folder / "kube-events.json"
+        if event_snapshot.is_file():
+            records = json.loads(event_snapshot.read_text(encoding="utf-8-sig"))["items"]
+            result["stall_platform"]["liveness_restart_events"] = liveness_restart_events(manifest, events, records)
     for window in result.get("windows", {}).values():
         begin, end = window["bounds_ms"]
         window["observed_diagnostic_deliveries"] = len({
@@ -35,6 +42,60 @@ def load(folder, manifest=None):
             and DIAGNOSTIC_ID.fullmatch(event["id"])
         })
     return manifest, result
+
+
+def liveness_restart_events(manifest, events, records):
+    starts = [e["at_ms"] for e in events if e["kind"] == "fault_requested"]
+    if not starts:
+        return []
+    start, end = min(starts), max(e["at_ms"] for e in events)
+    selected = []
+    for record in records:
+        target = record.get("involvedObject", {})
+        if (target.get("uid") != manifest["initial"]["uid"] or record.get("reason") != "Killing"
+                or "Container kafka failed liveness probe" not in record.get("message", "")):
+            continue
+        stamp = record.get("firstTimestamp") or record.get("eventTime")
+        if not stamp:
+            continue
+        timestamp = int(datetime.fromisoformat(stamp.replace("Z", "+00:00")).timestamp() * 1000)
+        # Core Events usually carry only whole seconds.
+        if timestamp + 999 >= start and timestamp <= end:
+            selected.append({"at_ms": timestamp, "message": record["message"], "count": record.get("count", 1)})
+    return selected
+
+
+def stall_platform(manifest, data):
+    events = sorted(data, key=lambda event: event["at_ms"])
+    entries = {e["id"]: e["at_ms"] for e in events
+               if e["kind"] == "broker_stage" and e["stage"] == "stall_enter"}
+    releases = {e["id"]: e["at_ms"] for e in events
+                if e["kind"] == "broker_stage" and e["stage"] == "stall_release"}
+    result = {"gate_entries_ms": entries, "gate_releases_ms": releases,
+              "observed_hold_ms": {key: releases[key] - started for key, started in entries.items() if key in releases}}
+    requested = next((e["at_ms"] for e in events if e["kind"] == "fault_requested"), None)
+    if requested is None:
+        return result
+    initial = manifest["initial"]
+    pods = [e for e in events if e["kind"] == "pod" and requested <= e["at_ms"]]
+    changed = next((pod for pod in pods if (pod["uid"], pod["container_id"]) !=
+                    (initial["uid"], initial["container_id"])), None)
+    if changed is None:
+        result["container_changed"] = False if pods else None
+        return result
+    previous = [p for p in pods if p["at_ms"] < changed["at_ms"]]
+    prior = previous[-1]["started_ms"] if previous else requested
+    result.update(container_changed=True, first_container_change_bounds_ms=[prior, changed["at_ms"]],
+                  restart_count=changed["restart_count"], pod_replaced=changed["uid"] != initial["uid"])
+    # Stop at a probe sample safely inside the old generation. The completed
+    # hold and the probe response before transition are separate outcomes.
+    old_probe_times = [e["at_ms"] for e in events if e["kind"] == "probe" and requested <= e["at_ms"] <= prior]
+    if old_probe_times and old_probe_times[-1] > requested:
+        end = old_probe_times[-1]
+        result["pre_change_probe_window_ms"] = [requested, end]
+        result["pre_change_probes"] = {kind: probe_result(events, manifest, kind, requested, end)
+                                       for kind in PROBE_TYPES}
+    return result
 
 
 def delta(left, right):
@@ -53,7 +114,8 @@ def compare(m0, m1):
     if [left["group"], right["group"]] != ["M0", "M1"]:
         raise ValueError("Supply the M0 trial first and the M1 trial second.")
     mismatches = [key for key in MATCHED if key not in left or key not in right or left[key] != right[key]]
-    mismatches.extend(key for key in ("stall_seconds", "stall_records") if left.get(key) != right.get(key))
+    optional_fields = ("stall_seconds", "stall_records", "replication_followers", "replication_port")
+    mismatches.extend(key for key in optional_fields if left.get(key) != right.get(key))
     if not left.get("pair_id"):
         mismatches.append("missing pair_id")
     for probe, settings in left["probes"].items():
