@@ -17,6 +17,23 @@ POD = "bitnami-kafka-controller-2"
 PORTS = (32992, 32993)
 
 
+class Forwarder:
+    def __init__(self, log):
+        self.log = log
+        self.process = None
+
+    def ensure(self):
+        if self.process is None or self.process.poll() is not None:
+            command = [*CONTEXT, "port-forward", "pod/" + POD, "--address", "127.0.0.1",
+                       f"{PORTS[0]}:9092", f"{PORTS[1]}:9093"]
+            self.process = subprocess.Popen(command, stdout=self.log, stderr=subprocess.STDOUT)
+
+    def close(self):
+        if self.process and self.process.poll() is None:
+            self.process.terminate()
+            self.process.wait(timeout=10)
+
+
 def pod_status():
     output = subprocess.check_output(
         [*CONTEXT, "--request-timeout=5s", "get", "pod", POD, "-o", "json"], timeout=8)
@@ -102,14 +119,13 @@ def run(args):
     if not before["ready"] or not before["started"]:
         raise RuntimeError("The target must initially be started and Ready.")
     save(args.output / "run.json", metadata)
-    local_forward = [*CONTEXT, "port-forward", "pod/" + POD, "--address", "127.0.0.1",
-                     f"{PORTS[0]}:9092", f"{PORTS[1]}:9093"]
     with (args.output / "forward.log").open("w") as log, (
             args.output / "events.jsonl").open("w", encoding="utf-8") as stream:
-        forward = subprocess.Popen(local_forward, stdout=log, stderr=subprocess.STDOUT)
+        forward = Forwarder(log)
         try:
             deadline = time.monotonic() + 10
-            while time.monotonic() < deadline and forward.poll() is None:
+            while time.monotonic() < deadline:
+                forward.ensure()
                 if capture(produce_handler)["value"] is True:
                     break
                 time.sleep(0.25)
@@ -123,8 +139,7 @@ def run(args):
                     result["command_exit_code"] = restart.wait(timeout=10)
             save(args.output / "summary.json", result)
         finally:
-            forward.terminate()
-            forward.wait(timeout=10)
+            forward.close()
 
 
 def observe(pool, stream, before, forward, restart_at, timeout):
@@ -133,7 +148,8 @@ def observe(pool, stream, before, forward, restart_at, timeout):
     generation_seen = False
     unavailable = {}
     previous = {}
-    while time.monotonic() < deadline and forward.poll() is None:
+    while time.monotonic() < deadline:
+        forward.ensure()
         checks = {"pod": pool.submit(capture, pod_status), "produce": pool.submit(capture, produce_handler),
                   "controller": pool.submit(capture, controller_available)}
         row = {key: future.result() for key, future in checks.items()}
